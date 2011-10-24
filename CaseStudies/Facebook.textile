@@ -1,0 +1,17 @@
+h2. News Feed Link
+
+Original
+
+bc. <a onmousedown="UntrustedLink.bootstrap($(this), "9AQHce9iTAQETYBmPwr-dYTEeSJJlpOtXdRfw58q8kf5TDA", event, bagof({}));" rel="nofollow nofollow" target="_blank" href="http://www.privateweb.com/uniqueID">
+  <span>http://www.privateweb.com/uniqueID</span>
+  <wbr></wbr>
+  <span class="word_break"></span>
+</a>
+
+Inlined:
+
+bc. <a target="_blank" href="http://www.privateweb.com/uniqueID">
+  <span>All your secrets are belong to us.</span>
+  <wbr></wbr>
+  <span class="word_break"></span>
+</a>
