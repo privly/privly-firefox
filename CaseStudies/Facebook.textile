@@ -1,6 +1,6 @@
 h2. News Feed Link
 
-Original
+h3. Original
 
 bc. <a onmousedown="UntrustedLink.bootstrap($(this), "9AQHce9iTAQETYBmPwr-dYTEeSJJlpOtXdRfw58q8kf5TDA", event, bagof({}));" rel="nofollow nofollow" target="_blank" href="http://www.privateweb.com/uniqueID">
   <span>http://www.privateweb.com/uniqueID</span>
@@ -8,10 +8,49 @@ bc. <a onmousedown="UntrustedLink.bootstrap($(this), "9AQHce9iTAQETYBmPwr-dYTEeS
   <span class="word_break"></span>
 </a>
 
-Inlined:
+h3. Inlined:
 
 bc. <a target="_blank" href="http://www.privateweb.com/uniqueID">
-  <span>All your secrets are belong to us.</span>
-  <wbr></wbr>
-  <span class="word_break"></span>
+  All your secrets are belong to us.
 </a>
+
+h2. Wall Post
+
+h3. Original
+
+bc. <span class="messageBody translationEligibleUserMessage" data-ft="{"type":3}">
+      <a onmousedown="UntrustedLink.bootstrap($(this), "sAQGTfnV7AQEdSLSS73-hg0KH_cBdNqY1wmJg62S3gTx2pw", event, bagof({}));" rel="nofollow nofollow" target="_blank" href="http://www.youtube.com/watch?v=elyQ4ShVw-Y">
+        <span>http://www.youtube.com/watch?v</span>
+        <wbr></wbr>
+        <span class="word_break"></span>
+        =elyQ4ShVw-Y
+      </a>
+</span>
+
+h3. Inlined:
+
+bc. <span class="messageBody translationEligibleUserMessage" data-ft="{"type":3}">
+      <a onmousedown="UntrustedLink.bootstrap($(this), "sAQGTfnV7AQEdSLSS73-hg0KH_cBdNqY1wmJg62S3gTx2pw", event, bagof({}));" rel="nofollow nofollow" target="_blank" href="http://www.youtube.com/watch?v=elyQ4ShVw-Y">
+        All your secrets are belong to us.
+      </a>
+</span>
+
+
+h2. Wall Post Comment
+
+bc. <span class="commentBody" data-jsid="text">
+  <a onmousedown="UntrustedLink.bootstrap($(this), "GAQE_QuMPAQEkmmzkF5bJTdglKyFgnGREMWF7hnTDf0f9-Q", event, bagof({}));" rel="nofollow nofollow" target="_blank" href="http://pastebin.com/U1zA6zFC">
+    <span>http://pastebin.com/U1zA6z</span>
+    <wbr></wbr>
+    <span class="word_break"></span>
+    FC
+  </a>
+</span>
+
+h3. Inlined
+
+bc. <span class="commentBody" data-jsid="text">
+  <a onmousedown="UntrustedLink.bootstrap($(this), "GAQE_QuMPAQEkmmzkF5bJTdglKyFgnGREMWF7hnTDf0f9-Q", event, bagof({}));" rel="nofollow nofollow" target="_blank" href="http://pastebin.com/U1zA6zFC">
+    All your secrets are belong to us.
+  </a>
+</span>
