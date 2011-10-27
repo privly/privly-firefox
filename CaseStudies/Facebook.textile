@@ -1,3 +1,7 @@
+h1. Facebook Case Study
+
+So far Facebook has not put any barriers to replacing the content of an anchor tag with the PrivateWeb content. We could simply replace the content of the tag with our content. We should probably also strip the onmousedown event and any other tracking facilities within the link. We should only leave the href the same.
+
 h2. News Feed Link
 
 h3. Original
@@ -19,18 +23,16 @@ h2. Wall Post
 h3. Original
 
 bc. <span class="messageBody translationEligibleUserMessage" data-ft="{"type":3}">
-      <a onmousedown="UntrustedLink.bootstrap($(this), "sAQGTfnV7AQEdSLSS73-hg0KH_cBdNqY1wmJg62S3gTx2pw", event, bagof({}));" rel="nofollow nofollow" target="_blank" href="http://www.youtube.com/watch?v=elyQ4ShVw-Y">
-        <span>http://www.youtube.com/watch?v</span>
+      <a onmousedown="UntrustedLink.bootstrap($(this), "sAQGTfnV7AQEdSLSS73-hg0KH_cBdNqY1wmJg62S3gTx2pw", event, bagof({}));" rel="nofollow nofollow" target="_blank" href="http://pastebin.com/U1zA6zFC">
+        <span>http://pastebin.com/U1zA6zFC</span>
         <wbr></wbr>
-        <span class="word_break"></span>
-        =elyQ4ShVw-Y
       </a>
 </span>
 
 h3. Inlined:
 
 bc. <span class="messageBody translationEligibleUserMessage" data-ft="{"type":3}">
-      <a onmousedown="UntrustedLink.bootstrap($(this), "sAQGTfnV7AQEdSLSS73-hg0KH_cBdNqY1wmJg62S3gTx2pw", event, bagof({}));" rel="nofollow nofollow" target="_blank" href="http://www.youtube.com/watch?v=elyQ4ShVw-Y">
+      <a target="_blank" href="http://pastebin.com/U1zA6zFC">
         All your secrets are belong to us.
       </a>
 </span>
@@ -50,7 +52,7 @@ bc. <span class="commentBody" data-jsid="text">
 h3. Inlined
 
 bc. <span class="commentBody" data-jsid="text">
-  <a onmousedown="UntrustedLink.bootstrap($(this), "GAQE_QuMPAQEkmmzkF5bJTdglKyFgnGREMWF7hnTDf0f9-Q", event, bagof({}));" rel="nofollow nofollow" target="_blank" href="http://pastebin.com/U1zA6zFC">
+  <a target="_blank" href="http://pastebin.com/U1zA6zFC">
     All your secrets are belong to us.
   </a>
 </span>
