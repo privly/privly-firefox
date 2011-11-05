@@ -18,6 +18,7 @@
           var request = new XMLHttpRequest();
           // hardcoded URL below, also asynchronous
           request.open('GET', "http://50.57.176.145", false);
+	  request.overrideMimeType("text/plain");
           try {
             request.send();
             if (request.status == 200) {
