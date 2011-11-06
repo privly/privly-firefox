@@ -1,4 +1,7 @@
 Babel::Application.routes.draw do
+  
+  match '/' => 'welcome#index', :as => :welcome
+  
   # The priority is based upon order of creation:
   # first created -> highest priority.
 
