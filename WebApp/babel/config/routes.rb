@@ -1,4 +1,4 @@
-Babel::Application.routes.draw do
+Privly::Application.routes.draw do
   
   match '/' => 'welcome#index', :as => :welcome
   
