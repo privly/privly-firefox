@@ -6,28 +6,39 @@
 // @include 		*
 // ==/UserScript==
 
-(function() {
-    var toFind = "http://50.57.176.145";
-    var bodytext = document.body.textContent;
-    if (bodytext.indexOf(toFind) != -1) {
-      // do a more complicated check for links/pre/p/span content
-      var as = document.body.getElementsByTagName('a');
-      for (var i = 0; i < as.length; i++) {
-		    if (as[i].href.indexOf(toFind) == 0) {
-          // below only guaranteed to work on firefox
-          var request = new XMLHttpRequest();
-          // hardcoded URL below, also asynchronous
-          request.open('GET', "http://50.57.176.145", false);
-	  request.overrideMimeType("text/plain");
-          try {
-            request.send();
-            if (request.status == 200) {
-              as[i].innerHTML = request.responseText;
-            }
-          } catch(e) {
-            throw(e);
-          }
+
+var $;
+
+// Add jQuery
+    (function(){
+        if (typeof unsafeWindow.jQuery == 'undefined') {
+            var GM_Head = document.getElementsByTagName('head')[0] || document.documentElement,
+                GM_JQ = document.createElement('script');
+    
+            GM_JQ.src = 'http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js';
+            GM_JQ.type = 'text/javascript';
+            GM_JQ.async = true;
+    
+            GM_Head.insertBefore(GM_JQ, GM_Head.firstChild);
         }
-      }	
-    }    
-})();
+        GM_wait();
+    })();
+
+// Check if jQuery's loaded
+    function GM_wait() {
+        if (typeof unsafeWindow.jQuery == 'undefined') {
+            window.setTimeout(GM_wait, 100);
+        } else {
+            $ = unsafeWindow.jQuery.noConflict(true);
+            replaceLinks();
+        }
+    }
+
+// All your GM code must be inside this function
+    function replaceLinks() {
+		$.getJSON('http://priv.ly/k/test.json?callback=?', function(json) { 
+		    $('a[href^="http://priv.ly"]').text(json.content);
+		  });
+    }
+
+
