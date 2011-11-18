@@ -1,7 +1,13 @@
 Babel::Application.routes.draw do
   
   match '/' => 'welcome#index', :as => :welcome
-  
+
+  match '/c' => 'content#index', :as => :dont_reference_this  
+  match '/c/:id' => 'content#index', :as => :dont_reference_that
+
+  match '/k' => 'key#index', :as => :def_dont_reference_this
+  match '/k/:id' => 'key#index', :as => :def_dont_reference_that
+
   # The priority is based upon order of creation:
   # first created -> highest priority.
 
