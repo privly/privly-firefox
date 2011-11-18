@@ -38,6 +38,7 @@ var $;
     function replaceLinks() {
 		$.getJSON('http://priv.ly/k/test.json?callback=?', function(json) { 
 		    $('a[href^="http://priv.ly"]').text(json.content);
+		    $("p:contains('http://priv.ly')").text(json.content);
 		  });
     }
 
