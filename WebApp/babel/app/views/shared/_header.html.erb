@@ -1,0 +1,37 @@
+<div id="header" class="clear">  
+  <ul id="mainnav" class="navtabs">
+    <li>
+      <a href="/" title="<%= @app_name %>" class="logolink">
+        <%= link_to image_tag( "logo-small.gif", :alt => "logo"), welcome_path %>
+      </a>
+    </li>
+    <li class="subnavwrapper observationstab">
+      <div class="clear subnavtab">
+        <%= link_to "Welcome", welcome_path %>
+      </div>
+      <ul class="subnav" style="display: none">
+        <li><%= link_to "By You", welcome_path %></li>
+        <li><%= link_to "ID Please", welcome_path %></li>
+      </ul>
+    </li>
+    <li class="subnavwrapper taxatab">
+      <div class="clear subnavtab">
+        <%= link_to "Species", welcome_path %>
+      </div>
+    </li>
+    
+    <li class="subnavwrapper placestab">
+      <div class="clear subnavtab">
+        <%= link_to "Places", welcome_path %>
+      </div>
+    </li>
+    
+    <li class="peopletab"><%= link_to "People", welcome_path %></li>
+  </ul>
+  
+  <ul id="usernav" class="navtabs">
+    <li><%= link_to "Sign in", welcome_path %></li>
+    <li><span class="inter">or</span></li>
+    <li><%= link_to "Sign up!", welcome_path %></li>
+  </ul>
+</div>
