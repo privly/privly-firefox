@@ -38,8 +38,14 @@ var $;
     function replaceLinks() {
 		$.getJSON('http://priv.ly/k/test.json?callback=?', function(json) { 
 		    $('a[href^="http://priv.ly"]').text(json.content);
-		    $("p:contains('http://priv.ly')").text(json.content);
+		    $("p:contains('http://priv.ly')").contents().filter(function() { return this.nodeType == 3; }).each(function() {
+				var currentText = $(this).text();
+				currentText = currentText.replace("http://priv.ly/c/19af", "<a href='http://priv.ly/c/19af'>" + json.content + "</a>");
+				$(this).replaceWith(currentText);
+			});
 		  });
     }
+
+
 
 
