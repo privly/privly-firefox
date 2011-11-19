@@ -7,9 +7,13 @@
 // ==/UserScript==
 
 
+//            //
+// Add jQuery //
+//            //
+
+// jQuery function
 var $;
 
-// Add jQuery
     (function(){
         if (typeof unsafeWindow.jQuery == 'undefined') {
             var GM_Head = document.getElementsByTagName('head')[0] || document.documentElement,
@@ -34,16 +38,48 @@ var $;
         }
     }
 
-// All your GM code must be inside this function
+//                                                             //
+// All your GM code must be inside this function to use jQuery //
+//                                                             //
     function replaceLinks() {
-		$.getJSON('http://priv.ly/k/test.json?callback=?', function(json) { 
-		    $('a[href^="http://priv.ly"]').text(json.content);
-		    $("p:contains('http://priv.ly')").contents().filter(function() { return this.nodeType == 3; }).each(function() {
-				var currentText = $(this).text();
-				currentText = currentText.replace("http://priv.ly/c/19af", "<a href='http://priv.ly/c/19af'>" + json.content + "</a>");
-				$(this).replaceWith(currentText);
+	
+		//replace all link bodies with the content on the other end
+		$('a[href^="http://priv.ly"]').each(function() {
+			var currentObject = $(this);
+			var url = $(this).attr("href") 
+			var callbackURL = url + '.json?callback=?';
+			$.getJSON(callbackURL, function(json) { 
+				var replaceWith = "<a href='" + url + "'>" + json.content + "</a>"
+			    currentObject.replaceWith(replaceWith);
 			});
-		  });
+		});
+
+		//replace all plain text references to privly content with the referenced content
+		$("p:contains('priv.ly')").contents().filter(function() { return this.nodeType == 3; }).each(function() {
+				var currentObject = $(this);
+				var currentText = $(this).text();
+				
+				//matches priv.ly urls with or without http:// in front
+				var patt = /(http:\/\/)?priv\.ly\/[ck]\/[a-zA-Z0-9]+/;
+				var resource = patt.exec(currentText)[0];
+				if(resource)
+				{
+					var callbackURL;
+					if(resource.indexOf("http://") != -1)
+					{
+						callbackURL = resource + ".json?callback=?";
+					} 
+					else
+					{
+						callbackURL = "http://" + resource + ".json?callback=?";
+					}
+					
+					$.getJSON(callbackURL, function(json) { 
+						currentText = currentText.replace(resource, "<a href='" + callbackURL + "'>" + json.content + "</a>");
+						currentObject.replaceWith(currentText);
+					});
+				}
+		});
     }
 
 
