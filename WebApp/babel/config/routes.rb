@@ -1,9 +1,11 @@
 Privly::Application.routes.draw do
   
+  resources :posts
+
   match '/' => 'welcome#index', :as => :welcome
 
-  match '/c' => 'content#index', :as => :dont_reference_this  
-  match '/c/:id' => 'content#index', :as => :dont_reference_that
+  # match '/c' => 'content#index', :as => :dont_reference_this  
+  # match '/c/:id' => 'content#index', :as => :dont_reference_that
 
   match '/k' => 'key#index', :as => :def_dont_reference_this
   match '/k/:id' => 'key#index', :as => :def_dont_reference_that
