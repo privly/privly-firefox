@@ -23,7 +23,7 @@ function replaceLinks() {
 	});
 
 	//replace all plain text references to privly content with the referenced content
-	$("p:contains('priv.ly')").contents().filter(function() { return this.nodeType == 3; }).each(function() {
+	/**$("p:contains('priv.ly')").contents().filter(function() { return this.nodeType == 3; }).each(function() {
 			var currentObject = $(this);
 			var currentText = $(this).text();
 			
@@ -47,8 +47,8 @@ function replaceLinks() {
 					currentObject.replaceWith(currentText);
 				});
 			}
-	});
-   }
+	});**/
+}
 
 $(document).ready(function() {
 	replaceLinks();
