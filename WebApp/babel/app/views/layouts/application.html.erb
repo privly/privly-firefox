@@ -1,177 +1,113 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Priv.ly</title>
+  <title><%= Rails.application.class.parent %> &middot; <%= yield :title %></title>
   <%= stylesheet_link_tag    "application" %>
 
   <%= csrf_meta_tags %>
-<link href="style.css" rel="stylesheet" type="text/css" />
+  <%= stylesheet_link_tag 'style.css' %>
 </head>
 <body>
 
-<div id="topbanner">
-	<div class="container">
-		<h1 id="sitename"><a href="#">CSS Heaven </a> <span>Free CSS Template</span></h1>
-		<div id="mainnav">
-			<ul>
-				<li class="active"><a href="index.html">Welcome <span>home..</span></a></li>
-    			<li><a href="style.html">Style <span>examples</span></a></li>
-    			<li><a href="about.html">About <span>another example</span></a></li>
-    			<li><a href="blog.html">Blog <span>examples of posts</span></a></li>
-			</ul>
-		</div>
-		<div class="clear"></div>
-	</div>
-</div>
+<!--TOP BANNER AND NAVIGATION -->
+<%= render "shared/nav" %>
+
 <div id="pagewrap">
-	<div id="wrap">
-		<%= yield :top_column %>
-		
-			
-			
-			
-			<div id="maincontent">
-				<%= yield :top_main_content_column %>
-				<div class="clear bordered"></div>
-				<div id="page">
-
-					<h2 class="subhead"><span>Shhhhhhh...</span></h2>
-					<div class="post">
-						<div class="posthead">
-							<p class="date">June 05, 2010</p>
-							<h3><a href="#">Example of a title</a></h3>
-							<p class="postmeta">By Roshan, Posted under <a href="#">Sitenews</a> | <a href="#">10 Comments</a></p>
-
-						</div>
-<p>
-
-<%= yield %>
-</p>
+    <div id="wrap">
+        <%= yield :top_column %>
+        <div id="maincontent">
+                
+            <!-- OPTIONAL MAIN CONTENT AREA, used mostly on welcome page-->
+            <%= yield :top_main_content_column %>
+                
+            <div class="clear bordered"></div>
+                
+            <!--MAIN CONTENT-->
+            <div id="page">
+                <h2 class="subhead"><span>Shhhhhhh...</span></h2>
+                <%= yield %>
+            </div>
+            
+            <!--MAIN CONTENT SIDEBAR-->
+            <div id="sidebar">
+                <h2>Categories</h2>
+                <ul class="menu">
+                    <li><a href="#">Computers</a></li>
+                    <li><a href="#">Health &amp; Beauty</a></li>
+                    <li><a href="#">Apple / Macintosh</a></li>
+                </ul>
+                <h2>Site News</h2>
+                <ul class="posts">
+                    <li><a href="#">Proof of Concept</a> <span>12/12/2009</span></li>
+                    <li><a href="#">Nullam Nulla Quam, Sagittis</a> <span>12/12/2009</span></li>
+                    <li><a href="#">Ultrices Vel Arcu Phasellus</a> <span>12/12/2009</span></li>
+                    <li><a href="#">Phasellus Faucibus Lacus Non Eros</a> <span>12/12/2009</span></li>
+                    <li><a href="#">Sed Tempus Est A Mi Iaculis</a> <span>12/12/2009</span></li>
+                    <li><a href="#">Lorem Ipsum Dolar Sit Amet</a> <span>12/12/2009</span></li>
+                    <li><a href="#">Nullam Nulla Quam, Sagittis</a> <span>12/12/2009</span></li>
+                    <li><a href="#">Ultrices Vel Arcu Phasellus</a> <span>12/12/2009</span></li>
+                    <li><a href="#">Phasellus Faucibus Lacus Non Eros</a> <span>12/12/2009</span></li>
+                    <li><a href="#">Sed Tempus Est A Mi Iaculis</a> <span>12/12/2009</span></li>
+                </ul>
+            </div>
+            <div class="clear"></div>
+        </div>
+    </div>
 </div>
 
 
-</div>
-<div id="sidebar">
-<h2>Categories</h2>
-<ul class="menu">
-<li><a href="#">Computers</a></li>
-<li><a href="#">Health &amp; Beauty</a></li>
-
-<li><a href="#">Apple / Macintosh</a></li>
-
-
-</ul>
-<h2>Latest Articles</h2>
-<ul class="posts">
-<li><a href="#">Lorem Ipsum Dolar Sit Amet</a> <span>12/12/2009 | 12 Comments</span>
-</li>
-<li><a href="#">Nullam Nulla Quam, Sagittis</a> <span>12/12/2009 | 12 Comments</span>
-</li>
-<li><a href="#">Ultrices Vel Arcu Phasellus</a> <span>12/12/2009 | 12 Comments</span>
-</li>
-<li><a href="#">Phasellus Faucibus Lacus Non Eros</a> <span>12/12/2009 | 12 Comments</span>
-</li>
-<li><a href="#">Sed Tempus Est A Mi Iaculis</a> <span>12/12/2009 | 12 Comments</span>
-</li>
-
-<li><a href="#">Lorem Ipsum Dolar Sit Amet</a> <span>12/12/2009 | 12 Comments</span>
-</li>
-<li><a href="#">Nullam Nulla Quam, Sagittis</a> <span>12/12/2009 | 12 Comments</span>
-</li>
-<li><a href="#">Ultrices Vel Arcu Phasellus</a> <span>12/12/2009 | 12 Comments</span>
-</li>
-<li><a href="#">Phasellus Faucibus Lacus Non Eros</a> <span>12/12/2009 | 12 Comments</span>
-</li>
-<li><a href="#">Sed Tempus Est A Mi Iaculis</a> <span>12/12/2009 | 12 Comments</span>
-</li>
-</ul>
-</div>
-<div class="clear"></div>
-</div>
-</div>
-</div>
 <div id="bottom">
-<div id="btmcontent">
-<div class="col1">
-<h2>Products</h2>
-<p>raesent tempor, diam at egestas mollis, nisi sapien tristique sem, ac feugiat lectus sapien in turpis. Nam viverra nibh quis arcu aliquam non hendrerit velit vehicula.</p>
-<ul>
-	<li><a href="#">raesent tempor</a></li>
-	<li><a href="#"> diam at egestas mollis</a></li>
-	<li><a href="#"> nisi sapien tristique sem</a></li>
-	<li><a href="#">ac feugiat lectus sapien in turpis</a></li>
-	<li><a href="#">Nam viverra nibh quis </a></li>
-	<li><a href="#">arcu aliquam non hendrerit </a></li>
-	<li><a href="#">velit vehicula</a></li>
-
-</ul>
+    
+    <!--Bottom Row -->
+    <div id="btmcontent">
+        <div class="col1">
+            <h2>Products</h2>
+            <p>raesent tempor, diam at egestas mollis, nisi sapien tristique sem, ac feugiat lectus sapien in turpis. Nam viverra nibh quis arcu aliquam non hendrerit velit vehicula.</p>
+            <ul>
+                <li><a href="#">raesent tempor</a></li>
+                <li><a href="#"> diam at egestas mollis</a></li>
+                <li><a href="#"> nisi sapien tristique sem</a></li>
+                <li><a href="#">ac feugiat lectus sapien in turpis</a></li>
+                <li><a href="#">Nam viverra nibh quis </a></li>
+                <li><a href="#">arcu aliquam non hendrerit </a></li>
+                <li><a href="#">velit vehicula</a></li>
+            </ul>
+        </div>
+        <div class="col2">
+            <h2>Support</h2>
+            <p>raesent tempor, diam at egestas mollis, nisi sapien tristique sem, ac feugiat lectus sapien in turpis. Nam viverra nibh quis arcu aliquam non hendrerit velit vehicula.</p>
+            <ul>
+                <li><a href="#">raesent tempor</a></li>
+                <li><a href="#"> diam at egestas mollis</a></li>
+                <li><a href="#"> nisi sapien tristique sem</a></li>
+                <li><a href="#">ac feugiat lectus sapien in turpis</a></li>
+                <li><a href="#">Nam viverra nibh quis </a></li>
+                <li><a href="#">arcu aliquam non hendrerit </a></li>
+                <li><a href="#">velit vehicula</a></li>
+            </ul>
+        </div>
+        <div class="col3">
+            <h2>Company</h2>
+            <p>raesent tempor, diam at egestas mollis, nisi sapien tristique sem, ac feugiat lectus sapien in turpis. Nam viverra nibh quis arcu aliquam non hendrerit velit vehicula.</p>
+            <ul>
+                <li><a href="#">raesent tempor</a></li>
+                <li><a href="#"> diam at egestas mollis</a></li>
+                <li><a href="#"> nisi sapien tristique sem</a></li>
+                <li><a href="#">ac feugiat lectus sapien in turpis</a></li>
+                <li><a href="#">Nam viverra nibh quis </a></li>
+                <li><a href="#">arcu aliquam non hendrerit </a></li>
+                <li><a href="#">velit vehicula</a></li>
+            </ul>
+        </div>
+        <div class="clear"></div>
+    </div>
+    
+    
+    <!--FOOTER -->
+    <div id="footer">
+        <p>Priv.ly</p>
+        <span class="credit"><a href="http://cssheaven.org" title="free and open source css template">CSS Template</a> by CSS Heaven Released under GPL License</span>
+    </div>
 </div>
-
-<div class="col2">
-<h2>Support</h2>
-
-<p>raesent tempor, diam at egestas mollis, nisi sapien tristique sem, ac feugiat lectus sapien in turpis. Nam viverra nibh quis arcu aliquam non hendrerit velit vehicula.</p>
-<ul>
-	<li><a href="#">raesent tempor</a></li>
-	<li><a href="#"> diam at egestas mollis</a></li>
-	<li><a href="#"> nisi sapien tristique sem</a></li>
-	<li><a href="#">ac feugiat lectus sapien in turpis</a></li>
-	<li><a href="#">Nam viverra nibh quis </a></li>
-	<li><a href="#">arcu aliquam non hendrerit </a></li>
-	<li><a href="#">velit vehicula</a></li>
-
-</ul>
-
-</div>
-
-<div class="col3">
-<h2>Company</h2>
-<p>raesent tempor, diam at egestas mollis, nisi sapien tristique sem, ac feugiat lectus sapien in turpis. Nam viverra nibh quis arcu aliquam non hendrerit velit vehicula.</p>
-<ul>
-	<li><a href="#">raesent tempor</a></li>
-	<li><a href="#"> diam at egestas mollis</a></li>
-	<li><a href="#"> nisi sapien tristique sem</a></li>
-	<li><a href="#">ac feugiat lectus sapien in turpis</a></li>
-	<li><a href="#">Nam viverra nibh quis </a></li>
-	<li><a href="#">arcu aliquam non hendrerit </a></li>
-	<li><a href="#">velit vehicula</a></li>
-
-</ul>
-</div>
-<div class="clear"></div>
-</div>
-<div id="footer">
-
-<p>Your Company</p>
-<span class="credit"><a href="http://cssheaven.org" title="free and open source css template">CSS Template</a> by CSS Heaven Released under GPL License</span>
-</div>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 </body>
 </html>
