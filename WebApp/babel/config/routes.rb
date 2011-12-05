@@ -1,5 +1,35 @@
 Privly::Application.routes.draw do
   
+  get "pages/faq"
+
+  get "pages/join"
+
+  get "pages/roadmap"
+
+  get "pages/people"
+
+  get "pages/license"
+
+  get "pages/privacy"
+
+  get "pages/terms"
+
+  get "pages/help"
+
+  get "pages/status"
+
+  get "pages/irc"
+
+  get "pages/bug"
+
+  get "pages/donate"
+
+  get "pages/download"
+
+  get "pages/about"
+
+  get "pages/email"
+
   resources :posts
 
   match '/' => 'welcome#index', :as => :welcome

@@ -4,6 +4,10 @@
   <title><%= Rails.application.class.parent %> &middot; <%= yield :title %></title>
   <%= stylesheet_link_tag    "application" %>
 
+  <%= yield :extrahead %>
+  <%= yield :extracss %>
+  <%= yield :extrajs %>
+
   <%= csrf_meta_tags %>
   <%= stylesheet_link_tag 'style.css' %>
 </head>
@@ -35,6 +39,10 @@
                     <li><a href="#">Timed Post</a></li>
                     <li><a href="#">Share Lists</a></li>
                 </ul>
+                <h2>Download</h2>
+                <ul class="posts">
+                    <li><a href="/pages/download">Download Extensions</a></li>
+                </ul>
                 <h2>Site News</h2>
                 <ul class="posts">
                     <li><a href="http://twitter.com/#!/Privly">Privly Twitter</a></li>
@@ -53,35 +61,35 @@
     <div id="btmcontent">
         <div class="col1">
             <h2>Contribute</h2>
-            <p>We are an <a href="#">open source</a> project so there are many ways to contribute.</p>
+            <p>We are an <a href="/pages/license">open source</a> project so there are many ways to contribute.</p>
             <ul>
-                <li><a href="#">Donate</a></li>
-                <li><a href="#">Submit Bug Report</a></li>
-                <li><a href="#">Submit Extension</a></li>
-                <li><a href="#">Submit Idea</a></li>
-                <li><a href="#">Join the Team</a></li>
+                <li><a href="/pages/donate">Donate</a></li>
+                <li><a href="/pages/bug">Submit Bug Report</a></li>
+                <li><a href="/pages/join">Submit Extension</a></li>
+                <li><a href="/pages/join">Submit Idea</a></li>
+                <li><a href="/pages/join">Join the Team</a></li>
             </ul>
         </div>
         <div class="col2">
             <h2>Help</h2>
             <p>We are still in the early stages of development, so expect a few bugs. </p>
             <ul>
-                <li><a href="#">Help Center</a></li>
-                <li><a href="#">Site Support List</a></li>
-                <li><a href="#">Submit a Bug</a></li>
-                <li><a href="#">Help Email List</a></li>
-                <li><a href="#">IRC</a></li>
+                <li><a href="/pages/help">Help Center</a></li>
+                <li><a href="/pages/status">Site Support List</a></li>
+                <li><a href="/pages/bug">Submit a Bug</a></li>
+                <li><a href="/pages/email">Help Email List</a></li>
+                <li><a href="/pages/irc">IRC</a></li>
             </ul>
         </div>
         <div class="col3">
             <h2>About Us</h2>
-            <p>The Privly concept was originally developed by <a href="http://seanbmcgregor.com"></a>, but has since benefited from numerous contributions.</p>
+            <p>The Privly concept was originally developed by <a href="http://seanbmcgregor.com">Sean McGregor</a>, but has since benefited from numerous contributions.</p>
             <ul>
-                <li><a href="http://seizeprivacy.org">Road Map</a></li>
-                <li><a href="#">People</a></li>
-                <li><a href="#">License</a></li>
-                <li><a href="#">Privacy Policy</a></li>
-                <li><a href="#">Terms of Service</a></li>
+                <li><a href="/pages/people">People</a></li>
+                <li><a href="/pages/roadmap">Road Map</a></li>
+                <li><a href="/pages/license">License</a></li>
+                <li><a href="/pages/privacy">Privacy Policy</a></li>
+                <li><a href="/pages/terms">Terms of Service</a></li>
             </ul>
         </div>
         <div class="clear"></div>
