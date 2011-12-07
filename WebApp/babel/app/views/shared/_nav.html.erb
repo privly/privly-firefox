@@ -6,7 +6,19 @@
 				<li class="active"><a href="/">Welcome <span>home</span></a></li>
     			<li><a href="/posts">Posts <span>list</span></a></li>
     			<li><a href="about.html">About <span>info</span></a></li>
-    			<li><a href="/">Login <span>auth</span></a></li>
+    			<% if user_signed_in? %>
+    			<li><%= link_to user_omniauth_callback do %>
+    			    Logout
+    			    <span>auth</span>
+    			    <% end %>
+    			</li>
+    			<% else %>
+    			<li><%= link_to new_user_session_path do %>
+    			    Login
+    			    <span>auth</span>
+    			    <% end %>
+    			</li>
+    			<% end %>
 			</ul>
 		</div>
 		<div class="clear"></div>
