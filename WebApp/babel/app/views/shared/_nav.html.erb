@@ -3,21 +3,52 @@
 		<h1 id="sitename"><a href="/">Priv.ly </a><span>Share Priv(ate).ly</span></h1>
 		<div id="mainnav">
 			<ul>
-				<li class="active"><a href="/">Welcome <span>home</span></a></li>
-    			<li><a href="/posts">Posts <span>list</span></a></li>
-    			<li><a href="about.html">About <span>info</span></a></li>
-    			<% if user_signed_in? %>
-    			<li><%= link_to user_omniauth_callback do %>
-    			    Logout
-    			    <span>auth</span>
-    			    <% end %>
-    			</li>
+			    <% if controller.controller_name == "welcome" %>
+				    <li class="active"><a href="/">Welcome <span>home</span></a></li>
+				<% else %>
+				    <li><a href="/">Welcome <span>home</span></a></li>
+				<% end %>
+				
+				<% if controller.controller_name == "post" %>
+    			    <li class="active"><a href="/posts">Posts <span>list</span></a></li>
     			<% else %>
-    			<li><%= link_to new_user_session_path do %>
-    			    Login
-    			    <span>auth</span>
+    			    <li><a href="/posts">Posts <span>list</span></a></li>
+    			<% end %>
+    			
+    			<% if controller.controller_name == "pages" %>
+    			    <li class="active"><a href="about.html">About <span>info</span></a></li>
+    			<% else %>
+    			    <li><a href="about.html">About <span>info</span></a></li>
+    			<% end %>
+    			
+    			<% if controller.controller_name == "sessions" %>
+    			    <% if user_signed_in? %>
+    			    <li class="active"><%= link_to destroy_user_session_path, :method => :delete do %>
+    			        Logout
+    			        <span>auth</span>
+    			        <% end %>
+    			    </li>
+    			    <% else %>
+    			    <li class="active"><%= link_to new_user_session_path do %>
+    			        Login
+    			        <span>auth</span>
+    			        <% end %>
+    			    </li>
     			    <% end %>
-    			</li>
+    			<% else %>
+    			    <% if user_signed_in? %>
+    			    <li><%= link_to destroy_user_session_path, :method => :delete do %>
+    			        Logout
+    			        <span>auth</span>
+    			        <% end %>
+    			    </li>
+    			    <% else %>
+    			    <li><%= link_to new_user_session_path do %>
+    			        Login
+    			        <span>auth</span>
+    			        <% end %>
+    			    </li>
+    			    <% end %>
     			<% end %>
 			</ul>
 		</div>

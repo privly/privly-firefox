@@ -9,7 +9,7 @@
             <label>
             <p class="date">Posted <%= time_ago_in_words(post.created_at) %> ago by Anonymous.</p>
             <h3><%= link_to post.content, post_path(post) %></h3>
-            <p class="postmeta"><%= button_to 'Destroy', @post, :confirm => 'Are you sure?', :method => :delete %></p>
+            <p class="postmeta"><%= link_to 'Destroy', post, :confirm => 'Are you sure?', :method => :delete %></p>
         </div>            
     </div>
 <% end %>

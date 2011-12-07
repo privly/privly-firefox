@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title><%= Rails.application.class.parent %> &middot; <%= yield :title %></title>
-  <%= stylesheet_link_tag    "application" %>
 
+  <title><%= Rails.application.class.parent %> &middot; <%= yield :title %></title>
+  
+  <%= stylesheet_link_tag    :application %>
+  <%= javascript_include_tag :application %>
+  
   <%= yield :extrahead %>
   <%= yield :extracss %>
   <%= yield :extrajs %>
