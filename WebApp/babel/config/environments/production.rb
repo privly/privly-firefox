@@ -59,4 +59,8 @@ Privly::Application.configure do
   config.active_support.deprecation = :notify
   
   config.action_mailer.default_url_options = { :host => 'priv.ly:80' }
+  
+  FACEBOOK_KEY = '231164433620222'
+  FACEBOOK_SECRET = '2c541ecbd1ab345e6215624b9031eda6'
+  
 end

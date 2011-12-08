@@ -29,4 +29,8 @@ Privly::Application.configure do
   config.assets.debug = true
   
   config.action_mailer.default_url_options = { :host => 'localhost:3000' }
+  
+  FACEBOOK_KEY = '199662380119917'
+  FACEBOOK_SECRET = 'b6b7451cfe9c6776eb4b2c9fd2920bac'
+  
 end

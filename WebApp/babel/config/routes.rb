@@ -1,6 +1,10 @@
 Privly::Application.routes.draw do
   
-  devise_for :users
+  match '/auth/:provider/callback' => 'authentications#create'
+  match '/users/auth/:provider' => 'users/omniauth_callbacks#passthru'
+  resources :authentications
+
+  devise_for :users, :controllers => { :omniauth_callbacks => "users/omniauth_callbacks" }
 
   root :to => "welcome#index"
   
@@ -24,12 +28,6 @@ Privly::Application.routes.draw do
   resources :posts
 
   match '/' => 'welcome#index', :as => :welcome
-
-  # match '/c' => 'content#index', :as => :dont_reference_this  
-  # match '/c/:id' => 'content#index', :as => :dont_reference_that
-
-  match '/k' => 'key#index', :as => :def_dont_reference_this
-  match '/k/:id' => 'key#index', :as => :def_dont_reference_that
 
   # The priority is based upon order of creation:
   # first created -> highest priority.
