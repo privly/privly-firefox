@@ -159,7 +159,6 @@ DEPENDENCIES
   jquery-rails
   json
   mysql2
-  omniauth
   omniauth-facebook
   omniauth-github
   omniauth-identity

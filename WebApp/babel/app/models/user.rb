@@ -13,21 +13,25 @@ class User < ActiveRecord::Base
   # Setup accessible (or protected) attributes for your model
   attr_accessible :email, :password, :password_confirmation, :remember_me
   
-  def self.find_for_facebook_oauth(access_token, signed_in_resource=nil)
-    data = access_token.extra.raw_info
-    if user = User.find_by_email(data.email)
+  def self.find_for_oauth(provider, uid, email)
+
+    if user = User.find_by_email(email)
       user
     else # Create a user with a stub password. 
-      User.create!(:email => data.email, :encrypted_password => Devise.friendly_token[0,20]) 
+      user = User.create!(:email => data.email, :password => Devise.friendly_token[0,20]) 
     end
+    
+    user.authentications.find_or_create_by_provider({:provider => "facebook", :uid => uid})
+    
+    user
   end
   
-  def self.new_with_session(params, session)
-    super.tap do |user|
-      if data = session["devise.facebook_data"] && session["devise.facebook_data"]["extra"]["user_hash"]
-        user.email = data["email"]
-      end
-    end
-  end
+  #def self.new_with_session(params, session)
+  #  super.tap do |user|
+  #    if data = session["devise.facebook_data"] && session["devise.facebook_data"]["extra"]["user_hash"]
+  #      user.email = data["email"]
+  #    end
+  #  end
+  #end
   
 end

@@ -5,8 +5,11 @@ class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
   end
   
   def facebook
-    # You need to implement the method below in your model
-    @user = User.find_for_facebook_oauth(request.env["omniauth.auth"], current_user)
+    auth = request.env["omniauth.auth"]
+    email = auth.extra.raw_info.email
+    uid = auth.uid
+    
+    @user = User.find_for_oauth("facebook", uid, email)
 
     if @user.persisted?
       flash[:notice] = I18n.t "devise.omniauth_callbacks.success", :kind => "Facebook"

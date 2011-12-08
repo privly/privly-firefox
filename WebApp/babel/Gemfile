@@ -42,7 +42,7 @@ gem 'devise' #https://github.com/plataformatec/devise
 #Gems for authorizing with other services, potentially many: 
 # https://github.com/intridea/omniauth/wiki/List-of-Strategies
 # each needs configuration
-gem 'omniauth' #https://github.com/intridea/omniauth
+# gem 'omniauth' #https://github.com/intridea/omniauth
 gem 'omniauth-twitter' #https://github.com/arunagw/omniauth-twitter
 gem 'omniauth-facebook' #https://github.com/mkdynamic/omniauth-facebook
 gem 'omniauth-openid' #https://github.com/intridea/omniauth-openid
