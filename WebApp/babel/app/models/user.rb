@@ -18,10 +18,10 @@ class User < ActiveRecord::Base
     if user = User.find_by_email(email)
       user
     else # Create a user with a stub password. 
-      user = User.create!(:email => data.email, :password => Devise.friendly_token[0,20]) 
+      user = User.create!(:email => email, :password => Devise.friendly_token[0,20]) 
     end
     
-    user.authentications.find_or_create_by_provider({:provider => "facebook", :uid => uid})
+    user.authentications.find_or_create_by_provider({:provider => provider, :uid => uid})
     
     user
   end
