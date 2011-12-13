@@ -108,7 +108,7 @@ function replaceLinks() {
         var url = $(this).attr("href") 
         
         $.get(url + ".gm", function(plainText) { 
-            var replaceWith = "<a href='" + url + "'>" + plainText + "</a>"
+            var replaceWith = "<a href='" + url + "'><pre>" + plainText + "<p/re></a>"
             currentObject.replaceWith(replaceWith);
         });
     });
