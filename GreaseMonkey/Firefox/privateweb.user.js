@@ -55,9 +55,9 @@ function createLinks() {
     //              https://
     //                        priv.ly/textAndNumbers/any/number/of/times
     //                                                                          
-    var regex = /\b(https?:\/\/){0,1}(priv\.ly)(\/\w*){2,}\b/gi;
+    //var regex = /\b(https?:\/\/){0,1}(priv\.ly)(\/\w*){2,}\b/gi;
     //also matches localhost:3000
-    //var regex = /\b(https?:\/\/){0,1}(priv\.ly|localhost:3000)(\/\w*){2,}\b/gi;
+    var regex = /\b(https?:\/\/){0,1}(priv\.ly|localhost:3000)(\/\w*){2,}\b/gi;
     
     var hasHTTPRegex = /^((https?)\:\/\/)/i
 
@@ -107,8 +107,19 @@ function replaceLinks() {
         var currentObject = $(this);
         var url = $(this).attr("href") 
         
-        $.get(url + ".gm", function(plainText) { 
-            var replaceWith = "<a href='" + url + "'><pre>" + plainText + "<p/re></a>"
+        $.get(url + ".gm", function(markdown) { 
+            var replaceWith = "<a href='" + url + "'>" + markdown + "</a>"
+            currentObject.replaceWith(replaceWith);
+        });
+    });
+    
+    //replace all link bodies with the content on the other end
+    $('a[href^="http://localhost:3000"]').each(function() {
+        var currentObject = $(this);
+        var url = $(this).attr("href") 
+        
+        $.get(url + ".gm", function(markdown) { 
+            var replaceWith = "<a href='" + url + "'>" + markdown + "</a>"
             currentObject.replaceWith(replaceWith);
         });
     });
