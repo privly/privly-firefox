@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://privateWeb/skin/skin.css" type="text/css"?> 
+<!DOCTYPE privateWeb SYSTEM "chrome://privateWeb/locale/translations.dtd">
+<overlay id="sample" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+		<script src="privateWeb-setUp.js" />
+
+		<menupopup id="menu_ToolsPopup"> 
+			<menuitem label="&runPrivateWeb;" key="privateWeb-run-key" oncommand="runPrivateWeb()"/> 
+		</menupopup>
+		
+		<keyset>
+			<key id="privateWeb-run-key" modifiers="accel alt" key="P" oncommand="runPrivateWeb()"/>
+		</keyset>
+
+</overlay>

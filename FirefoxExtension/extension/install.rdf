@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+
+	<Description about="urn:mozilla:install-manifest">
+		<em:id>privateweb@privateweb.com</em:id>
+		<em:name>Private Web</em:name>
+		<em:version>0.1.1</em:version>
+		<em:type>2</em:type>
+		<em:creator>The Private Web Team</em:creator>
+		<em:description>Protect your data on the web with Private Web</em:description>
+		<em:homepageURL>http://priv.ly/</em:homepageURL>
+		<em:optionsURL>chrome://privateWeb/content/options.xul</em:optionsURL>
+
+		<em:targetApplication>
+			<Description>
+				<em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+				<em:minVersion>3.6.*</em:minVersion>
+				<em:maxVersion>8.0.*</em:maxVersion>
+			</Description>
+		</em:targetApplication>
+	</Description>      
+</RDF>
