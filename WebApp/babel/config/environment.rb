@@ -5,3 +5,4 @@ require File.expand_path('../application', __FILE__)
 Privly::Application.initialize!
 
 Mime::Type.register "text/plain", :gm
+Mime::Type.register "text/html", :iframe

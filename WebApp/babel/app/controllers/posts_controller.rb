@@ -5,8 +5,7 @@ class PostsController < ApplicationController
   # GET /posts
   # GET /posts.json
   def index
-    @posts = Post.all
-
+    @posts = Post.page(params[:page]).order('created_at DESC')
     respond_to do |format|
       format.html # index.html.erb
       format.json { render :json => @posts }
@@ -21,6 +20,7 @@ class PostsController < ApplicationController
     respond_to do |format|
       format.html # show.html.erb
       format.gm { render }
+      format.iframe { render }
       format.json { render :json => @post, :callback => params[:callback] }
     end
   end

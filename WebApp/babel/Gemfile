@@ -51,3 +51,5 @@ gem 'omniauth-facebook' #https://github.com/mkdynamic/omniauth-facebook
 # gem 'omniauth-linkedin' #https://github.com/skorks/omniauth-linkedin
 
 gem 'rdiscount'
+
+gem 'will_paginate'
