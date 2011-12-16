@@ -8,6 +8,9 @@ Privly::Application.routes.draw do
 
   root :to => "welcome#index"
   
+  #account settings and delete account
+  get "pages/account"
+  
   #nearly static pages
   get "pages/faq"
   get "pages/join"
@@ -24,7 +27,8 @@ Privly::Application.routes.draw do
   get "pages/download"
   get "pages/about"
   get "pages/email"
-
+  
+    
   resources :posts
 
   match '/' => 'welcome#index', :as => :welcome

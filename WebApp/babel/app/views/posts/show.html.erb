@@ -6,7 +6,7 @@
 <div class="post">
     <div class="posthead">
         <p class="date">June 05, 2010</p>
-        <h3><a href="#"><%= @post.content %></a></h3>
+        <h3><a href="#"><%= @post.content.safe_markdown %></a></h3>
         <p class="postmeta">By Anonymous, <%= link_to 'Edit', edit_post_path(@post) %> | <%= link_to 'Destroy', @post, :confirm => 'Are you sure?', :method => :delete %></p>
     </div>
     <p>

@@ -46,5 +46,8 @@ class PagesController < ApplicationController
 
   def email
   end
+  
+  def account
+  end
 
 end
