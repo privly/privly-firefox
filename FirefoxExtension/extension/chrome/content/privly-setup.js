@@ -4,22 +4,22 @@
 function onPgeLd(event){
 	var appcontent = document.getElementById("appcontent");
 	if( appcontent ) {
-		appcontent.addEventListener("DOMContentLoaded", loadLibraries, true);
+		appcontent.addEventListener("DOMContentLoaded", loadLibraries, true);;
 	}
 }
 
 function loadLibraries(evt) {
+	console.log('loading libraries')
 	var doc = evt.originalTarget;
 	var wnd = doc.defaultView;
 	var loader = Components.classes["@mozilla.org/moz/jssubscript-loader;1"].getService(Components.interfaces.mozIJSSubScriptLoader);
 	// load jQuery and save it as a property of the window
-	loader.loadSubScript("chrome://privateWeb/content/jquery-1.7.js",wnd);
-	//loader.loadSubScript("chrome://privateWeb/content/gm_jq_xhr.js", wnd);
-	loader.loadSubScript("chrome://privateWeb/content/privateWeb.js", wnd);
-	autoRunPrivateWeb();
+	loader.loadSubScript("chrome://privly/content/jquery-1.7.js",wnd);
+	//loader.loadSubScript("chrome://privly/content/gm_jq_xhr.js", wnd);
+	loader.loadSubScript("chrome://privly/content/privly.js", wnd);
 }
 
-function runPrivateWeb(){
+function runPrivly(){
 	var pwbutton = content.document.getElementById('pwbtn');
 	if(pwbutton)
 		pwbutton.click();

@@ -9296,5 +9296,5 @@ jQuery.each([ "Height", "Width" ], function( i, name ) {
 
 
 // Expose jQuery to the global object
-window.pwjQ = jQuery;
+window.jQ = jQuery;
 })( window );

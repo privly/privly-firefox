@@ -2,13 +2,13 @@
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 
 <prefwindow 
-     title="Private Web Preferences"
+     title="Privly Preferences"
      xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
  
-	<prefpane label="Private Web Preferences">
+	<prefpane label="Privly Preferences">
 
 		<preferences>
-			<preference id="private-web-autorun" name="extensions.privateWeb.autorun" type="bool"/>
+			<preference id="privly-autorun" name="extensions.privly.autorun" type="bool"/>
 		</preferences>
 		
 		<groupbox>
@@ -21,7 +21,7 @@
 				<rows>
 					<row>
 						<label control="autorun" value="Autorun"/>
-						<checkbox id="autorun" preference="private-web-autorun"/>
+						<checkbox id="autorun" preference="privly-autorun"/>
 					</row>
 				</rows>
 			</grid>
