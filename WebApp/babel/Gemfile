@@ -29,8 +29,8 @@ gem 'jquery-rails'
 # gem 'ruby-debug'
 
 #Javascript runtime
-#gem 'execjs'
-#gem 'johnson'
+gem 'execjs'
+gem 'johnson'
 
 #required for omniauth until they put the dependency in
 gem 'bcrypt-ruby', '~> 3.0.0'
