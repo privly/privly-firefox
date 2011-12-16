@@ -3,14 +3,14 @@
      xmlns:em="http://www.mozilla.org/2004/em-rdf#">
 
 	<Description about="urn:mozilla:install-manifest">
-		<em:id>privateweb@privateweb.com</em:id>
-		<em:name>Private Web</em:name>
+		<em:id>privly@priv.ly</em:id>
+		<em:name>Privly</em:name>
 		<em:version>0.1.1</em:version>
 		<em:type>2</em:type>
-		<em:creator>The Private Web Team</em:creator>
-		<em:description>Protect your data on the web with Private Web</em:description>
+		<em:creator>The Privly Team</em:creator>
+		<em:description>Protect your data on the web with Privly</em:description>
 		<em:homepageURL>http://priv.ly/</em:homepageURL>
-		<em:optionsURL>chrome://privateWeb/content/options.xul</em:optionsURL>
+		<em:optionsURL>chrome://privly/content/options.xul</em:optionsURL>
 
 		<em:targetApplication>
 			<Description>

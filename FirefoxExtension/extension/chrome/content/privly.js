@@ -27,9 +27,8 @@ DEALINGS IN THE SOFTWARE.
 
 /******************************************************************************
 Transforming the Greasemonkey userscript to extension javascript should be fairly straight forward - 
-	Copy the greasemonkey userscript(privateweb.user.js) and	paste it into privateWeb.js. 
-	Change all '$' references to 'pwjQ'.
-	Remove replaceLinks from pwjQ.ready() method
+	Copy the greasemonkey userscript(privateweb.user.js) and paste it into privly.js. 
+	Change all '$' references to 'jQ'.
 ******************************************************************************/
 
 /*******************************************************************************
@@ -95,14 +94,14 @@ function createLinks() {
 
 
 function replaceLinks(){
-	console.log('inside replacePWLinks');
+	console.log('inside replaceLinks');
 	//replace all link bodies with the content on the other end
-	pwjQ('a[href^="http://priv.ly"]').each(function() {	
-		var currentObject = pwjQ(this);
-		var pwUrl = pwjQ(this).attr("href");		
+	jQ('a[href^="http://priv.ly"]').each(function() {	
+		var currentObject = jQ(this);
+		var pwUrl = jQ(this).attr("href");		
 		console.log(pwUrl);
 		
-		pwjQ.getJSON(pwUrl + ".json?callback=?", function(data) {
+		jQ.getJSON(pwUrl + ".json?callback=?", function(data) {
 			var replaceWith = "<a href='" + pwUrl + "'>" + data['content'] + "</a>";
 			currentObject.replaceWith(replaceWith);
 			console.log('url: '+pwUrl+'; content: '+data['content']);
@@ -112,8 +111,8 @@ function replaceLinks(){
 
 
 
-/* we want to execute the function replaceLinks() that is defined in privateWeb.js(which is loaded on the webpage, hence it is part of 
-the web page) from privateWeb-setup.js(which is part of the extension). We want to run replaceLinks whenever the user tries to run 
+/* we want to execute the function replaceLinks() that is defined in privly.js(which is loaded on the webpage, hence it is part of 
+the web page) from privly-setup.js(which is part of the extension). We want to run replaceLinks whenever the user tries to run 
 the extension either via key press or by mouse click.
 There is no straight way of calling a function defined on the web page from an extension. A hack for this is to add a HTML element
 (in this case a button) to the page and to call the required function(here replaceLinks) on the button's click/mousedown. 
@@ -123,10 +122,10 @@ refer - http://stackoverflow.com/a/2896066
  
 function addPWbutton(){
 	var pwbutton = '<input type="button" id="pwbtn" style="visibility:hidden;" onclick="replaceLinks()" />';
-	pwjQ('body').append(pwbutton);
+	jQ('body').append(pwbutton);
 }
 
-pwjQ(document).ready(function() {
+jQ(document).ready(function() {
     addPWbutton();
     createLinks();
     replaceLinks();

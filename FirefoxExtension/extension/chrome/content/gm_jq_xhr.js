@@ -72,6 +72,6 @@ function GM_XHR() {
 };
 
 // Tell jQuery to use the GM_XHR object instead of the standard browser XHR
-window.pwjQ.ajaxSetup({
+window.jQ.ajaxSetup({
     xhr: function(){return new GM_XHR;}
 });

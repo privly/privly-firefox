@@ -1,1 +1,1 @@
-//pref("extensions.privateWeb.autorun", false);
+//pref("extensions.privly.autorun", false);
