@@ -5,7 +5,7 @@ class PostsController < ApplicationController
   # GET /posts
   # GET /posts.json
   def index
-    @posts = Post.page(params[:page]).order('created_at DESC')
+    @posts = current_user.posts.page(params[:page]).order('created_at DESC')
     respond_to do |format|
       format.html # index.html.erb
       format.json { render :json => @posts }
@@ -38,12 +38,17 @@ class PostsController < ApplicationController
 
   # GET /posts/1/edit
   def edit
-    @post = Post.find(params[:id])
+    @post = current_user.posts.find(params[:id])
   end
 
   # POST /posts
   # POST /posts.json
   def create
+    
+    if current_user
+      params[:post].merge!({:user => current_user})
+    end
+    
     @post = Post.new(params[:post])
 
     respond_to do |format|
@@ -84,4 +89,18 @@ class PostsController < ApplicationController
       format.json { head :ok }
     end
   end
+  
+  # DELETE /posts/1
+  # DELETE /posts/1.json
+  def destroy_all
+    posts = current_user.posts
+
+    posts.each do |post|
+      post.destroy
+    end
+
+    redirect_to posts_url, :notice => "Destroyed all Posts."
+
+  end
+  
 end

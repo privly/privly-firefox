@@ -1,6 +1,6 @@
 class PagesController < ApplicationController
   
-  before_filter :authenticate_user!
+  before_filter :authenticate_user!, :only => [:account]
   
   def faq
   end
