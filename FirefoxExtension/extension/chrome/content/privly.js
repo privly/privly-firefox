@@ -132,12 +132,13 @@ function addPWbutton(){
 
 jQ(document).ready(function(){
 	if(document.URL.indexOf('localhost:3000') == -1 && document.URL.indexOf('priv.ly') == -1)
-    addPWbutton();
-    createLinks();
-    replaceLinks();
-    
-    if(document.URL.indexOf('localhost:3000') == -1 && document.URL.indexOf('priv.ly') == -1)
-    	window.addEventListener("IframeResizeEvent", function(e) { resizeIframe(e); }, false, true);
+		addPWbutton();
+		
+	createLinks();
+	replaceLinks();
+    ;
+   if(document.URL.indexOf('localhost:3000') == -1 && document.URL.indexOf('priv.ly') == -1)
+   	window.addEventListener("IframeResizeEvent", function(e) { resizeIframe(e); }, false, true);
    
 });
 
