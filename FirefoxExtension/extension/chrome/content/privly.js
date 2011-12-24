@@ -94,18 +94,23 @@ function createLinks() {
 
 
 function replaceLinks(){
-	console.log('inside replaceLinks');
 	//replace all link bodies with the content on the other end
-	jQ('a[href^="http://priv.ly"]').each(function() {	
+	jQ('a[href^="http://priv.ly"]').each(function() {
 		var currentObject = jQ(this);
-		var pwUrl = jQ(this).attr("href");		
-		console.log(pwUrl);
-		
+		var pwUrl = jQ(this).attr("href");
+		var postId = pwUrl.substr(pwUrl.indexOf("/posts")+7).replace(".iframe","");
+		/*
 		jQ.getJSON(pwUrl + ".json?callback=?", function(data) {
 			var replaceWith = "<a href='" + pwUrl + "'>" + data['content'] + "</a>";
 			currentObject.replaceWith(replaceWith);
 			console.log('url: '+pwUrl+'; content: '+data['content']);
 		});
+		*/
+		iframe = jQ('<iframe />', {"frameborder":"0", "vspace":"0", "hspace":"0", 
+		"marginwidth":"0", "marginheight":"0", "src":pwUrl + ".iframe","id":"ifrm"+postId});
+		iframe.attr('scrolling','no');
+		iframe.css('overflow','hidden');
+		currentObject.replaceWith(iframe);
 	});
 };
 
@@ -125,11 +130,22 @@ function addPWbutton(){
 	jQ('body').append(pwbutton);
 }
 
-jQ(document).ready(function() {
+jQ(document).ready(function(){
+	if(document.URL.indexOf('localhost:3000') == -1 && document.URL.indexOf('priv.ly') == -1)
     addPWbutton();
     createLinks();
     replaceLinks();
+    
+    if(document.URL.indexOf('localhost:3000') == -1 && document.URL.indexOf('priv.ly') == -1)
+    	window.addEventListener("IframeResizeEvent", function(e) { resizeIframe(e); }, false, true);
+   
 });
+
+function resizeIframe(evt){
+	//do nothing. Actual implementation is in privly-setup.js
+}
+
+
 
 
 

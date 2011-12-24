@@ -4,12 +4,11 @@
 function onPgeLd(event){
 	var appcontent = document.getElementById("appcontent");
 	if( appcontent ) {
-		appcontent.addEventListener("DOMContentLoaded", loadLibraries, true);;
+		appcontent.addEventListener("DOMContentLoaded", loadLibraries, true);
 	}
 }
 
 function loadLibraries(evt) {
-	console.log('loading libraries')
 	var doc = evt.originalTarget;
 	var wnd = doc.defaultView;
 	var loader = Components.classes["@mozilla.org/moz/jssubscript-loader;1"].getService(Components.interfaces.mozIJSSubScriptLoader);
@@ -23,10 +22,15 @@ function runPrivly(){
 	var pwbutton = content.document.getElementById('pwbtn');
 	if(pwbutton)
 		pwbutton.click();
-	else
-		console.log('no pw button');
+}
+
+function resizeIframe(evt){	
+	var iframeHeight = evt.target.getAttribute("height");
+	var iframeSrc = evt.target.getAttribute("url");
+	var postId = iframeSrc.substr(iframeSrc.indexOf("/posts")+7).replace(".iframe","");
+	var ifr = content.document.getElementById('ifrm'+postId);
+	ifr.style.height = iframeHeight+'px';
 }
 
 window.addEventListener("load", onPgeLd, false);
-
-
+window.addEventListener("IframeResizeEvent", function(e) { resizeIframe(e); }, false, true);
