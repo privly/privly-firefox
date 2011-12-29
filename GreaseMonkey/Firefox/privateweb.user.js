@@ -103,23 +103,23 @@ function createLinks() {
 
 function replaceLinks() {
     //replace all link bodies with the content on the other end
-    $('a[href^="http://priv.ly"]').each(function() {
+    $('a[href^="http://priv.ly/posts/"]').each(function() {
         var currentObject = $(this);
         var url = $(this).attr("href") 
         
         $.get(url + ".gm", function(markdown) { 
-            var replaceWith = "<a href='" + url + "'>" + markdown + "</a>"
+            var replaceWith = "<a href='" + url + "'>	&gt;&gt;</a>" + markdown + "<a href='" + url + "'>	&lt;&lt;</a>"
             currentObject.replaceWith(replaceWith);
         });
     });
     
     //replace all link bodies with the content on the other end
-    $('a[href^="http://localhost:3000"]').each(function() {
+    $('a[href^="http://localhost:3000/posts/"]').each(function() {
         var currentObject = $(this);
         var url = $(this).attr("href") 
         
         $.get(url + ".gm", function(markdown) { 
-            var replaceWith = "<a href='" + url + "'>" + markdown + "</a>"
+            var replaceWith = "<a href='" + url + "'>	&gt;&gt;</a>" + markdown + "<a href='" + url + "'>	&lt;&lt;</a>"
             currentObject.replaceWith(replaceWith);
         });
     });
