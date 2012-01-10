@@ -26,9 +26,8 @@ function runPrivly(){
 
 function resizeIframe(evt){	
 	var iframeHeight = evt.target.getAttribute("height");
-	var iframeSrc = evt.target.getAttribute("url");
-	var postId = iframeSrc.substr(iframeSrc.indexOf("/posts")+7).replace(".iframe","");
-	var ifr = content.document.getElementById('ifrm'+postId);
+	var frame_id = evt.target.getAttribute("frame_id");
+	var ifr = content.document.getElementById('ifrm'+frame_id);
 	ifr.style.height = iframeHeight+'px';
 }
 

@@ -8,8 +8,7 @@
 // @include         *
 // @exclude         *.txt
 // @exclude         *.iframe
-// @require       http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js
-// @require       http://courses.ischool.berkeley.edu/i290-4/f09/resources/gm_jq_xhr.js
+// @require       http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js
 
 // ==/UserScript==
 /*******************************************************************************
@@ -57,6 +56,9 @@ function makeHref(domain){
   return domain;
 }
 
+/**
+ * Make plain text links into anchor elements
+ */
 function createLinks() {
     /*************************************************************************
     Inspired by Linkify script:
@@ -132,47 +134,72 @@ function correctIndirection() {
   });
 }
 
+// Our iframe identifiers
+var nextAvailableFrameID = 0;
+
 /**
  * Replace a jQuery anchor element with its referenced content.
  */
 function replaceLink(currentObject) {
   
-  var url = currentObject.attr("href");
+  var linkUrl = currentObject.attr("href");
+  var postId = linkUrl.substr(linkUrl.indexOf("/posts")+7);
   
-  $.get(url + ".gm", function(markdown) {
-      var replaceWith = "<a href='" + url + "' privly='exclude'> &gt;&gt;</a>" + markdown + "<a href='" + url + "' privly='exclude'> &lt;&lt;</a>";
-      currentObject.replaceWith(replaceWith);
-  });
+  iframe = $('<iframe />', {"frameborder":"0",
+    "vspace":"0",
+    "hspace":"0",
+    "width":"100%",
+    "marginwidth":"0", 
+    "marginheight":"0", 
+    "src":linkUrl + ".iframe?frame_id=" + nextAvailableFrameID,
+    "id":"ifrm"+nextAvailableFrameID});
+  nextAvailableFrameID++;
+  iframe.attr('scrolling','no');
+  iframe.css('overflow','hidden');
+  currentObject.replaceWith(iframe);
 }
 
-// These jquery selection strings select anchor elements 
+
+// This jquery selection string selects anchor elements 
 // that point to the posts controller in the Web Application.
-var selectors = ['a[href^="https://priv.ly/posts/"]', 
-                 'a[href^="http://priv.ly/posts/"]', 
-                 'a[href^="http://localhost:3000/posts/"]'];
+var selectors = 'a[href^="https://priv.ly/posts/"],'+ 
+                 'a[href^="http://priv.ly/posts/"],'+ 
+                 'a[href^="http://localhost:3000/posts/"]';
 
 /**
  * Replaces all matching links with their referenced content.
  * Links with the attribute privly='exclude' are excluded.
  */
 function replaceLinks() {
-  for(var i = 0; i < selectors.length; i++)
-  {
-    $(selectors[i]).each(function() {
-        var exclude = $(this).attr("privly");
-        if(exclude != "exclude")
-        {
-          replaceLink($(this));
-        }
-    });
-  };
+  $(selectors).each(function() {
+      var exclude = $(this).attr("privly");
+      
+      if(exclude != "exclude")
+      {
+        replaceLink($(this));
+      }
+  });
+}
+
+/**
+ * resizeIframe is called when the listener
+ */
+function resizeIframe(evt){	
+	var iframeHeight = evt.target.getAttribute("height");
+	var frame_id = evt.target.getAttribute("frame_id");
+	var ifr = content.document.getElementById('ifrm'+frame_id);
+	ifr.style.height = iframeHeight+'px';
 }
 
 
 // When the document is ready, it fetches the appropriate content
 // It checks again whenever the body is clicked. This allows for
-// dynamic content to be replaced.
-$(document).ready(function() {
+// dynamic content to be replaced. Note: GM automatically wraps this
+// code in an onready event so this is not necessary in GM.
+$(document).ready(function() {  
+  
+  window.addEventListener("IframeResizeEvent", resizeIframe, false);
+  
   createLinks();
   correctIndirection();
   replaceLinks();
@@ -182,4 +209,3 @@ $(document).ready(function() {
     replaceLinks();
   });
 });
-
