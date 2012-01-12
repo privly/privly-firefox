@@ -11,5 +11,10 @@
 		<keyset>
 			<key id="privly-run-key" modifiers="accel alt" key="P" oncommand="runPrivly()"/>
 		</keyset>
+	
+		<menupopup id="contentAreaContextMenu">  
+		  <menuitem id="postToPrivlyMenuItem" label="Post to Privly" oncommand="postToPrivly()"/>  
+		</menupopup>
+
 
 </overlay>

@@ -187,12 +187,12 @@ function addPWbutton(){
 
 jQ(document).ready(function(){
   
-  if(document.URL.indexOf('localhost:3000') == -1 && document.URL.indexOf('priv.ly') == -1)
-    addPWbutton();
-
-    createLinks();
-    correctIndirection();
-    replaceLinks();
+  if(document.URL.indexOf('localhost:3000') == -1 && document.URL.indexOf('priv.ly') == -1){
+	   addPWbutton();
+	}
+   createLinks();
+   correctIndirection();
+   replaceLinks();
 
     jQ("body").live('click', function() {
       createLinks();
@@ -207,4 +207,3 @@ jQ(document).ready(function(){
 function resizeIframe(evt){
 	//do nothing. Actual implementation is in privly-setup.js
 }
-
