@@ -33,7 +33,7 @@ function postToPrivly(){
 	token=prompt("enter token(copy it from the page source)","");
 	jQ.ajax(
 		{
-			data: { authenticity_token: token
+			data: { auth_token: token
 			, "post[content]":value, endpoint:"extension",browser:"firefox",version:"0.1.1.1"			
 			},
         	type: "POST",
