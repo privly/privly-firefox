@@ -160,6 +160,11 @@ var selectors = 'a[href^="https://priv.ly/posts/"],'+
                  'a[href^="http://localhost:3000/posts/"]';
 
 function replaceLinks(){
+  
+  //don't recursively replace links
+  if(document.URL.indexOf('priv.ly') != -1 || document.URL.indexOf('localhost:3000') != -1)
+    return;
+  
   jQ(selectors).each(function() {
     var exclude = jQ(this).attr("privly");
     if(exclude != "exclude")
@@ -207,3 +212,4 @@ jQ(document).ready(function(){
 function resizeIframe(evt){
 	//do nothing. Actual implementation is in privly-setup.js
 }
+
