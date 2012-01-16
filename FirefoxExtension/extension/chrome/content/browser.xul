@@ -16,5 +16,12 @@
 		  <menuitem id="postToPrivlyMenuItem" label="Post to Privly" oncommand="postToPrivly()"/>  
 		</menupopup>
 
+		<menupopup id="contentAreaContextMenu">  
+		  <menuitem id="loginToPrivlyMenuItem" label="Login to Privly" oncommand="loginToPrivly()"/>  
+		</menupopup>
+
+		<menupopup id="contentAreaContextMenu">  
+		  <menuitem id="logoutFromPrivlyMenuItem" label="Logout from Privly" oncommand="logoutFromPrivly()"/>  
+		</menupopup>
 
 </overlay>

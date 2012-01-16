@@ -1,4 +1,4 @@
-
+var user_auth_token = "";
 
 function onPgeLd(event){
 	var appcontent = document.getElementById("appcontent");
@@ -24,20 +24,18 @@ function runPrivly(){
 }
 
 function postToPrivly(){
-	var tBrowser = document.getElementById("content");
 	var target = document.popupNode;
 	var value = target.value;
 	if(value == "")
 		alert("Sorry. You can not post empty content to Privly");		
 	else{
-	token=prompt("enter token(copy it from the page source)","");
 	jQ.ajax(
 		{
-			data: { auth_token: token
-			, "post[content]":value, endpoint:"extension",browser:"firefox",version:"0.1.1.1"			
+			data: { auth_token: user_auth_token, "post[content]":value, endpoint:"extension",
+			  browser:"firefox",version:"0.1.1.1"
 			},
         	type: "POST",
-        	url: "http://localhost:3000/posts",
+        	url: "https://priv.ly/posts",
         	contentType: "application/x-www-form-urlencoded; charset=UTF-8",
         	success: function(data, textStatus, jqXHR){
         		target.value=jqXHR.getResponseHeader("privlyurl");
@@ -45,7 +43,49 @@ function postToPrivly(){
 		}
 		);
 	}
-	
+}
+
+function loginToPrivly(){
+  userEmailAddress = prompt("enter email address","");
+  userPassword = prompt("enter password","");
+  jQ.ajax(
+    {
+      data: { email: userEmailAddress, password: userPassword, 
+        endpoint:"extension", browser:"firefox", version:"0.1.1.1"
+      },
+      type: "POST",
+      url: "https://priv.ly/token_authentications.json",
+      contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+      success: function(data, textStatus, jqXHR){
+        user_auth_token = data.auth_key;
+        if(user_auth_token)
+        {
+          alert("You are now logged into Privly");
+        }
+        else
+        {
+          alert("Incorrect email or password for Priv.ly login");
+        }
+      }
+    }
+  );
+}
+
+function logoutFromPrivly(){
+  jQ.ajax(
+    {
+      data: { _method: "delete", endpoint:"extension", browser:"firefox", 
+        version:"0.1.1.1"
+      },
+      type: "POST",
+      url: "https://priv.ly/token_authentications.json",
+      contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+      success: function(data, textStatus, jqXHR){
+        user_auth_token = "";
+        alert("You are logged out from Priv.ly");
+      }
+    }
+  );
 }
 
 function resizeIframe(evt){	
@@ -56,13 +96,28 @@ function resizeIframe(evt){
 }
 
 function checkContextForPrivly(evt){
-	var menu = document.getElementById('postToPrivlyMenuItem');
-    if(evt.target.nodeName != null && (evt.target.nodeName.toLowerCase() == 'input' || evt.target.nodeName.toLowerCase() == 'textarea')){ 
-        menu.hidden = false;
+  
+  var loginToPrivlyMenuItem = document.getElementById('loginToPrivlyMenuItem'); 
+  var logoutFromPrivlyMenuItem = document.getElementById('logoutFromPrivlyMenuItem');   
+  var postToPrivlyMenuItem = document.getElementById('postToPrivlyMenuItem');
+
+  if(user_auth_token)
+  {
+    loginToPrivlyMenuItem.hidden = true;
+    logoutFromPrivlyMenuItem.hidden = false;
+    if(evt.target.nodeName != null && (evt.target.nodeName.toLowerCase() == 'input' || evt.target.nodeName.toLowerCase() == 'textarea')){
+      postToPrivlyMenuItem.hidden = false;
     }
     else {
-        menu.hidden = true;
-    }	
+      postToPrivlyMenuItem.hidden = true;
+    }
+  }
+  else
+  {
+    loginToPrivlyMenuItem.hidden = false;
+    logoutFromPrivlyMenuItem.hidden = true;
+    postToPrivlyMenuItem.hidden = true;
+  }
 }
 
 Components.classes["@mozilla.org/moz/jssubscript-loader;1"].getService(Components.interfaces.mozIJSSubScriptLoader).loadSubScript("chrome://privly/content/jquery-1.7.js",window);
