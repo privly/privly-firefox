@@ -35,8 +35,9 @@ function postToPrivly(){
 			  browser:"firefox",version:"0.1.1.1"
 			},
         	type: "POST",
-        	url: "https://priv.ly/posts",
-        	contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+        	//url: "https://priv.ly/posts",
+        	url: "http://localhost:3000/posts",
+        	contentType: "application/x-www-form-urlencoded; charset=UTF-8", 
         	success: function(data, textStatus, jqXHR){
         		target.value=jqXHR.getResponseHeader("privlyurl");
 			}
@@ -46,15 +47,23 @@ function postToPrivly(){
 }
 
 function loginToPrivly(){
-  userEmailAddress = prompt("enter email address","");
-  userPassword = prompt("enter password","");
+  var prompts = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+                        .getService(Components.interfaces.nsIPromptService);
+	var email = {value: ""}; 	
+	var password = {value: ""}; 
+	var result = prompts.promptUsernameAndPassword(null, "Privly Authentication", "Enter your Privly email and password:",
+                                               email, password, "", {});
+	userEmailAddress = email.value;
+	userPassword = password.value;                                         
+                                               
   jQ.ajax(
     {
       data: { email: userEmailAddress, password: userPassword, 
         endpoint:"extension", browser:"firefox", version:"0.1.1.1"
       },
       type: "POST",
-      url: "https://priv.ly/token_authentications.json",
+      //url: "https://priv.ly/token_authentications.json",
+      url: "http://localhost:3000/token_authentications.json",
       contentType: "application/x-www-form-urlencoded; charset=UTF-8",
       success: function(data, textStatus, jqXHR){
         user_auth_token = data.auth_key;
@@ -78,7 +87,8 @@ function logoutFromPrivly(){
         version:"0.1.1.1"
       },
       type: "POST",
-      url: "https://priv.ly/token_authentications.json",
+      //url: "https://priv.ly/token_authentications.json",
+      url: "http://localhost:3000/token_authentications.json",
       contentType: "application/x-www-form-urlencoded; charset=UTF-8",
       success: function(data, textStatus, jqXHR){
         user_auth_token = "";
