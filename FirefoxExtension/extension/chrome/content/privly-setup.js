@@ -35,8 +35,7 @@ function postToPrivly(){
 			  browser:"firefox",version:"0.1.1.1"
 			},
         	type: "POST",
-        	//url: "https://priv.ly/posts",
-        	url: "http://localhost:3000/posts",
+        	url: "https://priv.ly/posts",
         	contentType: "application/x-www-form-urlencoded; charset=UTF-8", 
         	success: function(data, textStatus, jqXHR){
         		target.value=jqXHR.getResponseHeader("privlyurl");
@@ -62,8 +61,7 @@ function loginToPrivly(){
         endpoint:"extension", browser:"firefox", version:"0.1.1.1"
       },
       type: "POST",
-      //url: "https://priv.ly/token_authentications.json",
-      url: "http://localhost:3000/token_authentications.json",
+      url: "https://priv.ly/token_authentications.json",
       contentType: "application/x-www-form-urlencoded; charset=UTF-8",
       success: function(data, textStatus, jqXHR){
         user_auth_token = data.auth_key;
@@ -87,8 +85,7 @@ function logoutFromPrivly(){
         version:"0.1.1.1"
       },
       type: "POST",
-      //url: "https://priv.ly/token_authentications.json",
-      url: "http://localhost:3000/token_authentications.json",
+      url: "https://priv.ly/token_authentications.json",
       contentType: "application/x-www-form-urlencoded; charset=UTF-8",
       success: function(data, textStatus, jqXHR){
         user_auth_token = "";
