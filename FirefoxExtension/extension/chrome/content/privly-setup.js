@@ -144,8 +144,7 @@ function logoutFromPrivly(){
 
 function resizeIframe(evt){	
 	var iframeHeight = evt.target.getAttribute("height");
-	var frame_id = evt.target.getAttribute("frame_id");
-	var ifr = content.document.getElementById('ifrm'+frame_id);
+	var ifr = evt.target.ownerDocument.defaultView.frameElement;
 	ifr.style.height = iframeHeight+'px';
 }
 
