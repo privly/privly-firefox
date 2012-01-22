@@ -86,7 +86,7 @@ var privly = {
 
                   var text = (href.indexOf(" ")==0)?href.substring(1):href;
 
-                  var href = makeHref(text);
+                  var href = privly.makeHref(text);
 
                   var a = document.createElement("a");
                   a.setAttribute("href", href);
@@ -110,7 +110,6 @@ var privly = {
     allLinks.each(function() {
         thisLink = jQ(this);
         linkBody = thisLink.html()
-
         if (privly.privlyReferencesRegex.test(linkBody)) {        
           var href = thisLink.attr("href");
           // If the href is not present or is on a different domain
@@ -118,7 +117,7 @@ var privly = {
           {
             privly.privlyReferencesRegex.lastIndex = 0;
             var results = privly.privlyReferencesRegex.exec(linkBody);
-            var newHref = makeHref(results[0]);
+            var newHref = privly.makeHref(results[0]);
             thisLink.attr("href", newHref);
           }
         }
@@ -198,18 +197,17 @@ jQ(document).ready(function(){
   if(document.URL.indexOf('localhost:3000') == -1 && document.URL.indexOf('priv.ly') == -1){
     privly.addPWbutton();
   }
+
+  privly.createLinks();
+  privly.correctIndirection();
+  privly.replaceLinks();
   
-   privly.createLinks();
-   privly.correctIndirection();
-   privly.replaceLinks();
-
-    jQ("body").live('click', function() {
-      privly.createLinks();
-      privly.correctIndirection();
-      privly.replaceLinks();
-    });
-
-    if(document.URL.indexOf('localhost:3000') == -1 && document.URL.indexOf('priv.ly') == -1)
-      window.addEventListener("IframeResizeEvent", function(e) { privly.resizeIframe(e); }, false, true);
+  jQ("body").live('click', function() {
+    privly.createLinks();
+    privly.correctIndirection();
+    privly.replaceLinks();
+  });
+  if(document.URL.indexOf('localhost:3000') == -1 && document.URL.indexOf('priv.ly') == -1)
+    window.addEventListener("IframeResizeEvent", function(e) { privly.resizeIframe(e); }, false, true);
 });
 
