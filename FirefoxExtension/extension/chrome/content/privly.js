@@ -141,6 +141,7 @@ function replaceLink(currentObject) {
   
   iframe = jQ('<iframe />', {"frameborder":"0",
     "vspace":"0",
+    "name":"privlyiframe",
     "hspace":"0",
     "width":"100%",
     "marginwidth":"0", 
@@ -151,6 +152,7 @@ function replaceLink(currentObject) {
   iframe.attr('scrolling','no');
   iframe.css('overflow','hidden');
   currentObject.replaceWith(iframe);
+  
 }
 
 // This jquery selection string selects anchor elements 
