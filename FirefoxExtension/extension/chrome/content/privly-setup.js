@@ -1,7 +1,15 @@
 var user_auth_token = "";
-var disableIframes = false;
-var disablePosts = false;
-var replaceIframes = false;
+
+var flags =
+{
+  //when the server is down and we don't want any further requests to the server.
+  noRequests: false,
+  //disablePosts - when we don't want the extension to post content to the server.
+  disablePosts: false,
+  //when the server is busy and we don't want the extension to replace links on the page.
+  requireClickthrough: false
+};
+
 
 // This is a temporary fix. We need to implement this in an XPCOM
 //
@@ -16,18 +24,21 @@ var httpRequestObserver =
 {
   observe: function(subject, topic, data)
   {
-    if (topic == "http-on-modify-request") {
-      
+    if (topic == "http-on-modify-request") 
+    {
       var httpChannel = subject.QueryInterface(Components.interfaces.nsIHttpChannel);
-      
-      /* 
-      cancel requests to priv.ly when disableIframes and replaceIframes flags are set. To know what each flag means see
-      the register function of httpResponseObserver below
-      */
-      if ((/priv.ly/.test(httpChannel.originalURI.host) || (/localhost/.test(httpChannel.originalURI.host) && /posts/.test(httpChannel.originalURI.path)))
-        && (disableIframes == true || replaceIframes == true)){
+      //cancel iframe requests to priv.ly when requireClickthrough is set.
+      //cancel all requests to priv.ly when noRequests is set
+      if (flags.noRequests == true || flags.requireClickthrough == true)
+      {
+        if ((/priv.ly/.test(httpChannel.originalURI.host) || (/localhost/.test(httpChannel.originalURI.host))))
+        {
+          if(flags.noRequests == true || (/.iframe/g).test(httpChannel.originalURI.path))
+          {
             subject.cancel(Components.results.NS_BINDING_ABORTED);
             convertIframesToLinks();
+          }
+        }
       }
       if (/priv.ly/.test(httpChannel.originalURI.host))
       {
@@ -64,41 +75,33 @@ var httpResponseObserver =
   {
     if (topic == "http-on-examine-response") {
       var httpChannel = subject.QueryInterface(Components.interfaces.nsIHttpChannel);
-      if (/priv.ly/.test(httpChannel.originalURI.host) || (/localhost/.test(httpChannel.originalURI.host) && /posts/.test(httpChannel.originalURI.path)))
-      {
-        /*
-        read the extensionCommand header from the response. if the response header is not set or the server 
-        didn't reply, it will throw an error. so catch it
-        */ 
-        try{
-          extensionCommand = httpChannel.getResponseHeader("extensionCommand");
-        }
-        catch(err){
-
-        }
-        /* the extensioncommand response header will be a json string. So far 3 params are identified.
-          disableIframes - when the server is down and we don't want any further requests to the server.
-          replaceIframes - when the server is busy and we don't want the extension to replace links on the page.
-          User can still see the content by visiting privly
-          disablePosts - when we don't want the extension to post content to the server.
-          disableIframes and replaceIframes are mutually exclusive. Only one should appear in the header string.
-        */
-        //eg - extensionCommand = '{"disableIframes": 100,"disablePosts" : 200, replaceIframes:110}';
-        extensionCommand = '';
-        command = jQ.parseJSON(extensionCommand);
-        if(command && command.disableIframes){
-          disableIframes = true;
-          setTimeout("disableIframes=false",command.disableIframes);
-        }
-        if(command && command.disablePosts){
-          disablePosts = true;
-         setTimeout("disablePosts=false",command.disablePosts);
-        } 
-        if(command && command.replaceIframes){
-          replaceIframes = true;
-          setTimeout("replaceIframes=false",command.replaceIframes);
+      //read the extensionCommand header from the response. if the response header is not set or the server 
+      //didn't reply, it will throw an error. so catch it
+      try{
+        extensionCommand = httpChannel.getResponseHeader("privlyExtensionCommand");
+        
+        if (/priv.ly/.test(httpChannel.originalURI.host) || (/localhost/.test(httpChannel.originalURI.host) && /posts/.test(httpChannel.originalURI.path)))
+        { 
+          //the extensioncommand response header will be a json string. So far 3 params are identified.
+          //disableIframes and requireClickthrough are mutually exclusive. Only one should appear in the header string.
+          //eg - extensionCommand = '{"noRequests": 100,"disablePosts" : 200, requireClickthrough:110}';
+          extensionCommand = '';
+          command = jQ.parseJSON(extensionCommand);
+          if(command && command.noRequests){
+            flags.noRequests = true;
+            setTimeout("flags.noRequests=false",command.noRequests);
+          }
+          if(command && command.disablePosts){
+            flags.disablePosts = true;
+            setTimeout("flags.disablePosts=false",command.disablePosts);
+          } 
+          if(command && command.requireClickthrough){
+            flags.requireClickthrough = true;
+            setTimeout("flags.requireClickthrough=false",command.requireClickthrough);
+          }
         }
       }
+      catch(err){}
     }
   },
 
@@ -215,6 +218,7 @@ function logoutFromPrivly(){
     }
   );
 }
+
 /*
  when the server is down/busy, this function is called to convert the privly iframes to anchors on the web page 
  depending upon the flags set in the extensionCommand header.
@@ -227,11 +231,11 @@ function convertIframesToLinks(){
       var href = privlyIframes[i].src;
       href = href.substring(0,href.indexOf(".iframe"));
       anchor.setAttribute('href',href);
-      if(disableIframes){
+      if(flags.noRequests){
           anchor.innerHTML = "Privly is not responding, please check this link later";
         }
-        else if(replaceIframes){
-          anchor.innerHTML = "Privly is in sleep mode so it can catch up with demand. You can still view this content on the website by clicking this link";
+        else if(flags.requireClickthrough){
+          anchor.innerHTML = "Privly is in sleep mode so it can catch up with demand. The content may still be viewable by clicking this link";
         }
       privlyIframes[i].parentNode.replaceChild(anchor,privlyIframes[i]);
     }
@@ -254,7 +258,7 @@ function checkContextForPrivly(evt){
   {
     loginToPrivlyMenuItem.hidden = true;
     logoutFromPrivlyMenuItem.hidden = false;
-    if(!disablePosts && evt.target.nodeName != null && (evt.target.nodeName.toLowerCase() == 'input' || evt.target.nodeName.toLowerCase() == 'textarea')){
+    if(!flags.disablePosts && evt.target.nodeName != null && (evt.target.nodeName.toLowerCase() == 'input' || evt.target.nodeName.toLowerCase() == 'textarea')){
       postToPrivlyMenuItem.hidden = false;
     }
     else {
