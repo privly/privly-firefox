@@ -231,12 +231,14 @@ function convertIframesToLinks(){
       var href = privlyIframes[i].src;
       href = href.substring(0,href.indexOf(".iframe"));
       anchor.setAttribute('href',href);
-      if(flags.noRequests){
-          anchor.innerHTML = "Privly is not responding, please check this link later";
-        }
-        else if(flags.requireClickthrough){
+      if(flags.noRequests)
+      {
+          anchor.innerHTML = "Privly temporarily disabled all requests to its servers. Please try again later.";
+      }
+      else if(flags.requireClickthrough)
+      {
           anchor.innerHTML = "Privly is in sleep mode so it can catch up with demand. The content may still be viewable by clicking this link";
-        }
+      }
       privlyIframes[i].parentNode.replaceChild(anchor,privlyIframes[i]);
     }
   }
