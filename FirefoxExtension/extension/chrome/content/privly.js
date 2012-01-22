@@ -109,7 +109,7 @@ var privly = {
     var allLinks = jQ("a");
     allLinks.each(function() {
         thisLink = jQ(this);
-        linkBody = thisLink.html()
+        linkBody = thisLink.html();
         if (privly.privlyReferencesRegex.test(linkBody)) {        
           var href = thisLink.attr("href");
           // If the href is not present or is on a different domain
@@ -123,7 +123,6 @@ var privly = {
         }
     });
   },
-
 
   nextAvailableFrameID: 0,
 
@@ -200,14 +199,24 @@ jQ(document).ready(function(){
 
   privly.createLinks();
   privly.correctIndirection();
-  privly.replaceLinks();
+  privly.replaceLinks();//replace all available links on load
   
+  //replace all links whenever the page is clicked in the body
   jQ("body").live('click', function() {
     privly.createLinks();
     privly.correctIndirection();
     privly.replaceLinks();
   });
+  
+  //replace the clicked link only, the link must be prepped with
+  //calls to privly.createLinks() and privly.correctIndirection()
+  //jQ(privly.selectors).live('click', function(event) {
+  //  event.preventDefault();
+  //  privly.replaceLink(jQ(this));
+  //});
+  
   if(document.URL.indexOf('localhost:3000') == -1 && document.URL.indexOf('priv.ly') == -1)
+  {
     window.addEventListener("IframeResizeEvent", function(e) { privly.resizeIframe(e); }, false, true);
+  }
 });
-
