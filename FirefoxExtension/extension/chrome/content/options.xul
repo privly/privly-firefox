@@ -5,29 +5,29 @@
      title="Privly Preferences"
      xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
  
-	<prefpane label="Privly Preferences">
+  <prefpane label="Privly Preferences">
 
-		<preferences>
-			<preference id="privly-autorun" name="extensions.privly.autorun" type="bool"/>
-		</preferences>
-		
-		<groupbox>
-			<caption label="Settings"/>
-			<grid>
-				<columns>
-					<column flex="4"/>
-					<column flex="1"/>
-				</columns>
-				<rows>
-					<row>
-						<label control="autorun" value="Autorun"/>
-						<checkbox id="autorun" preference="privly-autorun"/>
-					</row>
-				</rows>
-			</grid>
-		</groupbox>	
+    <preferences>
+      <preference id="privly-autorun" name="extensions.privly.autorun" type="bool"/>
+    </preferences>
+    
+    <groupbox>
+      <caption label="Settings"/>
+      <grid>
+        <columns>
+          <column flex="4"/>
+          <column flex="1"/>
+        </columns>
+        <rows>
+          <row>
+            <label control="autorun" value="Autorun"/>
+            <checkbox id="autorun" preference="privly-autorun"/>
+          </row>
+        </rows>
+      </grid>
+    </groupbox>
 
-	</prefpane>
- 
+  </prefpane>
+
 </prefwindow>
 

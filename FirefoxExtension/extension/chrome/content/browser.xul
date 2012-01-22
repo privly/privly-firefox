@@ -2,26 +2,26 @@
 <?xml-stylesheet href="chrome://privly/skin/skin.css" type="text/css"?> 
 <!DOCTYPE privly SYSTEM "chrome://privly/locale/translations.dtd">
 <overlay id="sample" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-		<script src="privly-setup.js" />
+    <script src="privly-setup.js" />
 
-		<menupopup id="menu_ToolsPopup"> 
-			<menuitem label="&runPrivly;" key="privly-run-key" oncommand="runPrivly()"/> 
-		</menupopup>
-		
-		<keyset>
-			<key id="privly-run-key" modifiers="accel alt" key="P" oncommand="runPrivly()"/>
-		</keyset>
-	
-		<menupopup id="contentAreaContextMenu">  
-		  <menuitem id="postToPrivlyMenuItem" label="Post to Privly" oncommand="postToPrivly()"/>  
-		</menupopup>
+    <menupopup id="menu_ToolsPopup"> 
+      <menuitem label="&runPrivly;" key="privly-run-key" oncommand="runPrivly()"/> 
+    </menupopup>
 
-		<menupopup id="contentAreaContextMenu">  
-		  <menuitem id="loginToPrivlyMenuItem" label="Login to Privly" oncommand="loginToPrivly()"/>  
-		</menupopup>
+    <keyset>
+      <key id="privly-run-key" modifiers="accel alt" key="P" oncommand="runPrivly()"/>
+    </keyset>
 
-		<menupopup id="contentAreaContextMenu">  
-		  <menuitem id="logoutFromPrivlyMenuItem" label="Logout from Privly" oncommand="logoutFromPrivly()"/>  
-		</menupopup>
+    <menupopup id="contentAreaContextMenu">  
+      <menuitem id="postToPrivlyMenuItem" label="Post to Privly" oncommand="postToPrivly()"/>  
+    </menupopup>
+
+    <menupopup id="contentAreaContextMenu">  
+      <menuitem id="loginToPrivlyMenuItem" label="Login to Privly" oncommand="loginToPrivly()"/>  
+    </menupopup>
+
+    <menupopup id="contentAreaContextMenu">  
+      <menuitem id="logoutFromPrivlyMenuItem" label="Logout from Privly" oncommand="logoutFromPrivly()"/>  
+    </menupopup>
 
 </overlay>

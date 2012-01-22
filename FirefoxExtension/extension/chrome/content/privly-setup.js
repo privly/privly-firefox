@@ -25,14 +25,14 @@ var httpRequestObserver =
       the register function of httpResponseObserver below
       */
       if ((/priv.ly/.test(httpChannel.originalURI.host) || (/localhost/.test(httpChannel.originalURI.host) && /posts/.test(httpChannel.originalURI.path)))
-      	&& (disableIframes == true || replaceIframes == true)){      			
-      			subject.cancel(Components.results.NS_BINDING_ABORTED);
-      			convertIframesToLinks();
+        && (disableIframes == true || replaceIframes == true)){
+            subject.cancel(Components.results.NS_BINDING_ABORTED);
+            convertIframesToLinks();
       }
       if (/priv.ly/.test(httpChannel.originalURI.host))
       {
         httpChannel.setRequestHeader("Privly-Version", "0.1.1.1", false);
-        httpChannel.setRequestHeader("auth_token", user_auth_token, false);        
+        httpChannel.setRequestHeader("auth_token", user_auth_token, false);
       }
       else if(/localhost/.test(httpChannel.originalURI.host))
       {
@@ -61,43 +61,43 @@ var httpRequestObserver =
 var httpResponseObserver =
 {
   observe: function(subject, topic, data)
-  {  		
+  {
     if (topic == "http-on-examine-response") {
       var httpChannel = subject.QueryInterface(Components.interfaces.nsIHttpChannel);
       if (/priv.ly/.test(httpChannel.originalURI.host) || (/localhost/.test(httpChannel.originalURI.host) && /posts/.test(httpChannel.originalURI.path)))
       {
-      	/*
-      	read the extensionCommand header from the response. if the response header is not set or the server 
-      	didn't reply, it will throw an error. so catch it
-      	*/ 
-      	try{
-	      	extensionCommand = httpChannel.getResponseHeader("extensionCommand");
-      	}
-      	catch(err){
+        /*
+        read the extensionCommand header from the response. if the response header is not set or the server 
+        didn't reply, it will throw an error. so catch it
+        */ 
+        try{
+          extensionCommand = httpChannel.getResponseHeader("extensionCommand");
+        }
+        catch(err){
 
-      	}
-      	/* the extensioncommand response header will be a json string. So far 3 params are identified.
-      		disableIframes - when the server is down and we don't want any further requests to the server.
-      		replaceIframes - when the server is busy and we don't want the extension to replace links on the page.
-      		User can still see the content by visiting privly
-      		disablePosts - when we don't want the extension to post content to the server.
-      		disableIframes and replaceIframes are mutually exclusive. Only one should appear in the header string.      		
-      	*/      	
-      	//eg - extensionCommand = '{"disableIframes": 100,"disablePosts" : 200, replaceIframes:110}';
-      	extensionCommand = '';
-      	command = jQ.parseJSON(extensionCommand);
-      	if(command && command.disableIframes){
-      		disableIframes = true;
-      		setTimeout("disableIframes=false",command.disableIframes);
-      	}
-      	if(command && command.disablePosts){
-      		disablePosts = true;
-   			setTimeout("disablePosts=false",command.disablePosts);   		
-      	} 
-      	if(command && command.replaceIframes){
-      		replaceIframes = true;
-   			setTimeout("replaceIframes=false",command.replaceIframes);   		
-      	}
+        }
+        /* the extensioncommand response header will be a json string. So far 3 params are identified.
+          disableIframes - when the server is down and we don't want any further requests to the server.
+          replaceIframes - when the server is busy and we don't want the extension to replace links on the page.
+          User can still see the content by visiting privly
+          disablePosts - when we don't want the extension to post content to the server.
+          disableIframes and replaceIframes are mutually exclusive. Only one should appear in the header string.
+        */
+        //eg - extensionCommand = '{"disableIframes": 100,"disablePosts" : 200, replaceIframes:110}';
+        extensionCommand = '';
+        command = jQ.parseJSON(extensionCommand);
+        if(command && command.disableIframes){
+          disableIframes = true;
+          setTimeout("disableIframes=false",command.disableIframes);
+        }
+        if(command && command.disablePosts){
+          disablePosts = true;
+         setTimeout("disablePosts=false",command.disablePosts);
+        } 
+        if(command && command.replaceIframes){
+          replaceIframes = true;
+          setTimeout("replaceIframes=false",command.replaceIframes);
+        }
       }
     }
   },
@@ -122,63 +122,63 @@ httpRequestObserver.register();
 httpResponseObserver.register();
 
 function onPgeLd(event){
-	var appcontent = document.getElementById("appcontent");
-	if( appcontent ) {
-		appcontent.addEventListener("DOMContentLoaded", loadLibraries, true);
-	}
+  var appcontent = document.getElementById("appcontent");
+  if( appcontent ) {
+    appcontent.addEventListener("DOMContentLoaded", loadLibraries, true);
+  }
 }
 
 function loadLibraries(evt) {
-	var doc = evt.originalTarget;
-	var wnd = doc.defaultView;
-	var loader = Components.classes["@mozilla.org/moz/jssubscript-loader;1"].getService(Components.interfaces.mozIJSSubScriptLoader);
-	 
-	// load jQuery and save it as a property of the window
-	loader.loadSubScript("chrome://privly/content/jquery-1.7.js",wnd);
-	loader.loadSubScript("chrome://privly/content/privly.js", wnd);
+  var doc = evt.originalTarget;
+  var wnd = doc.defaultView;
+  var loader = Components.classes["@mozilla.org/moz/jssubscript-loader;1"].getService(Components.interfaces.mozIJSSubScriptLoader);
+   
+  // load jQuery and save it as a property of the window
+  loader.loadSubScript("chrome://privly/content/jquery-1.7.js",wnd);
+  loader.loadSubScript("chrome://privly/content/privly.js", wnd);
 }
 
 function runPrivly(){
-	var pwbutton = content.document.getElementById('pwbtn');
-	if(pwbutton)
-		pwbutton.click();
+  var pwbutton = content.document.getElementById('pwbtn');
+  if(pwbutton)
+    pwbutton.click();
 }
 
 function postToPrivly(){
-	var target = document.popupNode;
-	var value = target.value;
-	if(value == "")
-		alert("Sorry. You can not post empty content to Privly");		
-	else{
-	jQ.ajax(
-		{
-			data: { auth_token: user_auth_token, "post[content]":value, endpoint:"extension",
-			  browser:"firefox",version:"0.1.1.1"
-			},
-        	type: "POST",
-        	url: "https://priv.ly/posts",
-        	contentType: "application/x-www-form-urlencoded; charset=UTF-8", 
-        	success: function(data, textStatus, jqXHR){
-        		target.value=jqXHR.getResponseHeader("privlyurl");
-			}
-		}
-		);
-	}
+  var target = document.popupNode;
+  var value = target.value;
+  if(value == "")
+    alert("Sorry. You can not post empty content to Privly");
+  else{
+  jQ.ajax(
+    {
+      data: { auth_token: user_auth_token, "post[content]":value, endpoint:"extension",
+        browser:"firefox",version:"0.1.1.1"
+      },
+          type: "POST",
+          url: "https://priv.ly/posts",
+          contentType: "application/x-www-form-urlencoded; charset=UTF-8", 
+          success: function(data, textStatus, jqXHR){
+            target.value=jqXHR.getResponseHeader("privlyurl");
+      }
+    }
+    );
+  }
 }
 
 function loginToPrivly(){
   var prompts = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
                         .getService(Components.interfaces.nsIPromptService);
-	var email = {value: "athreya86@gmail.com"}; 	
-	var password = {value: "password-1"}; 
-	var result = prompts.promptUsernameAndPassword(null, "Privly Authentication", "Enter your Privly email and password:",
+  var email = {value: ""};
+  var password = {value: ""};
+  var result = prompts.promptUsernameAndPassword(null, "Privly Authentication", "Enter your Privly email and password:",
                                                email, password, "", {});
-	userEmailAddress = email.value;
-	userPassword = password.value;                                         
+  userEmailAddress = email.value;
+  userPassword = password.value;
                                                
   jQ.ajax(
     {
-      data: { email: userEmailAddress, password: userPassword, 
+      data: { email: userEmailAddress, password: userPassword,
         endpoint:"extension", browser:"firefox", version:"0.1.1.1"
       },
       type: "POST",
@@ -220,28 +220,28 @@ function logoutFromPrivly(){
  depending upon the flags set in the extensionCommand header.
 */
 function convertIframesToLinks(){
-	privlyIframes = content.document.getElementsByName("privlyiframe");
-	if(privlyIframes.length > 0){
-		for(i = 0; i< privlyIframes.length; i++){
-			var anchor = content.document.createElement("a");
-			var href = privlyIframes[i].src;
-			href = href.substring(0,href.indexOf(".iframe"));
-			anchor.setAttribute('href',href);
-			if(disableIframes){
-  				anchor.innerHTML = "Privly is not responding, please check this link later";
-  			}
-  			else if(replaceIframes){
-  				anchor.innerHTML = "Privly is in sleep mode so it can catch up with demand. You can still view this content on the website by clicking this link";
-  			}
-			privlyIframes[i].parentNode.replaceChild(anchor,privlyIframes[i]);				
-		}
-	}
+  privlyIframes = content.document.getElementsByName("privlyiframe");
+  if(privlyIframes.length > 0){
+    for(i = 0; i< privlyIframes.length; i++){
+      var anchor = content.document.createElement("a");
+      var href = privlyIframes[i].src;
+      href = href.substring(0,href.indexOf(".iframe"));
+      anchor.setAttribute('href',href);
+      if(disableIframes){
+          anchor.innerHTML = "Privly is not responding, please check this link later";
+        }
+        else if(replaceIframes){
+          anchor.innerHTML = "Privly is in sleep mode so it can catch up with demand. You can still view this content on the website by clicking this link";
+        }
+      privlyIframes[i].parentNode.replaceChild(anchor,privlyIframes[i]);
+    }
+  }
 }
-	
-function resizeIframe(evt){	
-	var iframeHeight = evt.target.getAttribute("height");
-	var ifr = evt.target.ownerDocument.defaultView.frameElement;
-	ifr.style.height = iframeHeight+'px';
+
+function resizeIframe(evt){
+  var iframeHeight = evt.target.getAttribute("height");
+  var ifr = evt.target.ownerDocument.defaultView.frameElement;
+  ifr.style.height = iframeHeight+'px';
 }
 
 function checkContextForPrivly(evt){
