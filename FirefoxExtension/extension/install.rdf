@@ -7,16 +7,19 @@
     <em:name>Privly</em:name>
     <em:version>0.1.1</em:version>
     <em:type>2</em:type>
-    <em:creator>The Privly Team</em:creator>
-    <em:description>Protect your data on the web with Privly</em:description>
-    <em:homepageURL>http://priv.ly/</em:homepageURL>
+    <em:creator>Sean McGregor</em:creator>
+    <em:contributor>Balaji Athreya</em:contributor>
+    <em:contributor>Jesse Hostetler</em:contributor>
+    <em:description>Privly enables you to post and read private content through any website. Only the people you designate can read your content, and the host page never has access. This extension is still experimental.</em:description>
+    <em:homepageURL>https://priv.ly/</em:homepageURL>
     <em:optionsURL>chrome://privly/content/options.xul</em:optionsURL>
-
+    <em:iconURL>chrome://privly/skin/logo_64.png</em:iconURL>
+    
     <em:targetApplication>
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
         <em:minVersion>3.6.*</em:minVersion>
-        <em:maxVersion>9.*.*</em:maxVersion>
+        <em:maxVersion>10.*</em:maxVersion>
       </Description>
     </em:targetApplication>
   </Description>      
