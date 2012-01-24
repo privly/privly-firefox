@@ -25,12 +25,6 @@ DEALINGS IN THE SOFTWARE.
 
 *******************************************************************************/
 
-/******************************************************************************
-Transforming the Greasemonkey userscript to extension javascript should be fairly straight forward - 
-       Copy the greasemonkey userscript(privateweb.user.js) and paste it into privly.js. 
-       Change all '$' references to 'jQ'.
-******************************************************************************/
-
 var privly = {
 
   //Matches:
@@ -140,7 +134,8 @@ var privly = {
       "name":"privlyiframe",
       "width":"100%",
       "marginwidth":"0", 
-      "marginheight":"0", 
+      "marginheight":"0",
+      "height":"1px", 
       "src":linkUrl + ".iframe?frame_id=" + privly.nextAvailableFrameID,
       "id":"ifrm"+privly.nextAvailableFrameID});
     privly.nextAvailableFrameID++;
