@@ -1,0 +1,5 @@
+*.textile
+__MACOSX*
+*.sh
+.package_ignore
+*.xpi
