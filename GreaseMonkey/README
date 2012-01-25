@@ -1,7 +1,0 @@
-Greasemonkey is a Mozilla Firefox extension that allows users to install scripts that make on-the-fly changes to HTML web page content on the DOMContentLoaded event, which happens immediately after it is loaded in the browser (also known as augmented browsing).
-
-Requires the GreaseMonkey Script Extension:
-https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/
-
-Visit These Pages with GreaseMonkey Installed:
-https://github.com/smcgregor/PrivateWebExtension/raw/master/GreaseMonkey/Firefox/privateweb.user.js
