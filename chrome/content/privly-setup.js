@@ -206,7 +206,7 @@ function logoutFromPrivly(){
   jQ.ajax(
     {
       data: { _method: "delete", endpoint:"extension", browser:"firefox", 
-        version:"0.1.1.1"
+        version:"0.1.1.1", auth_token: user_auth_token
       },
       type: "POST",
       url: "https://priv.ly/token_authentications.json",
@@ -214,6 +214,9 @@ function logoutFromPrivly(){
       success: function(data, textStatus, jqXHR){
         user_auth_token = "";
         alert("You are logged out from Priv.ly");
+      },
+      error: function(data, textStatus, jqXHR){
+        alert(data.error);
       }
     }
   );
