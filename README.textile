@@ -1,5 +1,0 @@
-h2. "FirefoxExtension" is the extension for Firefox
-
-h2. "GreaseMonkey" is the GreaseMonkey script
-
-h2. "Meetings" is for agendas and meeting minutes
