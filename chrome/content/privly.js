@@ -58,7 +58,7 @@ var privly = {
 
       var excludeParents = ["a", "applet", "button", "code", "form",
                              "input", "option", "script", "select", "meta", 
-                             "style", "textarea", "title", "div"];
+                             "style", "textarea", "title", "div","span"];
       var excludedParentsString = excludeParents.join(" or parent::");
       var xpathExpression = ".//text()[not(parent:: " + excludedParentsString +")]";
 
@@ -111,12 +111,12 @@ var privly = {
           if (privly.privlyReferencesRegex.test(linkBody)) {        
             
             // If the href is not present or is on a different domain
-              privly.privlyReferencesRegex.lastIndex = 0;
-              var results = privly.privlyReferencesRegex.exec(linkBody);
-              var newHref = privly.makeHref(results[0]);
-              thisLink.attr("href", newHref);
-              //Preventing the default link behavior
-              thisLink.attr("onmousedown", "event.cancelBubble = true; event.stopPropagation(); event.preventDefault(); privly.replaceLink(this)");
+            privly.privlyReferencesRegex.lastIndex = 0;
+            var results = privly.privlyReferencesRegex.exec(linkBody);
+            var newHref = privly.makeHref(results[0]);
+            thisLink.attr("href", newHref);
+            //Preventing the default link behavior
+            thisLink.attr("onmousedown", "event.cancelBubble = true; event.stopPropagation(); event.preventDefault(); privly.replaceLink(this)");
           }
         }
         else
