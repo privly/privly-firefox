@@ -104,27 +104,36 @@ var privly = {
     allLinks.each(function() {
         thisLink = jQ(this);
         linkBody = thisLink.html();
-        if (privly.privlyReferencesRegex.test(linkBody)) {        
-          var href = thisLink.attr("href");
-          // If the href is not present or is on a different domain
-          if(href.indexOf("priv.ly/posts/") == -1 || href.indexOf("priv.ly/posts/") > 9)
-          {
-            privly.privlyReferencesRegex.lastIndex = 0;
-            var results = privly.privlyReferencesRegex.exec(linkBody);
-            var newHref = privly.makeHref(results[0]);
-            thisLink.attr("href", newHref);
+        href = thisLink.attr("href");
+        if(href && (href.indexOf("priv.ly/posts/") == -1 || href.indexOf("priv.ly/posts/") > 9))
+        {
+          
+          if (privly.privlyReferencesRegex.test(linkBody)) {        
+            
+            // If the href is not present or is on a different domain
+              privly.privlyReferencesRegex.lastIndex = 0;
+              var results = privly.privlyReferencesRegex.exec(linkBody);
+              var newHref = privly.makeHref(results[0]);
+              thisLink.attr("href", newHref);
+              //Preventing the default link behavior
+              thisLink.attr("onmousedown", "event.cancelBubble = true; event.stopPropagation(); event.preventDefault(); privly.replaceLink(this)");
           }
+        }
+        else
+        {
+          
+          //Preventing the default link behavior
+          thisLink.attr("onmousedown", "event.cancelBubble = true; event.stopPropagation(); event.preventDefault(); privly.replaceLink(this)");
         }
     });
   },
 
   nextAvailableFrameID: 0,
 
-
   // Replace a jQuery anchor element with its referenced content.
-  replaceLink: function(currentObject) 
+  replaceLink: function(object) 
   {
-
+    var currentObject = jQ(object)
     var linkUrl = currentObject.attr("href");
     var postId = linkUrl.substr(linkUrl.indexOf("/posts")+7);
 
@@ -152,11 +161,6 @@ var privly = {
 
   //Replace Privly links with their iframe
   replaceLinks: function(){
-
-    //don't recursively replace links
-    if(document.URL.indexOf('priv.ly') != -1 )
-      return;
-
     jQ(privly.selectors).each(function() {
       var exclude = jQ(this).attr("privly");
       if(exclude != "exclude")
@@ -168,28 +172,54 @@ var privly = {
 
   resizeIframe: function(evt){
     //do nothing. Actual implementation is in privly-setup.js
-  }
+  },
+  
+  //indicates whether the extension shoud immediatly replace all Privly
+  //links it encounters
+  active: true
 };
 
+
 jQ(document).ready(function(){
+  
+  //don't recursively replace links
+  if(document.URL.indexOf('priv.ly') != -1 )
+    return;
+  
+  //create and correct the links pointing
+  //to Privly content
   privly.createLinks();
   privly.correctIndirection();
-  privly.replaceLinks();//replace all available links on load
-    
+  
+  //replace all available links on load, if in active mode
+  if(privly.active)
+    privly.replaceLinks();
+  
+  //Everytime the page is updated via javascript, we have to check
+  //for new Privly content. This might not be supported on other platforms
   jQ(document).bind('DOMNodeInserted', function(event) {
+        privly.createLinks();
         privly.correctIndirection();
-        privly.replaceLinks();
+        
+        //replace them without clicking if the script is in
+        //active mode
+        if(privly.active)
+        {
+          privly.replaceLinks();
+        }
   });
   
   //replace the clicked link only, the link must be prepped with
   //calls to privly.createLinks() and privly.correctIndirection()
-  //jQ(privly.selectors).live('click', function(event) {
-  //  event.preventDefault();
-  //  privly.replaceLink(jQ(this));
-  //});
-  
-  if(document.URL.indexOf('localhost:3000') == -1 && document.URL.indexOf('priv.ly') == -1)
+  if(!privly.active)
   {
-    window.addEventListener("IframeResizeEvent", function(e) { privly.resizeIframe(e); }, false, true);
+    jQ(privly.selectors).live('click', function(event) {
+      event.preventDefault();
+      privly.replaceLink(jQ(this));
+    });
   }
+  
+  //The content's iframe will fire a resize event when it has loaded, resizeIframe
+  //sets the height of the iframe to the height of the content contained within.
+  window.addEventListener("IframeResizeEvent", function(e) { privly.resizeIframe(e); }, false, true);
 });

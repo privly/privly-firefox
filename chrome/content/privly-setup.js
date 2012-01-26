@@ -7,7 +7,9 @@ var flags =
   //disablePosts - when we don't want the extension to post content to the server.
   disablePosts: false,
   //when the server is busy and we don't want the extension to replace links on the page.
-  requireClickthrough: false
+  requireClickthrough: false,
+  //all posts default to public
+  allPostsPublic: false
 };
 
 
@@ -149,8 +151,8 @@ function postToPrivly(){
   else{
   jQ.ajax(
     {
-      data: { auth_token: user_auth_token, "post[content]":value, endpoint:"extension",
-        browser:"firefox",version:"0.1.1.1"
+      data: { auth_token: user_auth_token, "post[content]":value, "post[public]":flags.allPostsPublic,
+              endpoint:"extension", browser:"firefox",version:"0.1.1.1"
       },
           type: "POST",
           url: "https://priv.ly/posts",
