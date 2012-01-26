@@ -58,7 +58,7 @@ var privly = {
 
       var excludeParents = ["a", "applet", "button", "code", "form",
                              "input", "option", "script", "select", "meta", 
-                             "style", "textarea", "title"];
+                             "style", "textarea", "title", "div"];
       var excludedParentsString = excludeParents.join(" or parent::");
       var xpathExpression = ".//text()[not(parent:: " + excludedParentsString +")]";
 
@@ -166,41 +166,19 @@ var privly = {
     });
   },
 
-
-
-  /* we want to execute the function replaceLinks() that is defined in privly.js(which is loaded on the webpage, hence it is part of 
-  the web page) from privly-setup.js(which is part of the extension). We want to run replaceLinks whenever the user tries to run 
-  the extension either via key press or by mouse click.
-  There is no straight way of calling a function defined on the web page from an extension. A hack for this is to add a HTML element
-  (in this case a button) to the page and to call the required function(here replaceLinks) on the button's click/mousedown. 
-  It is possible to simulate click/mousedown on any HTML element from the extension as content.document is available to the extension. 
-  refer - http://stackoverflow.com/a/2896066
-   */
-
-  addPWbutton: function(){
-    var pwbutton = '<input type="button" id="pwbtn" style="visibility:hidden;" onclick="replaceLinks()" />';
-    jQ('body').append(pwbutton);
-  },
-
   resizeIframe: function(evt){
     //do nothing. Actual implementation is in privly-setup.js
   }
 };
 
 jQ(document).ready(function(){
-  if(document.URL.indexOf('localhost:3000') == -1 && document.URL.indexOf('priv.ly') == -1){
-    privly.addPWbutton();
-  }
-
   privly.createLinks();
   privly.correctIndirection();
   privly.replaceLinks();//replace all available links on load
-  
-  //replace all links whenever the page is clicked in the body
-  jQ("body").live('click', function() {
-    privly.createLinks();
-    privly.correctIndirection();
-    privly.replaceLinks();
+    
+  jQ(document).bind('DOMNodeInserted', function(event) {
+        privly.correctIndirection();
+        privly.replaceLinks();
   });
   
   //replace the clicked link only, the link must be prepped with

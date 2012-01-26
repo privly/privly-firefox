@@ -141,12 +141,6 @@ function loadLibraries(evt) {
   loader.loadSubScript("chrome://privly/content/privly.js", wnd);
 }
 
-function runPrivly(){
-  var pwbutton = content.document.getElementById('pwbtn');
-  if(pwbutton)
-    pwbutton.click();
-}
-
 function postToPrivly(){
   var target = document.popupNode;
   var value = target.value;
