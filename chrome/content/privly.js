@@ -119,9 +119,8 @@ var privly = {
             thisLink.attr("onmousedown", "event.cancelBubble = true; event.stopPropagation(); event.preventDefault(); privly.replaceLink(this)");
           }
         }
-        else
+        else if(href && href.indexOf("priv.ly/posts/") != -1)
         {
-          
           //Preventing the default link behavior
           thisLink.attr("onmousedown", "event.cancelBubble = true; event.stopPropagation(); event.preventDefault(); privly.replaceLink(this)");
         }
