@@ -5,23 +5,23 @@
     <script src="privly-setup.js" />
 
     <menupopup id="menu_ToolsPopup"> 
-      <menuitem label="&runPrivly;" key="privly-run-key" oncommand="runPrivly()"/> 
+      <menuitem label="&runPrivly;" key="privly-run-key" oncommand="privlyExtension.runPrivly()"/> 
     </menupopup>
 
     <keyset>
-      <key id="privly-run-key" modifiers="accel alt" key="P" oncommand="runPrivly()"/>
+      <key id="privly-run-key" modifiers="accel alt" key="P" oncommand="privlyExtension.runPrivly()"/>
     </keyset>
 
     <menupopup id="contentAreaContextMenu">  
-      <menuitem id="postToPrivlyMenuItem" label="Post to Privly" oncommand="postToPrivly()"/>  
+      <menuitem id="postToPrivlyMenuItem" label="Post to Privly" oncommand="privlyExtension.postToPrivly()"/>  
     </menupopup>
 
     <menupopup id="contentAreaContextMenu">  
-      <menuitem id="loginToPrivlyMenuItem" label="Login to Privly" oncommand="loginToPrivly()"/>  
+      <menuitem id="loginToPrivlyMenuItem" label="Login to Privly" oncommand="privlyExtension.loginToPrivly()"/>  
     </menupopup>
 
     <menupopup id="contentAreaContextMenu">  
-      <menuitem id="logoutFromPrivlyMenuItem" label="Logout from Privly" oncommand="logoutFromPrivly()"/>  
+      <menuitem id="logoutFromPrivlyMenuItem" label="Logout from Privly" oncommand="privlyExtension.logoutFromPrivly()"/>  
     </menupopup>
 
 </overlay>
