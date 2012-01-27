@@ -3,7 +3,7 @@
 <!DOCTYPE privly SYSTEM "chrome://privly/locale/translations.dtd">
 <overlay id="sample" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
     
-    <script src="privly-setup.js" />
+    <script src="extension-host-interface.js" />
     <script src="observers.js" />
     <script src="authentication.js" />
     

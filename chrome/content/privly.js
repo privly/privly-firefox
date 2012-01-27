@@ -171,7 +171,7 @@ var privly = {
   },
 
   resizeIframe: function(evt){
-    //do nothing. Actual implementation is in privly-setup.js
+    //do nothing. Actual implementation is in extension-host-interface.js
   },
   
   //indicates whether the extension shoud immediatly replace all Privly
