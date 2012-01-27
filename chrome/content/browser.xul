@@ -2,8 +2,11 @@
 <?xml-stylesheet href="chrome://privly/skin/skin.css" type="text/css"?> 
 <!DOCTYPE privly SYSTEM "chrome://privly/locale/translations.dtd">
 <overlay id="sample" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+    
     <script src="privly-setup.js" />
     <script src="observers.js" />
+    <script src="authentication.js" />
+    
     <menupopup id="menu_ToolsPopup"> 
       <menuitem label="&runPrivly;" key="privly-run-key" oncommand="privlyExtension.runPrivly()"/> 
     </menupopup>
@@ -17,11 +20,11 @@
     </menupopup>
 
     <menupopup id="contentAreaContextMenu">  
-      <menuitem id="loginToPrivlyMenuItem" label="Login to Privly" oncommand="privlyExtension.loginToPrivly()"/>  
+      <menuitem id="loginToPrivlyMenuItem" label="Login to Privly" oncommand="privlyAuthentication.loginToPrivly()"/>  
     </menupopup>
 
     <menupopup id="contentAreaContextMenu">  
-      <menuitem id="logoutFromPrivlyMenuItem" label="Logout from Privly" oncommand="privlyExtension.logoutFromPrivly()"/>  
+      <menuitem id="logoutFromPrivlyMenuItem" label="Logout from Privly" oncommand="privlyAuthentication.logoutFromPrivly()"/>  
     </menupopup>
 
 </overlay>
