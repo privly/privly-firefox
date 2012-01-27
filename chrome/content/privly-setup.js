@@ -287,15 +287,12 @@ window.jQ.noConflict();
 privlyExtension.httpRequestObserver.register();
 privlyExtension.httpResponseObserver.register();
 
-function onPgeLd(event)
-{
+	
+window.addEventListener("load", function (e){
 	var appcontent = document.getElementById("appcontent");
 	if( appcontent ) {
 		appcontent.addEventListener("DOMContentLoaded", privlyExtension.loadLibraries, true);
 	}
-}
-
-	
-window.addEventListener("load", onPgeLd, false);
+}, false);
 window.addEventListener("IframeResizeEvent", function(e) { privlyExtension.resizeIframe(e); }, false, true);
 window.addEventListener("contextmenu", function(e) { privlyExtension.checkContextForPrivly(e);}, false);
