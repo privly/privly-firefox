@@ -3,7 +3,7 @@
 <!DOCTYPE privly SYSTEM "chrome://privly/locale/translations.dtd">
 <overlay id="sample" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
     <script src="privly-setup.js" />
-
+    <script src="observers.js" />
     <menupopup id="menu_ToolsPopup"> 
       <menuitem label="&runPrivly;" key="privly-run-key" oncommand="privlyExtension.runPrivly()"/> 
     </menupopup>
