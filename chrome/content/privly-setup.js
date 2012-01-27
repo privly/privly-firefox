@@ -1,5 +1,5 @@
-//privly_server_url = "https://priv.ly";
-privly_server_url = "http://localhost:3000";
+privly_server_url = "https://priv.ly";
+//privly_server_url = "http://localhost:3000";
 
 privly_user_auth_token = "";
 
