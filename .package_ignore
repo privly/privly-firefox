@@ -4,3 +4,4 @@ __MACOSX*
 .package_ignore
 *.xpi
 *.DS_Store
+*~

@@ -116,8 +116,8 @@ var privlyExtension =
   }
 }
 
-Components.classes["@mozilla.org/moz/jssubscript-loader;1"].getService(Components.interfaces.mozIJSSubScriptLoader).loadSubScript("chrome://privly/content/jquery-1.7.js",window);
-window.jQ.noConflict();
+Components.classes["@mozilla.org/moz/jssubscript-loader;1"].getService(Components.interfaces.mozIJSSubScriptLoader).loadSubScript("chrome://privly/content/jquery-1.7.1.min.js",window);
+jQ = window.jQuery.noConflict();
 
 window.addEventListener("load", function (e){
   var appcontent = document.getElementById("appcontent");

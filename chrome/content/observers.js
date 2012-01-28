@@ -87,15 +87,18 @@ var privlyObservers =
             command = jQ.parseJSON(extensionCommand);
             if(command && command.noRequests){
               privlyFlags.noRequests = true;
-              setTimeout("privlyFlags.noRequests=false",command.noRequests);
+              setTimeout(function(){privlyFlags.noRequests=false;},
+                command.noRequests);
             }
             if(command && command.disablePosts){
               privlyFlags.disablePosts = true;
-              setTimeout("privlyFlags.disablePosts=false",command.disablePosts);
+              setTimeout(function(){privlyFlags.disablePosts=false;},
+                command.disablePosts);
             } 
             if(command && command.requireClickthrough){
               privlyFlags.requireClickthrough = true;
-              setTimeout("privlyFlags.requireClickthrough=false",command.requireClickthrough);
+              setTimeout(function(){privlyFlags.requireClickthrough=false;},
+                command.requireClickthrough);
             }
           }
         }
