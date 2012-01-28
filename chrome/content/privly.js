@@ -100,31 +100,29 @@ var privly = {
   //Twitter and other hosts change links so they can collect click events.
   correctIndirection: function() 
   {
-    var allLinks = jQ("a");
-    allLinks.each(function() {
-        thisLink = jQ(this);
-        linkBody = thisLink.html();
-        href = thisLink.attr("href");
-        if(href && (href.indexOf("priv.ly/posts/") == -1 || href.indexOf("priv.ly/posts/") > 9))
-        {
-          
-          if (privly.privlyReferencesRegex.test(linkBody)) {        
-            
-            // If the href is not present or is on a different domain
-            privly.privlyReferencesRegex.lastIndex = 0;
-            var results = privly.privlyReferencesRegex.exec(linkBody);
-            var newHref = privly.makeHref(results[0]);
-            thisLink.attr("href", newHref);
-            //Preventing the default link behavior
-            thisLink.attr("onmousedown", "event.cancelBubble = true; event.stopPropagation(); event.preventDefault(); privly.replaceLink(this)");
-          }
-        }
-        else if(href && href.indexOf("priv.ly/posts/") != -1)
-        {
+    var anchors = document.links;
+    var i = anchors.length;
+    while (i--){
+      var a = anchors[i];
+      
+      if(a.href && (a.href.indexOf("priv.ly/posts/") == -1 || a.href.indexOf("priv.ly/posts/") > 9))
+      {
+        if (privly.privlyReferencesRegex.test(a.innerHTML)) {        
+          // If the href is not present or is on a different domain
+          privly.privlyReferencesRegex.lastIndex = 0;
+          var results = privly.privlyReferencesRegex.exec(a.innerHTML);
+          var newHref = privly.makeHref(results[0]);
+          a.setAttribute("href", newHref);
           //Preventing the default link behavior
-          thisLink.attr("onmousedown", "event.cancelBubble = true; event.stopPropagation(); event.preventDefault(); privly.replaceLink(this)");
+          a.setAttribute("onmousedown", "event.cancelBubble = true; event.stopPropagation(); event.preventDefault(); privly.replaceLink(this)");
         }
-    });
+      }
+      else if(a.href)
+      {
+        //Preventing the default link behavior
+        a.setAttribute("onmousedown", "event.cancelBubble = true; event.stopPropagation(); event.preventDefault(); privly.replaceLink(this)");
+      }
+    }
   },
 
   nextAvailableFrameID: 0,
