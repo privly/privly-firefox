@@ -127,44 +127,44 @@ var privly = {
 
   nextAvailableFrameID: 0,
 
-  // Replace a jQuery anchor element with its referenced content.
+  // Replace an anchor element with its referenced content.
   replaceLink: function(object) 
-  {
-    var currentObject = jQ(object)
-    var linkUrl = currentObject.attr("href");
-    var postId = linkUrl.substr(linkUrl.indexOf("/posts")+7);
-
-    iframe = jQ('<iframe />', {"frameborder":"0",
-      "vspace":"0",
-      "hspace":"0",
-      "name":"privlyiframe",
-      "width":"100%",
-      "marginwidth":"0", 
-      "marginheight":"0",
-      "height":"1px", 
-      "src":linkUrl + ".iframe?frame_id=" + privly.nextAvailableFrameID,
-      "id":"ifrm"+privly.nextAvailableFrameID});
+  { 
+    var iFrame = document.createElement('iframe');
+    iFrame.setAttribute("frameborder","0");
+    iFrame.setAttribute("vspace","0");
+    iFrame.setAttribute("hspace","0");
+    iFrame.setAttribute("name","privlyiframe");
+    iFrame.setAttribute("width","100%");
+    iFrame.setAttribute("marginwidth","0");
+    iFrame.setAttribute("marginheight","0");
+    iFrame.setAttribute("height","1px");
+    iFrame.setAttribute("src",object.href + ".iframe?frame_id=" + privly.nextAvailableFrameID);
+    iFrame.setAttribute("id","ifrm"+privly.nextAvailableFrameID);
+    iFrame.setAttribute("frameborder","0");
     privly.nextAvailableFrameID++;
-    iframe.attr('scrolling','no');
-    iframe.css('overflow','hidden');
-    currentObject.replaceWith(iframe);
+    iFrame.setAttribute("style","width: 100%; height: 32px; overflow: hidden;");
+    iFrame.setAttribute("scrolling","no");
+    iFrame.setAttribute("overflow","hidden");
+    
+    object.parentNode.replaceChild(iFrame, object);
   },
-
-  // This jquery selection string selects anchor elements 
-  // that point to the posts controller in the Web Application.
-  selectors: 'a[href^="https://priv.ly/posts/"],'+ 
-                   'a[href^="http://priv.ly/posts/"],'+ 
-                   'a[href^="http://localhost:3000/posts/"]',
 
   //Replace Privly links with their iframe
   replaceLinks: function(){
-    jQ(privly.selectors).each(function() {
-      var exclude = jQ(this).attr("privly");
-      if(exclude != "exclude")
+    var anchors = document.links;
+    var i = anchors.length;
+    while (i--){
+      var a = anchors[i];
+      if(a.href && privly.privlyReferencesRegex.test(a.href))
       {
-        privly.replaceLink(jQ(this));
+        var exclude = a.getAttribute("privly");
+        if(exclude != "exclude")
+        {
+          privly.replaceLink(a);
+        }
       }
-    });
+    }
   },
 
   resizeIframe: function(evt){
@@ -194,27 +194,18 @@ jQ(document).ready(function(){
   
   //Everytime the page is updated via javascript, we have to check
   //for new Privly content. This might not be supported on other platforms
-  jQ(document).bind('DOMNodeInserted', function(event) {
-        privly.createLinks();
-        privly.correctIndirection();
+  document.addEventListener("DOMNodeInserted", function(event) {
+    privly.createLinks();
+    privly.correctIndirection();
         
-        //replace them without clicking if the script is in
-        //active mode
-        if(privly.active)
-        {
-          privly.replaceLinks();
-        }
+    //replace them without clicking if the script is in
+    //active mode
+    if(privly.active)
+    {
+      privly.replaceLinks();
+    }
   });
   
-  //replace the clicked link only, the link must be prepped with
-  //calls to privly.createLinks() and privly.correctIndirection()
-  if(!privly.active)
-  {
-    jQ(privly.selectors).live('click', function(event) {
-      event.preventDefault();
-      privly.replaceLink(jQ(this));
-    });
-  }
   
   //The content's iframe will fire a resize event when it has loaded, resizeIframe
   //sets the height of the iframe to the height of the content contained within.
