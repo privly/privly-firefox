@@ -171,43 +171,58 @@ var privly = {
     //do nothing. Actual implementation is in extension-host-interface.js
   },
   
-  //indicates whether the extension shoud immediatly replace all Privly
-  //links it encounters
-  active: true
-};
+  run: function(){
 
+    //don't recursively replace links
+    if(document.URL.indexOf('priv.ly') != -1 )
+      return;
 
-jQ(document).ready(function(){
-  
-  //don't recursively replace links
-  if(document.URL.indexOf('priv.ly') != -1 )
-    return;
-  
-  //create and correct the links pointing
-  //to Privly content
-  privly.createLinks();
-  privly.correctIndirection();
-  
-  //replace all available links on load, if in active mode
-  if(privly.active)
-    privly.replaceLinks();
-  
-  //Everytime the page is updated via javascript, we have to check
-  //for new Privly content. This might not be supported on other platforms
-  document.addEventListener("DOMNodeInserted", function(event) {
+    //create and correct the links pointing
+    //to Privly content
     privly.createLinks();
     privly.correctIndirection();
-        
-    //replace them without clicking if the script is in
-    //active mode
+
+    //replace all available links on load, if in active mode
     if(privly.active)
-    {
       privly.replaceLinks();
-    }
-  });
+
+    //Everytime the page is updated via javascript, we have to check
+    //for new Privly content. This might not be supported on other platforms
+    document.addEventListener("DOMNodeInserted", function(event) {
+      privly.createLinks();
+      privly.correctIndirection();
+
+      //replace them without clicking if the script is in
+      //active mode
+      if(privly.active)
+      {
+        privly.replaceLinks();
+      }
+    });
+
+    //The content's iframe will fire a resize event when it has loaded, resizeIframe
+    //sets the height of the iframe to the height of the content contained within.
+    window.addEventListener("IframeResizeEvent", function(e) { privly.resizeIframe(e); }, false, true);
+  },
   
+  //indicates whether the extension shoud immediatly replace all Privly
+  //links it encounters
+  active: true,
   
-  //The content's iframe will fire a resize event when it has loaded, resizeIframe
-  //sets the height of the iframe to the height of the content contained within.
-  window.addEventListener("IframeResizeEvent", function(e) { privly.resizeIframe(e); }, false, true);
-});
+  // cross platform onload event
+  // won't attach anything on IE 
+  // on macintosh systems.
+  addEvent: function(obj, evType, fn){ 
+   if (obj.addEventListener){ 
+     obj.addEventListener(evType, fn, false); 
+     return true; 
+   } else if (obj.attachEvent){ 
+     var r = obj.attachEvent("on"+evType, fn); 
+     return r; 
+   } else { 
+     return false; 
+   } 
+  }
+};
+
+privly.addEvent(window, 'load', privly.run);

@@ -20,8 +20,7 @@ var privlyExtension =
     var wnd = doc.defaultView;
     var loader = Components.classes["@mozilla.org/moz/jssubscript-loader;1"].getService(Components.interfaces.mozIJSSubScriptLoader);
     
-    // load jQuery and save it as a property of the window
-    loader.loadSubScript("chrome://privly/content/jquery-1.7.js",wnd);
+    //load the script running on the host page
     loader.loadSubScript("chrome://privly/content/privly.js", wnd);
   },
   
