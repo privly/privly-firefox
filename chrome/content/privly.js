@@ -150,7 +150,7 @@ var privly = {
     object.parentNode.replaceChild(iFrame, object);
   },
 
-  //Replace Privly links with their iframe
+  //Replace all Privly links with their iframe
   replaceLinks: function(){
     var anchors = document.links;
     var i = anchors.length;
@@ -167,15 +167,14 @@ var privly = {
     }
   },
 
-  resizeIframe: function(evt){
-    //do nothing. Actual implementation is in extension-host-interface.js
-  },
+  //do nothing. Actual implementation is in extension-host-interface.js
+  resizeIframe: function(evt){},
   
+  //prevents DOMNodeInserted from sending hundreds of extension runs
+  runPending: false,
+  
+  //prep the page and replace the links if it is in active mode
   run: function(){
-
-    //don't recursively replace links
-    if(document.URL.indexOf('priv.ly') != -1 )
-      return;
 
     //create and correct the links pointing
     //to Privly content
@@ -185,21 +184,35 @@ var privly = {
     //replace all available links on load, if in active mode
     if(privly.active)
       privly.replaceLinks();
-
+  },
+  
+  //runs privly once then registers the update listener
+  //for dynamic pages
+  listeners: function(){
+    
+    //don't recursively replace links
+    if(document.URL.indexOf('priv.ly') != -1 )
+      return;
+    
+    privly.run();
+    
     //Everytime the page is updated via javascript, we have to check
     //for new Privly content. This might not be supported on other platforms
     document.addEventListener("DOMNodeInserted", function(event) {
-      privly.createLinks();
-      privly.correctIndirection();
-
-      //replace them without clicking if the script is in
-      //active mode
-      if(privly.active)
-      {
-        privly.replaceLinks();
-      }
+      
+      //we check the page a maximum of two times a second
+      if(privly.runPending )
+        return;
+      privly.runPending=true;
+      
+      setTimeout(
+        function(){
+          privly.runPending=false;
+          privly.run();
+        },
+        500);
     });
-
+    
     //The content's iframe will fire a resize event when it has loaded, resizeIframe
     //sets the height of the iframe to the height of the content contained within.
     window.addEventListener("IframeResizeEvent", function(e) { privly.resizeIframe(e); }, false, true);
@@ -225,4 +238,4 @@ var privly = {
   }
 };
 
-privly.addEvent(window, 'load', privly.run);
+privly.addEvent(window, 'load', privly.listeners);
