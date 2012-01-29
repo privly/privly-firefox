@@ -120,11 +120,11 @@ var privly = {
               e.preventDefault();
               linkClicked(a);
             }, true);
-          //a.setAttribute("onmousedown", "event.cancelBubble = true; event.stopPropagation(); event.preventDefault(); privly.replaceLink(this)");
         }
       }
       else if(a.href)
       {
+        //Preventing the default link behavior
         a.addEventListener("mousedown", function(e){
             e.cancelBubble = true;
             e.stopPropagation();
@@ -132,8 +132,6 @@ var privly = {
             replaceLink(a);
           }, 
           true);
-        //Preventing the default link behavior
-        //a.setAttribute("onmousedown", "event.cancelBubble = true; event.stopPropagation(); event.preventDefault(); privly.replaceLink(this)");
       }
     }
   },

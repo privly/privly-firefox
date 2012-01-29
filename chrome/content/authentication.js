@@ -16,8 +16,8 @@ var privlyAuthentication =
     var password = {value: ""};
     var result = prompts.promptUsernameAndPassword(null, "Privly Authentication", "Enter your Privly email and password:",
                                                 email, password, "", {});
-    userEmailAddress = email.value;
-    userPassword = password.value;
+    var userEmailAddress = email.value;
+    var userPassword = password.value;
                                                 
     jQ.ajax(
       {
