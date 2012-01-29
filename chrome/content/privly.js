@@ -58,7 +58,7 @@ var privly = {
 
       var excludeParents = ["a", "applet", "button", "code", "form",
                              "input", "option", "script", "select", "meta", 
-                             "style", "textarea", "title"];
+                             "style", "textarea", "title", "div","span"];
       var excludedParentsString = excludeParents.join(" or parent::");
       var xpathExpression = ".//text()[not(parent:: " + excludedParentsString +")]";
 
@@ -100,118 +100,155 @@ var privly = {
   //Twitter and other hosts change links so they can collect click events.
   correctIndirection: function() 
   {
-    var allLinks = jQ("a");
-    allLinks.each(function() {
-        thisLink = jQ(this);
-        linkBody = thisLink.html();
-        if (privly.privlyReferencesRegex.test(linkBody)) {        
-          var href = thisLink.attr("href");
+    var anchors = document.links;
+    var i = anchors.length;
+    while (i--){
+      var a = anchors[i];
+      
+      if(a.href && (a.href.indexOf("priv.ly/posts/") == -1 || a.href.indexOf("priv.ly/posts/") > 9))
+      {
+        if (privly.privlyReferencesRegex.test(a.innerHTML)) {        
           // If the href is not present or is on a different domain
-          if(href.indexOf("priv.ly/posts/") == -1 || href.indexOf("priv.ly/posts/") > 9)
-          {
-            privly.privlyReferencesRegex.lastIndex = 0;
-            var results = privly.privlyReferencesRegex.exec(linkBody);
-            var newHref = privly.makeHref(results[0]);
-            thisLink.attr("href", newHref);
-          }
+          privly.privlyReferencesRegex.lastIndex = 0;
+          var results = privly.privlyReferencesRegex.exec(a.innerHTML);
+          var newHref = privly.makeHref(results[0]);
+          a.setAttribute("href", newHref);
+          //Preventing the default link behavior
+          a.addEventListener("mousedown", function(e){
+              e.cancelBubble = true;
+              e.stopPropagation();
+              e.preventDefault();
+              linkClicked(a);
+            }, true);
+          //a.setAttribute("onmousedown", "event.cancelBubble = true; event.stopPropagation(); event.preventDefault(); privly.replaceLink(this)");
         }
-    });
+      }
+      else if(a.href)
+      {
+        a.addEventListener("mousedown", function(e){
+            e.cancelBubble = true;
+            e.stopPropagation();
+            e.preventDefault();
+            replaceLink(a);
+          }, 
+          true);
+        //Preventing the default link behavior
+        //a.setAttribute("onmousedown", "event.cancelBubble = true; event.stopPropagation(); event.preventDefault(); privly.replaceLink(this)");
+      }
+    }
   },
 
   nextAvailableFrameID: 0,
 
-
-  // Replace a jQuery anchor element with its referenced content.
-  replaceLink: function(currentObject) 
-  {
-
-    var linkUrl = currentObject.attr("href");
-    var postId = linkUrl.substr(linkUrl.indexOf("/posts")+7);
-
-    iframe = jQ('<iframe />', {"frameborder":"0",
-      "vspace":"0",
-      "hspace":"0",
-      "name":"privlyiframe",
-      "width":"100%",
-      "marginwidth":"0", 
-      "marginheight":"0",
-      "height":"1px", 
-      "src":linkUrl + ".iframe?frame_id=" + privly.nextAvailableFrameID,
-      "id":"ifrm"+privly.nextAvailableFrameID});
+  // Replace an anchor element with its referenced content.
+  replaceLink: function(object) 
+  { 
+    var iFrame = document.createElement('iframe');
+    iFrame.setAttribute("frameborder","0");
+    iFrame.setAttribute("vspace","0");
+    iFrame.setAttribute("hspace","0");
+    iFrame.setAttribute("name","privlyiframe");
+    iFrame.setAttribute("width","100%");
+    iFrame.setAttribute("marginwidth","0");
+    iFrame.setAttribute("marginheight","0");
+    iFrame.setAttribute("height","1px");
+    iFrame.setAttribute("src",object.href + ".iframe?frame_id=" + privly.nextAvailableFrameID);
+    iFrame.setAttribute("id","ifrm"+privly.nextAvailableFrameID);
+    iFrame.setAttribute("frameborder","0");
     privly.nextAvailableFrameID++;
-    iframe.attr('scrolling','no');
-    iframe.css('overflow','hidden');
-    currentObject.replaceWith(iframe);
+    iFrame.setAttribute("style","width: 100%; height: 32px; overflow: hidden;");
+    iFrame.setAttribute("scrolling","no");
+    iFrame.setAttribute("overflow","hidden");
+    
+    object.parentNode.replaceChild(iFrame, object);
   },
 
-  // This jquery selection string selects anchor elements 
-  // that point to the posts controller in the Web Application.
-  selectors: 'a[href^="https://priv.ly/posts/"],'+ 
-                   'a[href^="http://priv.ly/posts/"],'+ 
-                   'a[href^="http://localhost:3000/posts/"]',
-
-  //Replace Privly links with their iframe
+  //Replace all Privly links with their iframe
   replaceLinks: function(){
+    var anchors = document.links;
+    var i = anchors.length;
+    while (i--){
+      var a = anchors[i];
+      if(a.href && privly.privlyReferencesRegex.test(a.href))
+      {
+        var exclude = a.getAttribute("privly");
+        if(exclude != "exclude")
+        {
+          privly.replaceLink(a);
+        }
+      }
+    }
+  },
 
+  //do nothing. Actual implementation is in extension-host-interface.js
+  resizeIframe: function(evt){},
+  
+  //prevents DOMNodeInserted from sending hundreds of extension runs
+  runPending: false,
+  
+  //prep the page and replace the links if it is in active mode
+  run: function(){
+
+    //create and correct the links pointing
+    //to Privly content
+    privly.createLinks();
+    privly.correctIndirection();
+
+    //replace all available links on load, if in active mode
+    if(privly.active)
+      privly.replaceLinks();
+  },
+  
+  //runs privly once then registers the update listener
+  //for dynamic pages
+  listeners: function(){
+    
     //don't recursively replace links
     if(document.URL.indexOf('priv.ly') != -1 )
       return;
-
-    jQ(privly.selectors).each(function() {
-      var exclude = jQ(this).attr("privly");
-      if(exclude != "exclude")
-      {
-        privly.replaceLink(jQ(this));
-      }
+    
+    privly.run();
+    
+    //Everytime the page is updated via javascript, we have to check
+    //for new Privly content. This might not be supported on other platforms
+    document.addEventListener("DOMNodeInserted", function(event) {
+      
+      //we check the page a maximum of two times a second
+      if(privly.runPending )
+        return;
+      privly.runPending=true;
+      
+      setTimeout(
+        function(){
+          privly.runPending=false;
+          privly.run();
+        },
+        500);
     });
+    
+    //The content's iframe will fire a resize event when it has loaded, resizeIframe
+    //sets the height of the iframe to the height of the content contained within.
+    window.addEventListener("IframeResizeEvent", function(e) { privly.resizeIframe(e); }, false, true);
   },
-
-
-
-  /* we want to execute the function replaceLinks() that is defined in privly.js(which is loaded on the webpage, hence it is part of 
-  the web page) from privly-setup.js(which is part of the extension). We want to run replaceLinks whenever the user tries to run 
-  the extension either via key press or by mouse click.
-  There is no straight way of calling a function defined on the web page from an extension. A hack for this is to add a HTML element
-  (in this case a button) to the page and to call the required function(here replaceLinks) on the button's click/mousedown. 
-  It is possible to simulate click/mousedown on any HTML element from the extension as content.document is available to the extension. 
-  refer - http://stackoverflow.com/a/2896066
-   */
-
-  addPWbutton: function(){
-    var pwbutton = '<input type="button" id="pwbtn" style="visibility:hidden;" onclick="replaceLinks()" />';
-    jQ('body').append(pwbutton);
-  },
-
-  resizeIframe: function(evt){
-    //do nothing. Actual implementation is in privly-setup.js
+  
+  //indicates whether the extension shoud immediatly replace all Privly
+  //links it encounters
+  active: true,
+  
+  // cross platform onload event
+  // won't attach anything on IE 
+  // on macintosh systems.
+  addEvent: function(obj, evType, fn){ 
+   if (obj.addEventListener){ 
+     obj.addEventListener(evType, fn, false); 
+     return true; 
+   } else if (obj.attachEvent){ 
+     var r = obj.attachEvent("on"+evType, fn); 
+     return r; 
+   } else { 
+     return false; 
+   } 
   }
 };
 
-jQ(document).ready(function(){
-  if(document.URL.indexOf('localhost:3000') == -1 && document.URL.indexOf('priv.ly') == -1){
-    privly.addPWbutton();
-  }
-
-  privly.createLinks();
-  privly.correctIndirection();
-  privly.replaceLinks();//replace all available links on load
-  
-  //replace all links whenever the page is clicked in the body
-  jQ("body").live('click', function() {
-    privly.createLinks();
-    privly.correctIndirection();
-    privly.replaceLinks();
-  });
-  
-  //replace the clicked link only, the link must be prepped with
-  //calls to privly.createLinks() and privly.correctIndirection()
-  //jQ(privly.selectors).live('click', function(event) {
-  //  event.preventDefault();
-  //  privly.replaceLink(jQ(this));
-  //});
-  
-  if(document.URL.indexOf('localhost:3000') == -1 && document.URL.indexOf('priv.ly') == -1)
-  {
-    window.addEventListener("IframeResizeEvent", function(e) { privly.resizeIframe(e); }, false, true);
-  }
-});
+privly.addEvent(window, 'load', privly.listeners);

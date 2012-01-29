@@ -1,33 +1,25 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 
-<prefwindow 
-     title="Privly Preferences"
-     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
- 
-  <prefpane label="Privly Preferences">
+<prefwindow title="Privly Preferences"
+xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-    <preferences>
-      <preference id="privly-autorun" name="extensions.privly.autorun" type="bool"/>
-    </preferences>
-    
-    <groupbox>
-      <caption label="Settings"/>
-      <grid>
-        <columns>
-          <column flex="4"/>
-          <column flex="1"/>
-        </columns>
-        <rows>
-          <row>
-            <label control="autorun" value="Autorun"/>
-            <checkbox id="autorun" preference="privly-autorun"/>
-          </row>
-        </rows>
-      </grid>
-    </groupbox>
+	<prefpane id="privly-preferences" label="Privly Preferences">
 
-  </prefpane>
+		<preferences>
+			<preference id="privly-mode" name="" type="string"/>
+			<preference id="privly-disable-post" name="" type="bool"/>
+		</preferences>
+
+		<label value="Mode" control="mode"/>
+		<radiogroup id="mode"  preference="privly-mode" >
+		  <radio id="active" label="Active" selected="true"/>	<label value="   Replaces priv.ly links with content automatically"  control="active" />
+		  <radio id="passive" label="Passive" />	<label value="   Replaces priv.ly links with content only when click on the link"  control="passive" />
+		</radiogroup>
+
+		<checkbox label="Disable post to Privly" checked="false"  preference="privly-disable-post"  />
+		
+	</prefpane>
 
 </prefwindow>
-
+	
