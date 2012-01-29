@@ -6,6 +6,7 @@
     <script src="extension-host-interface.js" />
     <script src="observers.js" />
     <script src="authentication.js" />
+    <script src="settings.js" />
     
     <menupopup id="menu_ToolsPopup"> 
       <menuitem label="&runPrivly;" key="privly-run-key" oncommand="privlyExtension.runPrivly()"/> 

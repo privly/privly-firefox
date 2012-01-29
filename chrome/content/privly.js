@@ -114,13 +114,26 @@ var privly = {
           var newHref = privly.makeHref(results[0]);
           a.setAttribute("href", newHref);
           //Preventing the default link behavior
-          a.setAttribute("onmousedown", "event.cancelBubble = true; event.stopPropagation(); event.preventDefault(); privly.replaceLink(this)");
+          a.addEventListener("mousedown", function(e){
+              e.cancelBubble = true;
+              e.stopPropagation();
+              e.preventDefault();
+              linkClicked(a);
+            }, true);
+          //a.setAttribute("onmousedown", "event.cancelBubble = true; event.stopPropagation(); event.preventDefault(); privly.replaceLink(this)");
         }
       }
       else if(a.href)
       {
+        a.addEventListener("mousedown", function(e){
+            e.cancelBubble = true;
+            e.stopPropagation();
+            e.preventDefault();
+            replaceLink(a);
+          }, 
+          true);
         //Preventing the default link behavior
-        a.setAttribute("onmousedown", "event.cancelBubble = true; event.stopPropagation(); event.preventDefault(); privly.replaceLink(this)");
+        //a.setAttribute("onmousedown", "event.cancelBubble = true; event.stopPropagation(); event.preventDefault(); privly.replaceLink(this)");
       }
     }
   },

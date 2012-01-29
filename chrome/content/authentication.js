@@ -1,7 +1,13 @@
-privly_user_auth_token = "";
+// Manages sessions for the content server
 
 var privlyAuthentication = 
 {
+  //When added to every request to the content server
+  //as the parameter auth_token, the extension has access
+  //to the referenced user account
+  authToken: "",
+  
+  //get a new auth token
   loginToPrivly : function()
   {
     var prompts = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
@@ -19,11 +25,11 @@ var privlyAuthentication =
           endpoint:"extension", browser:"firefox", version:"0.1.1.1"
         },
         type: "POST",
-        url: privly_server_url+"/token_authentications.json",
+        url: privlySettings.contentServerUrl+"/token_authentications.json",
         contentType: "application/x-www-form-urlencoded; charset=UTF-8",
         success: function(data, textStatus, jqXHR){
-          privly_user_auth_token = data.auth_key;
-          if(privly_user_auth_token)
+          privlyAuthentication.authToken = data.auth_key;
+          if(privlyAuthentication.authToken)
           {
             alert("You are now logged into Privly");
           }
@@ -36,18 +42,19 @@ var privlyAuthentication =
     );
   },
   
+  //destroy the auth token
   logoutFromPrivly : function()
   {
     jQ.ajax(
       {
         data: { _method: "delete", endpoint:"extension", browser:"firefox", 
-          version:"0.1.1.1", auth_token: privly_user_auth_token
+          version:"0.1.1.1", auth_token: privlyAuthentication.authToken
         },
         type: "POST",
-        url: privly_server_url+"/token_authentications.json",
+        url: privlySettings.contentServerUrl+"/token_authentications.json",
         contentType: "application/x-www-form-urlencoded; charset=UTF-8",
         success: function(data, textStatus, jqXHR){
-          privly_user_auth_token = "";
+          privlyAuthentication.authToken = "";
           alert("You are logged out from Priv.ly");
         },
         error: function(data, textStatus, jqXHR){

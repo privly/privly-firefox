@@ -27,11 +27,11 @@ var privlyObservers =
         var httpChannel = subject.QueryInterface(Components.interfaces.nsIHttpChannel);
         //cancel iframe requests to priv.ly when requireClickthrough is set.
         //cancel all requests to priv.ly when noRequests is set
-        if (privlyFlags.noRequests == true || privlyFlags.requireClickthrough == true)
+        if (privlySettings.noRequests == true || privlySettings.requireClickthrough == true)
         {
           if ((/priv.ly/.test(httpChannel.originalURI.host) || (/localhost/.test(httpChannel.originalURI.host))))
           {
-            if(privlyFlags.noRequests == true || (/.iframe/g).test(httpChannel.originalURI.path))
+            if(privlySettings.noRequests == true || (/.iframe/g).test(httpChannel.originalURI.path))
             {
               subject.cancel(Components.results.NS_BINDING_ABORTED);
               convertIframesToLinks();
@@ -41,12 +41,12 @@ var privlyObservers =
         if (/priv.ly/.test(httpChannel.originalURI.host))
         {
           httpChannel.setRequestHeader("Privly-Version", "0.1.2", false);
-          httpChannel.setRequestHeader("auth_token", privly_user_auth_token, false);
+          httpChannel.setRequestHeader("auth_token", privlyAuthentication.authToken, false);
         }
         else if(/localhost/.test(httpChannel.originalURI.host))
         {
           httpChannel.setRequestHeader("Privly-Version", "0.1.2", false);
-          httpChannel.setRequestHeader("auth_token", privly_user_auth_token, false);
+          httpChannel.setRequestHeader("auth_token", privlyAuthentication.authToken, false);
         }
       }
     },
@@ -76,7 +76,7 @@ var privlyObservers =
         //read the extensionCommand header from the response. if the response header is not set or the server 
         //didn't reply, it will throw an error. so catch it
         try{
-          extensionCommand = httpChannel.getResponseHeader("privlyExtensionCommand");
+          var extensionCommand = httpChannel.getResponseHeader("privlyExtensionCommand");
           
           if (/priv.ly/.test(httpChannel.originalURI.host) || (/localhost/.test(httpChannel.originalURI.host) && /posts/.test(httpChannel.originalURI.path)))
           { 
@@ -84,20 +84,20 @@ var privlyObservers =
             //disableIframes and requireClickthrough are mutually exclusive. Only one should appear in the header string.
             //eg - extensionCommand = '{"noRequests": 100,"disablePosts" : 200, requireClickthrough:110}';
             extensionCommand = '';
-            command = jQ.parseJSON(extensionCommand);
+            var command = jQ.parseJSON(extensionCommand);
             if(command && command.noRequests){
-              privlyFlags.noRequests = true;
-              setTimeout(function(){privlyFlags.noRequests=false;},
+              privlySettings.noRequests = true;
+              setTimeout(function(){privlySettings.noRequests=false;},
                 command.noRequests);
             }
             if(command && command.disablePosts){
-              privlyFlags.disablePosts = true;
-              setTimeout(function(){privlyFlags.disablePosts=false;},
+              privlySettings.disablePosts = true;
+              setTimeout(function(){privlySettings.disablePosts=false;},
                 command.disablePosts);
             } 
             if(command && command.requireClickthrough){
-              privlyFlags.requireClickthrough = true;
-              setTimeout(function(){privlyFlags.requireClickthrough=false;},
+              privlySettings.requireClickthrough = true;
+              setTimeout(function(){privlySettings.requireClickthrough=false;},
                 command.requireClickthrough);
             }
           }

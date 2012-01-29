@@ -1,17 +1,3 @@
-privly_server_url = "https://priv.ly";
-//privly_server_url = "http://localhost:3000";
-
-privlyFlags = {
-  //when the server is down and we don't want any further requests to the server.
-  noRequests: false,
-  //disablePosts - when we don't want the extension to post content to the server.
-  disablePosts: false,
-  //when the server is busy and we don't want the extension to replace links on the page.
-  requireClickthrough: false,
-  //all posts default to public
-  allPostsPublic: false
-};
-
 var privlyExtension = 
 {
   loadLibraries : function(evt)
@@ -40,12 +26,12 @@ var privlyExtension =
     else{
       jQ.ajax(
         {
-          data: { auth_token: privly_user_auth_token, "post[content]":value, 
-            "post[public]":privlyFlags.allPostsPublic,
+          data: { auth_token: privlyAuthentication.authToken, "post[content]":value, 
+            "post[public]":privlySettings.allPostsPublic,
             endpoint:"extension", browser:"firefox", version:"0.1.1.1"
           },
           type: "POST",
-          url: privly_server_url+"/posts",
+          url: privlySettings.contentServerUrl+"/posts",
           contentType: "application/x-www-form-urlencoded; charset=UTF-8", 
           success: function(data, textStatus, jqXHR){
             target.value=jqXHR.getResponseHeader("privlyurl");
@@ -57,22 +43,22 @@ var privlyExtension =
   
   /*
    *when the server is down/busy, this function is called to convert the privly iframes to anchors on the web page 
-   *depending upon the privlyFlags set in the extensionCommand header.
+   *depending upon the privlySettings set in the extensionCommand header.
    */
   convertIframesToLinks : function()
   {
-    privlyIframes = content.document.getElementsByName("privlyiframe");
+    var privlyIframes = content.document.getElementsByName("privlyiframe");
     if(privlyIframes.length > 0){
-      for(i = 0; i< privlyIframes.length; i++){
+      for(var i = 0; i < privlyIframes.length; i++){
         var anchor = content.document.createElement("a");
         var href = privlyIframes[i].src;
         href = href.substring(0,href.indexOf(".iframe"));
         anchor.setAttribute('href',href);
-        if(privlyFlags.noRequests)
+        if(privlySettings.noRequests)
         {
             anchor.innerHTML = "Privly temporarily disabled all requests to its servers. Please try again later.";
         }
-        else if(privlyFlags.requireClickthrough)
+        else if(privlySettings.requireClickthrough)
         {
             anchor.innerHTML = "Privly is in sleep mode so it can catch up with demand. The content may still be viewable by clicking this link";
         }
@@ -95,11 +81,11 @@ var privlyExtension =
     var logoutFromPrivlyMenuItem = document.getElementById('logoutFromPrivlyMenuItem');   
     var postToPrivlyMenuItem = document.getElementById('postToPrivlyMenuItem');
   
-    if(privly_user_auth_token)
+    if(privlyAuthentication.authToken)
     {
       loginToPrivlyMenuItem.hidden = true;
       logoutFromPrivlyMenuItem.hidden = false;
-      if(!privlyFlags.disablePosts && evt.target.nodeName != null && (evt.target.nodeName.toLowerCase() == 'input' || evt.target.nodeName.toLowerCase() == 'textarea')){
+      if(!privlySettings.disablePosts && evt.target.nodeName != null && (evt.target.nodeName.toLowerCase() == 'input' || evt.target.nodeName.toLowerCase() == 'textarea')){
         postToPrivlyMenuItem.hidden = false;
       }
       else {
