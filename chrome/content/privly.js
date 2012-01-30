@@ -202,7 +202,7 @@ var privly = {
   listeners: function(){
     
     //don't recursively replace links
-    if(document.URL.indexOf('priv.ly') != -1 )
+    if(document.URL.indexOf('priv.ly') != -1 || document.URL.indexOf('localhost:3000') != -1)
       return;
     
     privly.run();
