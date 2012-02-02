@@ -3,21 +3,29 @@
 
 <prefwindow title="Privly Preferences"
 xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-
-	<prefpane id="privly-preferences" label="Privly Preferences">
-
+	
+	<script src="options.js" />
+	<prefpane id="appPreferences" label="Privly - Preferences" onpaneload="privlyPrefPane.onPaneLoad(event);">
+	
 		<preferences>
-			<preference id="privly-mode" name="" type="string"/>
-			<preference id="privly-disable-post" name="" type="bool"/>
+			<preference id="privly-mode" name="extensions.privly.extensionMode" type="int" instantApply="true" onchange="privlyPrefPane.updateMode();"/>
+			<preference id="privly-disable-post" name="extensions.privly.disablePosts" type="bool" instantApply="true" onchange="privlyPrefPane.updatePostMode();"/>
 		</preferences>
 
-		<label value="Mode" control="mode"/>
-		<radiogroup id="mode"  preference="privly-mode" >
-		  <radio id="active" label="Active" selected="true"/>	<label value="   Replaces priv.ly links with content automatically"  control="active" />
-		  <radio id="passive" label="Passive" />	<label value="   Replaces priv.ly links with content only when click on the link"  control="passive" />
-		</radiogroup>
-
-		<checkbox label="Disable post to Privly" checked="false"  preference="privly-disable-post"  />
+		<vbox>		
+			<groupbox>
+				<caption label="Extension Mode" />
+				<radiogroup id="mode"  preference="privly-mode">
+					<radio id="active" label="Active - Shows content from priv.ly on the page automatically" value="0"/>
+		  		<radio id="passive" label="Passive - Shows content from priv.ly on the page only when you click on the link" value="1"/>
+		  		<radio id="require-clickthrough" label="Require clickthrough - Shows content from priv.ly on a new tab when you click on the link" value="2"/>
+		  		<radio id="disable" label="Disable" value="3"/>
+				</radiogroup>
+  		</groupbox>
+  		<groupbox>
+				<checkbox id="disable-post" label="Disable extension from posting to content to priv.ly" checked="false"  preference="privly-disable-post"  />
+			</groupbox>
+		</vbox>
 		
 	</prefpane>
 

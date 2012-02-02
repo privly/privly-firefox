@@ -171,7 +171,7 @@ var privly = {
       var a = anchors[i];
       if(a.href && privly.privlyReferencesRegex.test(a.href))
       {
-        var exclude = a.getAttribute("privly");
+      	var exclude = a.getAttribute("privly");
         if(exclude != "exclude")
         {
           privly.replaceLink(a);
