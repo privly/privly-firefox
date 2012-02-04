@@ -30,7 +30,6 @@
 	
 	<toolbarpalette id="BrowserToolbarPalette">
 		<toolbarbutton id="privly-tlbr" label="Privly" tooltiptext="Privly" oncommand="privlyExtension.toggleExtensionMode()" />		 
-  </menupopup>
 	</toolbarpalette>
 	
 </overlay>
