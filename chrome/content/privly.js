@@ -69,7 +69,8 @@ var privly = {
           item = textNodes.snapshotItem(i);
 
           var itemText = item.nodeValue;
-
+          
+          privly.privlyReferencesRegex.lastIndex = 0;
           if(privly.privlyReferencesRegex.test(itemText)){
               var span = document.createElement("span");    
               var lastLastIndex = 0;
@@ -167,6 +168,7 @@ var privly = {
     var i = anchors.length;
     while (i--){
       var a = anchors[i];
+      privly.privlyReferencesRegex.lastIndex = 0;
       if(a.href && privly.privlyReferencesRegex.test(a.href))
       {
         var exclude = a.getAttribute("privly");
@@ -205,7 +207,13 @@ var privly = {
     if(document.URL.indexOf('priv.ly') != -1 || document.URL.indexOf('localhost:3000') != -1)
       return;
     
-    privly.run();
+    privly.runPending=true;
+      setTimeout(
+        function(){
+          privly.runPending=false;
+          privly.run();
+        },
+        100);
     
     //Everytime the page is updated via javascript, we have to check
     //for new Privly content. This might not be supported on other platforms
