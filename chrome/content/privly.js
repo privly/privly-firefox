@@ -33,7 +33,7 @@ var privly = {
   //                        priv.ly/textAndNumbers/any/number/of/times
   //                                                                          
   //also matches localhost:3000
-  privlyReferencesRegex: /\b(https?:\/\/){0,1}(priv\.ly|localhost:3000)(\/\w*){2,}\b/gi,
+  privlyReferencesRegex: /\b(https?:\/\/){0,1}(priv\.ly|localhost:3000)(\/posts)(\/\w*){1,}\b/gi,
   
   // Takes a domain with an optional http(s) in front and returns a fully formed domain name
   makeHref: function(domain)
