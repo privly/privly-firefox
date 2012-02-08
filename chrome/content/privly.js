@@ -96,6 +96,20 @@ var privly = {
           }
       }
   },
+
+  //Kill default link behaviour on Privly Links
+  makePassive: function(anchor) 
+  {    
+    //Preventing the default link behavior
+    anchor.addEventListener("mousedown", function(e){
+        e.cancelBubble = true;
+        e.stopPropagation();
+        e.preventDefault();
+        privly.replaceLink(anchor);
+        console.log("a")
+      }, 
+      true);
+  },
   
   //Checks link attributes and text for privly links without the proper href attribute.
   //Twitter and other hosts change links so they can collect click events.
@@ -114,25 +128,7 @@ var privly = {
           var results = privly.privlyReferencesRegex.exec(a.innerHTML);
           var newHref = privly.makeHref(results[0]);
           a.setAttribute("href", newHref);
-          //Preventing the default link behavior
-          a.addEventListener("mousedown", function(e){
-              e.cancelBubble = true;
-              e.stopPropagation();
-              e.preventDefault();
-              linkClicked(a);
-            }, true);
         }
-      }
-      else if(a.href)
-      {
-        //Preventing the default link behavior
-        a.addEventListener("mousedown", function(e){
-            e.cancelBubble = true;
-            e.stopPropagation();
-            e.preventDefault();
-            replaceLink(a);
-          }, 
-          true);
       }
     }
   },
@@ -174,7 +170,14 @@ var privly = {
         var exclude = a.getAttribute("privly");
         if(exclude != "exclude")
         {
-          privly.replaceLink(a);
+          if(privly.active)
+          {
+            privly.replaceLink(a);
+          }
+          else
+          {
+            privly.makePassive(a);
+          }
         }
       }
     }
@@ -193,10 +196,10 @@ var privly = {
     //to Privly content
     privly.createLinks();
     privly.correctIndirection();
-
-    //replace all available links on load, if in active mode
-    if(privly.active)
-      privly.replaceLinks();
+    
+    //replace all available links on load, if in active mode,
+    //otherwise replace all links default behavior
+    privly.replaceLinks();
   },
   
   //runs privly once then registers the update listener
