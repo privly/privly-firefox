@@ -106,7 +106,6 @@ var privly = {
         e.stopPropagation();
         e.preventDefault();
         privly.replaceLink(anchor);
-        console.log("a")
       }, 
       true);
   },
