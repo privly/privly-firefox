@@ -8,14 +8,11 @@
 // the user of the issue, and switch into passive mode. 
 
 
-// We need to refactor this functionality, see below.
-// From: https://developer.mozilla.org/en/Setting_HTTP_request_headers
-// You need to register a single http-on-modify-request observer per
-// application (and not one per window). This means that you should
-// put the observer's implementation in an XPCOM component instead
-// of an overlay. If you want to support Gecko2 (Firefox4) you need
-// to register your javascript component as described here:
-// https://developer.mozilla.org/en/XPCOM/XPCOM_changes_in_Gecko_2.0#JavaScript_components.
+// We need to refactor this functionality into a JS module.
+// Observers should be registered once per application,
+// not once per window. Nils Maier Provided these resoucrces
+// For example: https://gist.github.com/1630169
+// https://developer.mozilla.org/en/JavaScript_modules
 var privlyObservers = 
 {
   httpRequestObserver :
