@@ -69,11 +69,16 @@ var privlyExtension =
     }
   },
   
+  //deprecated method of resizing the iframe at the extension level using 
+  //an event. We now resize the iframe within the page context using post
+  //message. We will eventually return this operation to the extension
+  //level so that the host page can't capture how much content is in the
+  //injected iframe
   resizeIframe : function(evt)
   {
-    var iframeHeight = evt.target.getAttribute("height");
-    var ifr = evt.target.ownerDocument.defaultView.frameElement;
-    ifr.style.height = iframeHeight+'px';
+    //var iframeHeight = evt.target.getAttribute("height");
+    //var ifr = evt.target.ownerDocument.defaultView.frameElement;
+    //ifr.style.height = iframeHeight+'px';
   },
   
   checkContextForPrivly : function(evt)
