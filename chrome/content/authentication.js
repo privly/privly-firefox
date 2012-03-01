@@ -27,6 +27,8 @@ var privlyAuthentication =
         type: "POST",
         url: privlySettings.contentServerUrl+"/token_authentications.json",
         contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+        dataType: "json",
+        accepts: "json",
         success: function(data, textStatus, jqXHR){
           privlyAuthentication.authToken = data.auth_key;
           if(privlyAuthentication.authToken)
@@ -37,6 +39,9 @@ var privlyAuthentication =
           {
             alert("Incorrect email or password for Priv.ly login");
           }
+        },
+        error: function(data, textStatus, jqXHR){
+            alert("We could not contact the Priv.ly servers. If the problem persists, please file a bug report.");
         }
       }
     );
@@ -53,6 +58,8 @@ var privlyAuthentication =
         type: "POST",
         url: privlySettings.contentServerUrl+"/token_authentications.json",
         contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+        dataType: "json",
+        accepts: "json",
         success: function(data, textStatus, jqXHR){
           privlyAuthentication.authToken = "";
           alert("You are logged out from Priv.ly");

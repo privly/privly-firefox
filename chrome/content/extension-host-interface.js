@@ -31,8 +31,10 @@ var privlyExtension =
             endpoint:"extension", browser:"firefox", version:"0.1.1.1"
           },
           type: "POST",
-          url: privlySettings.contentServerUrl+"/posts",
-          contentType: "application/x-www-form-urlencoded; charset=UTF-8", 
+          url: privlySettings.contentServerUrl+"/posts.json",
+          contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+          dataType: "json",
+          accepts: "json",
           success: function(data, textStatus, jqXHR){
             target.value=jqXHR.getResponseHeader("privlyurl");
           }
