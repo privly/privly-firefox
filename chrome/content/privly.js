@@ -210,12 +210,12 @@ var privly = {
       return;
     
     privly.runPending=true;
-      setTimeout(
-        function(){
-          privly.runPending=false;
-          privly.run();
-        },
-        100);
+    setTimeout(
+      function(){
+        privly.runPending=false;
+        privly.run();
+      },
+      100);
     
     //Everytime the page is updated via javascript, we have to check
     //for new Privly content. This might not be supported on other platforms
