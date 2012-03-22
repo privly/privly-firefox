@@ -17,8 +17,13 @@
 	</keyset>
 
 	<menupopup id="contentAreaContextMenu">  
-		<menuitem id="postToPrivlyMenuItem" label="Post to Privly" oncommand="privlyExtension.postToPrivly()"/>  
+		<menuitem id="publicPostToPrivlyMenuItem" label="Post Public Content to Privly" oncommand="privlyExtension.postToPrivly('public')"/>  
 	</menupopup>
+
+	<menupopup id="contentAreaContextMenu">  
+		<menuitem id="privatePostToPrivlyMenuItem" label="Post Private Content to Privly" oncommand="privlyExtension.postToPrivly('private')"/>  
+	</menupopup>
+
 
 	<menupopup id="contentAreaContextMenu">  
 		<menuitem id="loginToPrivlyMenuItem" label="Login to Privly" oncommand="privlyAuthentication.loginToPrivly()"/>  

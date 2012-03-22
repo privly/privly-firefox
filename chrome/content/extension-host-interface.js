@@ -8,9 +8,12 @@ var privlyExtension =
     var doc = evt.originalTarget;
     var wnd = doc.defaultView;
     var loader = Components.classes["@mozilla.org/moz/jssubscript-loader;1"].getService(Components.interfaces.mozIJSSubScriptLoader);
-    
+    preferences = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.privly.");
+    wnd.balExtensionMode =preferences.getIntPref("extensionMode");
     //load the script running on the host page
-    loader.loadSubScript("chrome://privly/content/privly.js", wnd);
+    if(doc.URL){
+    	loader.loadSubScript("chrome://privly/content/privly.js", wnd);    
+    }
   },
   runPrivly : function()
   {
@@ -19,19 +22,20 @@ var privlyExtension =
       pwbutton.click();
   },
   
-  postToPrivly : function()
+  postToPrivly : function(privacySetting)
   {
     var target = document.popupNode;
     var value = target.value;
     var allPostsPublic = this.preferences.getBoolPref("allPostsPublic");
-    var contentServer = this.preferences.getCharPref("contentServerUrl");
+    var contentServerUrl = this.preferences.getCharPref("contentServerUrl");
+    var postPrivacySetting = allPostsPublic || (privacySetting == 'public');
     if(value == "")
       alert("Sorry. You can not post empty content to Privly");
     else{
       jQ.ajax(
         {
           data: { auth_token: privlyAuthentication.authToken, "post[content]":value, 
-            "post[public]":allPostsPublic,
+            "post[public]":postPrivacySetting,
             endpoint:"extension", browser:"firefox", version:"0.1.1.1"
           },
           type: "POST",
@@ -52,19 +56,17 @@ var privlyExtension =
   convertIframesToLinks : function()
   {
   	var privlyIframes = content.document.getElementsByName("privlyiframe");
-    if(privlyIframes.length > 0){
+  	extensionMode = this.preferences.getIntPref("extensionMode");
+    if((extensionMode == 2 || extensionMode == 1) && privlyIframes != null && privlyIframes.length > 0){
       for(var i = 0; i < privlyIframes.length; i++){
         var anchor = content.document.createElement("a");
         var href = privlyIframes[i].src;
         href = href.substring(0,href.indexOf(".iframe"));
         anchor.setAttribute('href',href);
-        extensionMode = this.preferences.getIntPref("extensionMode");
-        if(extensionMode == 3)
-        {
+        if(extensionMode == 3){
             anchor.innerHTML = "Privly temporarily disabled all requests to its servers. Please try again later.";
         }
-        else if(extensionMode == 2)
-        {
+        else if(extensionMode == 2){
             anchor.innerHTML = "Privly is in sleep mode so it can catch up with demand. The content may still be viewable by clicking this link";
         }
         privlyIframes[i].parentNode.replaceChild(anchor,privlyIframes[i]);
@@ -83,25 +85,30 @@ var privlyExtension =
   {
     var loginToPrivlyMenuItem = document.getElementById('loginToPrivlyMenuItem'); 
     var logoutFromPrivlyMenuItem = document.getElementById('logoutFromPrivlyMenuItem');   
-    var postToPrivlyMenuItem = document.getElementById('postToPrivlyMenuItem');
+    var publicPostToPrivlyMenuItem = document.getElementById('publicPostToPrivlyMenuItem');
+    var privatePostToPrivlyMenuItem = document.getElementById('privatePostToPrivlyMenuItem');
   
     if(privlyAuthentication.authToken)
     {
       loginToPrivlyMenuItem.hidden = true;
       logoutFromPrivlyMenuItem.hidden = false;
       disablePosts = this.preferences.getBoolPref("disablePosts");
-      if(!disablePosts && evt.target.nodeName != null && (evt.target.nodeName.toLowerCase() == 'input' || evt.target.nodeName.toLowerCase() == 'textarea')){
-        postToPrivlyMenuItem.hidden = false;
+      if(!disablePosts && evt.target.nodeName != null && 
+      		(evt.target.nodeName.toLowerCase() == 'input' || evt.target.nodeName.toLowerCase() == 'textarea')){
+        publicPostToPrivlyMenuItem.hidden = false;
+        privatePostToPrivlyMenuItem.hidden = false;
       }
       else {
-        postToPrivlyMenuItem.hidden = true;
+        publicPostToPrivlyMenuItem.hidden = true;
+        privatePostToPrivlyMenuItem.hidden = true;
       }
     }
     else
     {
       loginToPrivlyMenuItem.hidden = false;
       logoutFromPrivlyMenuItem.hidden = true;
-      postToPrivlyMenuItem.hidden = true;
+      publicPostToPrivlyMenuItem.hidden = true;
+      privatePostToPrivlyMenuItem.hidden = true;
     }
   },
   //toggle extension mode when toolbar button is clicked
@@ -114,10 +121,10 @@ var privlyExtension =
   	else if(extensionMode == 1){
   		extensionMode = 0;
   	}
-  	this.preferences.setIntPref("extensionMode",extensionMode);
-  	this.updateToolbarButtonIcon();
+  	this.updateExtensionMode(extensionMode);
   },
-  updateToolbarButtonIcon : function(extensionMode)
+  
+  updateToolbarButtonIcon : function()
   {
   	privlyToolbarButton = document.getElementById('privly-tlbr');
   	extensionMode = this.preferences.getIntPref("extensionMode");
@@ -126,9 +133,35 @@ var privlyExtension =
   		privlyToolbarButton.tooltipText="Privly is in active mode";
   	}
   	else if(extensionMode == 1){
-			privlyToolbarButton.style.listStyleImage="url('chrome://privly/skin/logo_16_dis.png')";
-  		privlyToolbarButton.tooltipText="Privly is in passive mode";  		
+  		privlyToolbarButton.style.listStyleImage="url('chrome://privly/skin/logo_16_dis.png')";
+  		privlyToolbarButton.tooltipText="Privly is in passive mode";
   	}
+  },
+  /* 
+   * inserts a 'privModeElement' with an attribute - 'mode'
+   */
+  updatePrivModeElement : function()
+  {
+  	this.updateToolbarButtonIcon();
+  	extensionMode = this.preferences.getIntPref("extensionMode");
+		elements = content.document.getElementsByTagName("privModeElement");
+		if(elements != null && elements.length != 0){
+			elements[0].setAttribute("mode", extensionMode);
+		}
+		else{
+			element = content.document.createElement("privModeElement");
+			element.setAttribute("mode", extensionMode);
+			content.document.documentElement.appendChild(element);
+		}
+  },
+  /* updates the variable in preferences and alerts privly.js about the 
+   * change. privly.js updates its 'active' variable
+   * accordingly.
+   */
+  updateExtensionMode : function(extensionMode)
+  {
+  	this.preferences.setIntPref("extensionMode",extensionMode);
+		this.updatePrivModeElement();
   }
 }
 
@@ -137,19 +170,27 @@ jQ = window.jQuery.noConflict();
 
 window.addEventListener("load", function (e){
   var appcontent = document.getElementById("appcontent");
-  
   if( appcontent) {
-		 	appcontent.addEventListener("DOMContentLoaded", privlyExtension.loadLibraries, true);
-   
-    //set the toolbar button icon on startup
-    extensionMode = privlyExtension.preferences.getIntPref("extensionMode");
-    privlyExtension.updateToolbarButtonIcon(extensionMode);
+		appcontent.addEventListener("DOMContentLoaded", privlyExtension.loadLibraries, true);
+    privlyExtension.updatePrivModeElement(); 
   }
 }, false);
+
 window.addEventListener("IframeResizeEvent", function(e) { privlyExtension.resizeIframe(e); }, false, true);
 window.addEventListener("contextmenu", function(e) { privlyExtension.checkContextForPrivly(e);}, false);
+
 /*
  * user could change the mode from the preferences menu in the add-on page. So, update toolbar
+ * button and dispatch an event to alert privly.js about the mode change
  * whenever tab is switched
  */
-window.addEventListener("activate", function(e) { privlyExtension.updateToolbarButtonIcon();}, false);
+gBrowser.addEventListener("select", function(event){
+	privlyExtension.updatePrivModeElement();
+}, false);
+
+gBrowser.addEventListener("load", function(event){
+	if ((event.originalTarget.nodeName == '#document') && 
+		(event.originalTarget.defaultView.location.href == gBrowser.currentURI.spec)){
+			privlyExtension.updatePrivModeElement();
+		}
+}, true);
