@@ -124,14 +124,13 @@ var privly = {
       {
         //Preventing the default link behavior
         a.addEventListener("mousedown", function(e){
-            e.cancelBubble = true;
-            e.stopPropagation();
-            e.preventDefault();
-            if(this.extensionMode == 0){
-            	replaceLink(a);
-            }
-          }, 
-          true);
+					e.cancelBubble = true;
+					e.stopPropagation();
+          e.preventDefault();
+          if(this.extensionMode == 0){
+          	replaceLink(a);
+          }
+				},true);
       }
     }
   },
@@ -171,9 +170,9 @@ var privly = {
 			this.extensionMode = elements[0].getAttribute('mode');
 		}
 		else{
-		/* if there is no privModeElement tag in DOM, then the extension is probably
-		 * disabled. so set the mode accordingly.
-		 */
+			/* if there is no privModeElement tag in DOM, then the extension is probably
+			* disabled. so set the mode accordingly.
+			*/
 			this.extensionMode = 3;
 		}
 		while (--i >= 0){
@@ -193,7 +192,7 @@ var privly = {
         			event.stopPropagation();
         			event.preventDefault();
         			privly.replaceLink(a);
-        		}
+        		};
         	}
         	else if(this.extensionMode == 2){
 							a.innerHTML = "Privly is in sleep mode so it can catch up with demand. The content may still be viewable by clicking this link";
@@ -231,7 +230,7 @@ var privly = {
     //don't recursively replace links
     if(document.URL.indexOf('priv.ly') != -1 || document.URL.indexOf('localhost:3000') != -1)
       return;
-		privly.run();
+    privly.run();
     //Everytime the page is updated via javascript, we have to check
     //for new Privly content. This might not be supported on other platforms
     document.addEventListener("DOMNodeInserted", function(event) {
@@ -257,15 +256,17 @@ var privly = {
   // won't attach anything on IE 
   // on macintosh systems.
   addEvent: function(obj, evType, fn){ 
-   if (obj.addEventListener){ 
-     obj.addEventListener(evType, fn, false); 
-     return true; 
-   } else if (obj.attachEvent){ 
-     var r = obj.attachEvent("on"+evType, fn); 
-     return r; 
-   } else { 
-     return false; 
-   } 
+		if (obj.addEventListener){ 
+			obj.addEventListener(evType, fn, false); 
+			return true; 
+		}
+		else if (obj.attachEvent){ 
+			var r = obj.attachEvent("on"+evType, fn); 
+			return r; 
+		}
+		else { 
+			return false; 
+		} 
   }
 }
 
