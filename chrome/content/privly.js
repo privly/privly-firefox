@@ -124,13 +124,13 @@ var privly = {
       {
         //Preventing the default link behavior
         a.addEventListener("mousedown", function(e){
-					e.cancelBubble = true;
-					e.stopPropagation();
+          e.cancelBubble = true;
+          e.stopPropagation();
           e.preventDefault();
           if(this.extensionMode == 0){
-          	replaceLink(a);
+            replaceLink(a);
           }
-				},true);
+        },true);
       }
     }
   },
@@ -166,40 +166,40 @@ var privly = {
     var anchors = document.links;
     var i = anchors.length;
     elements = document.getElementsByTagName("privModeElement");
-		if(elements != null && elements.length != 0){
-			this.extensionMode = elements[0].getAttribute('mode');
-		}
-		else{
-			/* if there is no privModeElement tag in DOM, then the extension is probably
-			* disabled. so set the mode accordingly.
-			*/
-			this.extensionMode = 3;
-		}
-		while (--i >= 0){
-			var a = anchors[i];
-			this.privlyReferencesRegex.lastIndex = 0;
+    if(elements != null && elements.length != 0){
+      this.extensionMode = elements[0].getAttribute('mode');
+    }
+    else{
+      /* if there is no privModeElement tag in DOM, then the extension is probably
+      * disabled. so set the mode accordingly.
+      */
+      this.extensionMode = 3;
+    }
+    while (--i >= 0){
+      var a = anchors[i];
+      this.privlyReferencesRegex.lastIndex = 0;
       if(a.href && this.privlyReferencesRegex.test(a.href))
       {
       	var exclude = a.getAttribute("privly");
         if(exclude == null || exclude != "exclude"){
-        	if(this.extensionMode == 0){
-        		this.replaceLink(a);
-        	}
-        	else if(this.extensionMode == 1){
-        		a.innerHTML = 'Privly is currently experiencing heavy traffic. Click here to see privly content';
-        		a.onmousedown = function(event){
-        			event.cancelBubble = true;
-        			event.stopPropagation();
-        			event.preventDefault();
-        			privly.replaceLink(a);
-        		};
-        	}
-        	else if(this.extensionMode == 2){
-							a.innerHTML = "Privly is in sleep mode so it can catch up with demand. The content may still be viewable by clicking this link";
-					}
-        	else if(this.extensionMode == 3){
-							a.innerHTML = "Privly temporarily disabled all requests to its servers. Please try again later.";
-					}
+          if(this.extensionMode == 0){
+            this.replaceLink(a);
+          }
+          else if(this.extensionMode == 1){
+            a.innerHTML = 'Privly is currently experiencing heavy traffic. Click here to see privly content';
+            a.onmousedown = function(event){
+              event.cancelBubble = true;
+              event.stopPropagation();
+              event.preventDefault();
+              privly.replaceLink(a);
+            };
+          }
+          else if(this.extensionMode == 2){
+            a.innerHTML = "Privly is in sleep mode so it can catch up with demand. The content may still be viewable by clicking this link";
+          }
+          else if(this.extensionMode == 3){
+            a.innerHTML = "Privly temporarily disabled all requests to its servers. Please try again later.";
+          }
         }
       }
     }
@@ -256,17 +256,17 @@ var privly = {
   // won't attach anything on IE 
   // on macintosh systems.
   addEvent: function(obj, evType, fn){ 
-		if (obj.addEventListener){ 
-			obj.addEventListener(evType, fn, false); 
-			return true; 
-		}
-		else if (obj.attachEvent){ 
-			var r = obj.attachEvent("on"+evType, fn); 
-			return r; 
-		}
-		else { 
-			return false; 
-		} 
+    if (obj.addEventListener){ 
+      obj.addEventListener(evType, fn, false); 
+      return true; 
+    }
+    else if (obj.attachEvent){ 
+      var r = obj.attachEvent("on"+evType, fn); 
+      return r; 
+    }
+    else { 
+      return false; 
+    } 
   }
 }
 
