@@ -31,7 +31,7 @@ var privly = {
   //                        priv.ly/textAndNumbers/any/number/of/times
   //                                                                          
   //also matches localhost:3000
-  privlyReferencesRegex: /\b(https?:\/\/){0,1}(priv\.ly|localhost:3000)(\/\w*){2,}\b/gi,
+  privlyReferencesRegex: /\b(https?:\/\/){0,1}(priv\.ly|localhost:3000)(\/posts)(\/\w*){1,}\b/gi,
   
   // Takes a domain with an optional http(s) in front and returns a fully formed domain name
   makeHref: function(domain)
@@ -67,7 +67,8 @@ var privly = {
           item = textNodes.snapshotItem(i);
 
           var itemText = item.nodeValue;
-
+          
+          privly.privlyReferencesRegex.lastIndex = 0;
           if(privly.privlyReferencesRegex.test(itemText)){
               var span = document.createElement("span");    
               var lastLastIndex = 0;
@@ -93,6 +94,19 @@ var privly = {
           }
       }
   },
+
+  //Kill default link behaviour on Privly Links
+  makePassive: function(anchor) 
+  {    
+    //Preventing the default link behavior
+    anchor.addEventListener("mousedown", function(e){
+        e.cancelBubble = true;
+        e.stopPropagation();
+        e.preventDefault();
+        privly.replaceLink(anchor);
+      }, 
+      true);
+  },
   
   //Checks link attributes and text for privly links without the proper href attribute.
   //Twitter and other hosts change links so they can collect click events.
@@ -111,26 +125,7 @@ var privly = {
           var results = privly.privlyReferencesRegex.exec(a.innerHTML);
           var newHref = privly.makeHref(results[0]);
           a.setAttribute("href", newHref);
-          //Preventing the default link behavior
-          a.addEventListener("mousedown", function(e){
-              e.cancelBubble = true;
-              e.stopPropagation();
-              e.preventDefault();
-              linkClicked(a);
-            }, true);
         }
-      }
-      else if(a.href)
-      {
-        //Preventing the default link behavior
-        a.addEventListener("mousedown", function(e){
-          e.cancelBubble = true;
-          e.stopPropagation();
-          e.preventDefault();
-          if(this.extensionMode == 0){
-            replaceLink(a);
-          }
-        },true);
       }
     }
   },
@@ -205,8 +200,17 @@ var privly = {
     }
   },
 
-  //do nothing. Actual implementation is in extension-host-interface.js
-  resizeIframe: function(evt){},
+  //resize the iframe using a posted message
+  resizeIframe: function(message){
+    
+    if(message.origin !== "https://priv.ly" && message.origin !== "http://localhost:3000")
+      return;
+    
+    var data = message.data.split(",");
+    
+    var iframe = document.getElementById("ifrm"+data[0]);
+    iframe.style.height = data[1]+'px';
+  },
   
   //indicates whether the extension shoud immediatly replace all Privly
   //links it encounters
@@ -222,15 +226,31 @@ var privly = {
     //to Privly content
     privly.createLinks();
     privly.correctIndirection();
+    
+    //replace all available links on load, if in active mode,
+    //otherwise replace all links default behavior
     privly.replaceLinks();
   },
+
   //runs privly once then registers the update listener
   //for dynamic pages
   listeners: function(){
     //don't recursively replace links
     if(document.URL.indexOf('priv.ly') != -1 || document.URL.indexOf('localhost:3000') != -1)
       return;
-    privly.run();
+      
+    //The content's iframe will post a message to the hosting document. This listener sets the height 
+    //of the iframe according to the messaged height
+    window.addEventListener("message", privly.resizeIframe, false, true);
+    
+    privly.runPending=true;
+    setTimeout(
+      function(){
+        privly.runPending=false;
+        privly.run();
+      },
+      100);
+    
     //Everytime the page is updated via javascript, we have to check
     //for new Privly content. This might not be supported on other platforms
     document.addEventListener("DOMNodeInserted", function(event) {
@@ -246,10 +266,6 @@ var privly = {
         },
         500);
     });
-    
-    //The content's iframe will fire a resize event when it has loaded, resizeIframe
-    //sets the height of the iframe to the height of the content contained within.
-    window.addEventListener("IframeResizeEvent", function(e) { this.resizeIframe(e); }, false, true);
   },
   
   // cross platform onload event
@@ -271,3 +287,4 @@ var privly = {
 }
 
 privly.addEvent(window, 'load', privly.listeners); 
+
