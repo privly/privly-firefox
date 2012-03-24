@@ -178,7 +178,8 @@ var privly = {
 		}
 		while (--i >= 0){
 			var a = anchors[i];
-      if(a.href && privly.privlyReferencesRegex.test(a.href))
+			this.privlyReferencesRegex.lastIndex = 0;
+      if(a.href && this.privlyReferencesRegex.test(a.href))
       {
       	var exclude = a.getAttribute("privly");
         if(exclude == null || exclude != "exclude"){
