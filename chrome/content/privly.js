@@ -119,6 +119,8 @@ var privly = {
       
       if(a.href && (a.href.indexOf("priv.ly/posts/") == -1 || a.href.indexOf("priv.ly/posts/") > 9))
       {
+        //check if Privly is in the body of the text
+        privly.privlyReferencesRegex.lastIndex = 0;
         if (privly.privlyReferencesRegex.test(a.innerHTML)) {        
           // If the href is not present or is on a different domain
           privly.privlyReferencesRegex.lastIndex = 0;
@@ -126,7 +128,19 @@ var privly = {
           var newHref = privly.makeHref(results[0]);
           a.setAttribute("href", newHref);
         }
+        
+        //check if Privly was moved to another attribute
+        for (var y = 0; y < a.attributes.length; y++) {
+          var attrib = a.attributes[y];
+          if (attrib.specified == true) {
+            privly.privlyReferencesRegex.lastIndex = 0;
+            if (privly.privlyReferencesRegex.test(attrib.value)) {
+              a.setAttribute("href", attrib.value);
+            }
+          }
+        }
       }
+      privly.privlyReferencesRegex.lastIndex = 0;
     }
   },
 
