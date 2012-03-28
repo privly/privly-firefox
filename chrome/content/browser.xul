@@ -1,31 +1,40 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://privly/skin/skin.css" type="text/css"?> 
 <!DOCTYPE privly SYSTEM "chrome://privly/locale/translations.dtd">
-<overlay id="sample" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-    
-    <script src="extension-host-interface.js" />
-    <script src="observers.js" />
-    <script src="authentication.js" />
-    <script src="settings.js" />
-    
-    <menupopup id="menu_ToolsPopup"> 
-      <menuitem label="&runPrivly;" key="privly-run-key" oncommand="privlyExtension.runPrivly()"/> 
-    </menupopup>
+<overlay id="privly" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-    <keyset>
-      <key id="privly-run-key" modifiers="accel alt" key="P" oncommand="privlyExtension.runPrivly()"/>
-    </keyset>
+	<script src="extension-host-interface.js" />
+	<script src="observers.js" />
+	<script src="authentication.js" />
+	<script src="settings.js" />
 
-    <menupopup id="contentAreaContextMenu">  
-      <menuitem id="postToPrivlyMenuItem" label="Post to Privly" oncommand="privlyExtension.postToPrivly()"/>  
-    </menupopup>
+	<menupopup id="menu_ToolsPopup"> 
+		<menuitem label="&runPrivly;" key="privly-run-key" oncommand="privlyExtension.runPrivly()"/> 
+	</menupopup>
 
-    <menupopup id="contentAreaContextMenu">  
-      <menuitem id="loginToPrivlyMenuItem" label="Login to Privly" oncommand="privlyAuthentication.loginToPrivly()"/>  
-    </menupopup>
+	<keyset>
+		<key id="privly-run-key" modifiers="accel alt" key="P" oncommand="privlyExtension.runPrivly()"/>
+	</keyset>
 
-    <menupopup id="contentAreaContextMenu">  
-      <menuitem id="logoutFromPrivlyMenuItem" label="Logout from Privly" oncommand="privlyAuthentication.logoutFromPrivly()"/>  
-    </menupopup>
+	<menupopup id="contentAreaContextMenu">  
+		<menuitem id="publicPostToPrivlyMenuItem" label="Post Public Content to Privly" oncommand="privlyExtension.postToPrivly('public')"/>  
+	</menupopup>
 
+	<menupopup id="contentAreaContextMenu">  
+		<menuitem id="privatePostToPrivlyMenuItem" label="Post Private Content to Privly" oncommand="privlyExtension.postToPrivly('private')"/>  
+	</menupopup>
+
+
+	<menupopup id="contentAreaContextMenu">  
+		<menuitem id="loginToPrivlyMenuItem" label="Login to Privly" oncommand="privlyAuthentication.loginToPrivly()"/>  
+	</menupopup>
+
+	<menupopup id="contentAreaContextMenu">  
+		<menuitem id="logoutFromPrivlyMenuItem" label="Logout from Privly" oncommand="privlyAuthentication.logoutFromPrivly()"/>  
+	</menupopup>
+	
+	<toolbarpalette id="BrowserToolbarPalette">
+		<toolbarbutton id="privly-tlbr" label="Privly" tooltiptext="Privly" oncommand="privlyExtension.toggleExtensionMode()" />		 
+	</toolbarpalette>
+	
 </overlay>

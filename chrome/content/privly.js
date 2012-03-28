@@ -24,9 +24,7 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
 *******************************************************************************/
-
-var privly = {
-
+var privly = {	
   //Matches:
   //              http://
   //              https://
@@ -38,8 +36,8 @@ var privly = {
   // Takes a domain with an optional http(s) in front and returns a fully formed domain name
   makeHref: function(domain)
   {
-    var hasHTTPRegex = /^((https?)\:\/\/)/i
-    if(!hasHTTPRegex.test(domain)) 
+    var hasHTTPRegex = /^((https?)\:\/\/)/i;
+    if(!hasHTTPRegex.test(domain))
         domain = "http://" + domain;
     return domain;
   },
@@ -150,7 +148,7 @@ var privly = {
 
   // Replace an anchor element with its referenced content.
   replaceLink: function(object) 
-  { 
+  {
     var iFrame = document.createElement('iframe');
     iFrame.setAttribute("frameborder","0");
     iFrame.setAttribute("vspace","0");
@@ -172,24 +170,44 @@ var privly = {
   },
 
   //Replace all Privly links with their iframe
-  replaceLinks: function(){
+  replaceLinks: function()
+  {
     var anchors = document.links;
     var i = anchors.length;
-    while (i--){
+    elements = document.getElementsByTagName("privModeElement");
+    if(elements != null && elements.length != 0){
+      this.extensionMode = elements[0].getAttribute('mode');
+    }
+    else{
+      /* if there is no privModeElement tag in DOM, then the extension is probably
+      * disabled. so set the mode accordingly.
+      */
+      this.extensionMode = 3;
+    }
+    while (--i >= 0){
       var a = anchors[i];
-      privly.privlyReferencesRegex.lastIndex = 0;
-      if(a.href && privly.privlyReferencesRegex.test(a.href))
+      this.privlyReferencesRegex.lastIndex = 0;
+      if(a.href && this.privlyReferencesRegex.test(a.href))
       {
-        var exclude = a.getAttribute("privly");
-        if(exclude != "exclude")
-        {
-          if(privly.active)
-          {
-            privly.replaceLink(a);
+      	var exclude = a.getAttribute("privly");
+        if(exclude == null || exclude != "exclude"){
+          if(this.extensionMode == 0){
+            this.replaceLink(a);
           }
-          else
-          {
-            privly.makePassive(a);
+          else if(this.extensionMode == 1){
+            a.innerHTML = 'Privly is currently experiencing heavy traffic. Click here to see privly content';
+            a.onmousedown = function(event){
+              event.cancelBubble = true;
+              event.stopPropagation();
+              event.preventDefault();
+              privly.replaceLink(a);
+            };
+          }
+          else if(this.extensionMode == 2){
+            a.innerHTML = "Privly is in sleep mode so it can catch up with demand. The content may still be viewable by clicking this link";
+          }
+          else if(this.extensionMode == 3){
+            a.innerHTML = "Privly temporarily disabled all requests to its servers. Please try again later.";
           }
         }
       }
@@ -208,12 +226,16 @@ var privly = {
     iframe.style.height = data[1]+'px';
   },
   
+  //indicates whether the extension shoud immediatly replace all Privly
+  //links it encounters
+  extensionMode: 0,
+  
   //prevents DOMNodeInserted from sending hundreds of extension runs
   runPending: false,
   
   //prep the page and replace the links if it is in active mode
-  run: function(){
-
+  run: function()
+  {
     //create and correct the links pointing
     //to Privly content
     privly.createLinks();
@@ -223,14 +245,14 @@ var privly = {
     //otherwise replace all links default behavior
     privly.replaceLinks();
   },
-  
+
   //runs privly once then registers the update listener
   //for dynamic pages
   listeners: function(){
     //don't recursively replace links
     if(document.URL.indexOf('priv.ly') != -1 || document.URL.indexOf('localhost:3000') != -1)
       return;
-        
+      
     //The content's iframe will post a message to the hosting document. This listener sets the height 
     //of the iframe according to the messaged height
     window.addEventListener("message", privly.resizeIframe, false, true);
@@ -246,9 +268,8 @@ var privly = {
     //Everytime the page is updated via javascript, we have to check
     //for new Privly content. This might not be supported on other platforms
     document.addEventListener("DOMNodeInserted", function(event) {
-      
       //we check the page a maximum of two times a second
-      if(privly.runPending )
+      if(privly.runPending)
         return;
       privly.runPending=true;
       
@@ -261,10 +282,6 @@ var privly = {
     });
   },
   
-  //indicates whether the extension shoud immediatly replace all Privly
-  //links it encounters
-  active: true,
-  
   // cross platform onload event
   // won't attach anything on IE 
   // on macintosh systems.
@@ -272,15 +289,16 @@ var privly = {
     if (obj.addEventListener){ 
       obj.addEventListener(evType, fn, false); 
       return true; 
-    } else if (obj.attachEvent){ 
+    }
+    else if (obj.attachEvent){ 
       var r = obj.attachEvent("on"+evType, fn); 
       return r; 
-    } else { 
+    }
+    else { 
       return false; 
     } 
   }
-  
-};
+}
 
-privly.addEvent(window, 'load', privly.listeners);
+privly.addEvent(window, 'load', privly.listeners); 
 

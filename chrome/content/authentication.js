@@ -25,7 +25,7 @@ var privlyAuthentication =
           endpoint:"extension", browser:"firefox", version:"0.1.1.1"
         },
         type: "POST",
-        url: privlySettings.contentServerUrl+"/token_authentications.json",
+        url: privlyExtension.preferences.getCharPref("contentServerUrl")+"/token_authentications.json",
         contentType: "application/x-www-form-urlencoded; charset=UTF-8",
         dataType: "json",
         accepts: "json",
@@ -56,7 +56,7 @@ var privlyAuthentication =
           version:"0.1.1.1", auth_token: privlyAuthentication.authToken
         },
         type: "POST",
-        url: privlySettings.contentServerUrl+"/token_authentications.json",
+        url: privlyExtension.preferences.getCharPref("contentServerUrl")+"/token_authentications.json",
         contentType: "application/x-www-form-urlencoded; charset=UTF-8",
         dataType: "json",
         accepts: "json",

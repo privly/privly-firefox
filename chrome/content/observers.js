@@ -15,20 +15,25 @@
 // https://developer.mozilla.org/en/JavaScript_modules
 var privlyObservers = 
 {
+    
   httpRequestObserver :
-  {    
+  {
+  	preferences : Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.privly."),
+      
     observe: function(subject, topic, data)
     {
       if (topic == "http-on-modify-request") 
       {
         var httpChannel = subject.QueryInterface(Components.interfaces.nsIHttpChannel);
-        //cancel iframe requests to priv.ly when requireClickthrough is set.
-        //cancel all requests to priv.ly when noRequests is set
-        if (privlySettings.noRequests == true || privlySettings.requireClickthrough == true)
+        //cancel iframe requests to priv.ly when extensionMode is set to 2.
+        //cancel all requests to priv.ly when extensionMode is set to 3
+        extensionMode = this.preferences.getIntPref("extensionMode");
+        
+        if (extensionMode == 3 || extensionMode == 2)
         {
           if ((/priv.ly/.test(httpChannel.originalURI.host) || (/localhost/.test(httpChannel.originalURI.host))))
           {
-            if(privlySettings.noRequests == true || (/.iframe/g).test(httpChannel.originalURI.path))
+            if(extensionMode == 3 || (/.iframe/g).test(httpChannel.originalURI.path))
             {
               subject.cancel(Components.results.NS_BINDING_ABORTED);
               convertIframesToLinks();
@@ -66,6 +71,8 @@ var privlyObservers =
   
   httpResponseObserver :
   {
+  	preferences : Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.privly."),
+  
     observe: function(subject, topic, data)
     {
       if (topic == "http-on-examine-response") {
@@ -77,14 +84,16 @@ var privlyObservers =
           
           if (/priv.ly/.test(httpChannel.originalURI.host) || (/localhost/.test(httpChannel.originalURI.host) && /posts/.test(httpChannel.originalURI.path)))
           { 
-            //the extensioncommand response header will be a json string. So far 3 params are identified.
-            //disableIframes and requireClickthrough are mutually exclusive. Only one should appear in the header string.
-            //eg - extensionCommand = '{"noRequests": 100,"disablePosts" : 200, requireClickthrough:110}';
+            /* the extensioncommand response header will be a json string. So far 3 params are identified.
+             * disableIframes and requireClickthrough are mutually exclusive. Only one should appear in the header string.
+             * eg - extensionCommand = '{"noRequests": 100,"disablePosts" : 200, requireClickthrough:110}';
+             */
             extensionCommand = '';
             var command = jQ.parseJSON(extensionCommand);
             if(command && command.noRequests){
-              privlySettings.noRequests = true;
-              setTimeout(function(){privlySettings.noRequests=false;},
+              //disable the extension. in the setTimeout function, enable the extension back.
+              this.preferences.setIntPref("extensionMode",3);
+              setTimeout(function(){this.preferences.setIntPref("extensionMode",0);},
                 command.noRequests);
             }
             if(command && command.disablePosts){
@@ -94,7 +103,12 @@ var privlyObservers =
             } 
             if(command && command.requireClickthrough){
               privlySettings.requireClickthrough = true;
-              setTimeout(function(){privlySettings.requireClickthrough=false;},
+              
+              /* set the extension mode to require-through. in the setTimeout function, set the
+               * mode back to active.
+               */
+              this.preferences.setIntPref("extensionMode",2);
+              setTimeout(function(){this.preferences.setIntPref("extensionMode",0);},
                 command.requireClickthrough);
             }
           }

@@ -1,33 +1,33 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 
-<prefwindow 
-     title="Privly Preferences"
-     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
- 
-  <prefpane label="Privly Preferences">
+<prefwindow title="Privly Preferences"
+xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	
+	<script src="options.js" />
+	<prefpane id="appPreferences" label="Privly - Preferences" onpaneload="privlyPrefPane.onPaneLoad(event);">
+	
+		<preferences>
+			<preference id="privly-mode" name="extensions.privly.extensionMode" type="int" instantApply="true" onchange="privlyPrefPane.updateMode();"/>
+			<preference id="privly-disable-post" name="extensions.privly.disablePosts" type="bool" instantApply="true" onchange="privlyPrefPane.updatePostMode();"/>
+		</preferences>
 
-    <preferences>
-      <preference id="privly-autorun" name="extensions.privly.autorun" type="bool"/>
-    </preferences>
-    
-    <groupbox>
-      <caption label="Settings"/>
-      <grid>
-        <columns>
-          <column flex="4"/>
-          <column flex="1"/>
-        </columns>
-        <rows>
-          <row>
-            <label control="autorun" value="Autorun"/>
-            <checkbox id="autorun" preference="privly-autorun"/>
-          </row>
-        </rows>
-      </grid>
-    </groupbox>
-
-  </prefpane>
+		<vbox>		
+			<groupbox>
+				<caption label="Extension Mode" />
+				<radiogroup id="mode"  preference="privly-mode">
+					<radio id="active" label="Active - Shows content from priv.ly on the page automatically" value="0"/>
+		  		<radio id="passive" label="Passive - Shows content from priv.ly on the page only when you click on the link" value="1"/>
+		  		<radio id="require-clickthrough" label="Require Clickthrough - Takes you to the corresponding priv.ly post on a new tab" value="2"/>
+		  		<radio id="disable" label="Disabled" value="3"/>
+				</radiogroup>
+  		</groupbox>
+  		<groupbox>
+				<checkbox id="disable-post" label="Disable extension from posting to content to priv.ly" checked="false"  preference="privly-disable-post"  />
+			</groupbox>
+		</vbox>
+		
+	</prefpane>
 
 </prefwindow>
-
+	
