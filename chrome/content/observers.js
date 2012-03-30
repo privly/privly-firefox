@@ -19,7 +19,7 @@ var privlyObservers =
   httpRequestObserver :
   {
   	preferences : Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.privly."),
-      
+
     observe: function(subject, topic, data)
     {
       if (topic == "http-on-modify-request") 
@@ -36,7 +36,7 @@ var privlyObservers =
             if(extensionMode == 3 || (/.iframe/g).test(httpChannel.originalURI.path))
             {
               subject.cancel(Components.results.NS_BINDING_ABORTED);
-              convertIframesToLinks();
+              privlyExtension.convertIframesToLinks();
             }
           }
         }

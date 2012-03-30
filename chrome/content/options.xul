@@ -9,7 +9,7 @@ xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	
 		<preferences>
 			<preference id="privly-mode" name="extensions.privly.extensionMode" type="int" instantApply="true" onchange="privlyPrefPane.updateMode();"/>
-			<preference id="privly-disable-post" name="extensions.privly.disablePosts" type="bool" instantApply="true" onchange="privlyPrefPane.updatePostMode();"/>
+			<preference id="privly-disable-post" name="extensions.privly.disablePosts" type="bool" instantApply="true" onchange="privlyPrefPane.updatePostMode()"/>
 		</preferences>
 
 		<vbox>		

@@ -2,19 +2,70 @@ var privlyExtension =
 {
   //https://developer.mozilla.org/en/Code_snippets/Preferences#Where_the_default_values_are_read_from
   preferences : Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.privly."),
-
+  
+  extensionModeEnum : {
+    ACTIVE : 0,
+    PASSIVE : 1,
+    CLICKTHROUGH : 2,
+    DISABLED:3
+  },
+  /*
+  getExtensionVersion : function(){
+    var extensionVersion = "";
+      try{
+        //for firefox versions >= 4
+        Components.utils.import("resource://gre/modules/AddonManager.jsm");
+        AddonManager.getAddonByID("privly@priv.ly", function(addon) {
+          extensionVersion = addon['version'];
+        });
+      }
+      catch(ex){
+        //for firefox versions < 4
+        var gExtensionManager = Components.classes["@mozilla.org/extensions/manager;1"].getService(Components.interfaces.nsIExtensionManager);
+        extensionVersion = gExtensionManager.getItemForID("privly@priv.ly").version;
+      }
+      return extensionVersion;
+  },
+  */
   loadLibraries : function(evt)
   {
     var doc = evt.originalTarget;
     var wnd = doc.defaultView;
     var loader = Components.classes["@mozilla.org/moz/jssubscript-loader;1"].getService(Components.interfaces.mozIJSSubScriptLoader);
     preferences = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.privly.");
-    wnd.balExtensionMode =preferences.getIntPref("extensionMode");
     //load the script running on the host page
     if(doc.URL){
-      loader.loadSubScript("chrome://privly/content/privly.js", wnd);    
+      loader.loadSubScript("chrome://privly/content/privly.js", wnd); 
     }
   },
+  
+  installToolbarButton : function(){
+    var currentset = document.getElementById("nav-bar").currentSet;
+    currentset = currentset+",privly-tlbr-btn";
+    document.getElementById("nav-bar").setAttribute("currentset",currentset);
+    document.getElementById("nav-bar").currentSet = currentset;
+    document.persist("nav-bar","currentset");
+    var menu = document.getElementById("privly-tlbr-menu");
+    var tlbrbtn = document.getElementById("privly-tlbr-btn");
+    if(menu && tlbrbtn)
+      tlbrbtn.appendChild(menu);
+  },
+  
+  checkToolbarButton : function()
+  {
+    /*
+    version = privlyExtension.getExtensionVersion();
+    alert(version);
+    firstRun = "firstRun_v"+version;
+    alert(firstRun);
+    */
+    firstRun = "firstRunDone";
+    if(!this.preferences.prefHasUserValue(firstRun)){
+      setTimeout("privlyExtension.installToolbarButton()",2000);
+      this.preferences.setBoolPref(firstRun,false);
+    }
+  },
+  
   runPrivly : function()
   {
     var pwbutton = content.document.getElementById('pwbtn');
@@ -39,9 +90,7 @@ var privlyExtension =
             endpoint:"extension", browser:"firefox", version:"0.1.1.1"
           },
           type: "POST",
-          url: contentServerUrl+"/posts",
-          contentType: "application/x-www-form-urlencoded; charset=UTF-8", 
-          url: privlySettings.contentServerUrl+"/posts.json",
+          url: contentServerUrl+"/posts.json",
           contentType: "application/x-www-form-urlencoded; charset=UTF-8",
           dataType: "json",
           accepts: "json",
@@ -72,6 +121,7 @@ var privlyExtension =
         }
         else if(extensionMode == 2){
             anchor.innerHTML = "Privly is in sleep mode so it can catch up with demand. The content may still be viewable by clicking this link";
+            anchor.setAttribute('target','_blank');
         }
         privlyIframes[i].parentNode.replaceChild(anchor,privlyIframes[i]);
       }
@@ -127,7 +177,7 @@ var privlyExtension =
     if(extensionMode == 0){
       extensionMode = 1;
     }
-    else if(extensionMode == 1){
+    else if(extensionMode == 1 || extensionMode == 2){
       extensionMode = 0;
     }
     this.updateExtensionMode(extensionMode);
@@ -135,15 +185,21 @@ var privlyExtension =
   
   updateToolbarButtonIcon : function()
   {
-    privlyToolbarButton = document.getElementById('privly-tlbr');
+    privlyToolbarButton = document.getElementById('privly-tlbr-btn');
     extensionMode = this.preferences.getIntPref("extensionMode");
-    if(extensionMode == 0){
-      privlyToolbarButton.style.listStyleImage="url('chrome://privly/skin/logo_16.png')";
-      privlyToolbarButton.tooltipText="Privly is in active mode";
-    }
-    else if(extensionMode == 1){
-      privlyToolbarButton.style.listStyleImage="url('chrome://privly/skin/logo_16_dis.png')";
-      privlyToolbarButton.tooltipText="Privly is in passive mode";
+    if(privlyToolbarButton){
+      if(extensionMode == 0){
+        privlyToolbarButton.style.listStyleImage="url('chrome://privly/skin/logo_16.png')";
+        privlyToolbarButton.tooltipText="Privly is in active mode";
+      }
+      else if(extensionMode == 1){
+        privlyToolbarButton.style.listStyleImage="url('chrome://privly/skin/logo_16_dis.png')";
+        privlyToolbarButton.tooltipText="Privly is in passive mode";
+      }
+      else if(extensionMode == 2){
+        privlyToolbarButton.style.listStyleImage="url('chrome://privly/skin/logo_16_dis.png')";
+        privlyToolbarButton.tooltipText="Privly is in require-clickthrough mode";
+      }
     }
   },
   /* 
@@ -178,12 +234,16 @@ Components.classes["@mozilla.org/moz/jssubscript-loader;1"].getService(Component
 jQ = window.jQuery.noConflict();
 
 window.addEventListener("load", function (e){
+
   var appcontent = document.getElementById("appcontent");
   if( appcontent) {
     appcontent.addEventListener("DOMContentLoaded", privlyExtension.loadLibraries, true);
-    privlyExtension.updatePrivModeElement(); 
+    privlyExtension.updatePrivModeElement();
+    setTimeout("privlyExtension.checkToolbarButton()",3000); 
   }
+
 }, false);
+
 
 window.addEventListener("IframeResizeEvent", function(e) { privlyExtension.resizeIframe(e); }, false, true);
 window.addEventListener("contextmenu", function(e) { privlyExtension.checkContextForPrivly(e);}, false);

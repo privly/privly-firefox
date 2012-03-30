@@ -1,7 +1,7 @@
 var privlyPrefPane =
 {
   preferences : Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.privly."),
-
+  
   onPaneLoad : function(event)
   {
     //get the extensionmode from preferences if it was modified using the toolbar button
@@ -37,6 +37,11 @@ var privlyPrefPane =
       mode = 3;
     }
     this.preferences.setIntPref("extensionMode",mode);
-  }
-	
+  },
+  updatePostMode : function()
+	{
+	  if(document.getElementById('disable-post').checked == true){
+	    this.preferences.setBoolPref('disablePosts',true);
+	  }
+	}
 }

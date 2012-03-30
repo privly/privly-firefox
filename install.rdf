@@ -5,7 +5,7 @@
   <Description about="urn:mozilla:install-manifest">
     <em:id>privly@priv.ly</em:id>
     <em:name>Privly</em:name>
-    <em:version>0.1.5</em:version>
+    <em:version>0.1.7</em:version>
     <em:type>2</em:type>
     <em:creator>Sean McGregor</em:creator>
     <em:contributor>Balaji Athreya</em:contributor>

@@ -41,7 +41,7 @@ var privly = {
         domain = "http://" + domain;
     return domain;
   },
-
+  
   //Make plain text links into anchor elements
   createLinks: function() 
   {
