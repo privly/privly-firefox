@@ -196,12 +196,7 @@ var privly = {
           }
           else if(this.extensionMode == 1){
             a.innerHTML = 'Privly is currently experiencing heavy traffic. Click here to see privly content';
-            a.onmousedown = function(event){
-              event.cancelBubble = true;
-              event.stopPropagation();
-              event.preventDefault();
-              privly.replaceLink(a);
-            };
+            privly.makePassive(a);
           }
           else if(this.extensionMode == 2){
             a.innerHTML = "Privly is in sleep mode so it can catch up with demand. The content may still be viewable by clicking this link";
