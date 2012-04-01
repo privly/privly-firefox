@@ -3,6 +3,14 @@ var privlyExtension =
   //https://developer.mozilla.org/en/Code_snippets/Preferences#Where_the_default_values_are_read_from
   preferences : Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.privly."),
   
+  //Matches:
+  //              http://
+  //              https://
+  //                        priv.ly/textAndNumbers/any/number/of/times
+  //                                                                          
+  //also matches localhost:3000
+  privlyReferencesRegex: /\b(https?:\/\/){0,1}(priv\.ly|localhost:3000)(\/posts)(\/\w*){1,}\b/gi,
+
   extensionModeEnum : {
     ACTIVE : 0,
     PASSIVE : 1,
