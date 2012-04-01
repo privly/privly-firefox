@@ -200,23 +200,48 @@ var privlyExtension =
         privlyToolbarButton.style.listStyleImage="url('chrome://privly/skin/logo_16_dis.png')";
         privlyToolbarButton.tooltipText="Privly is in require-clickthrough mode";
       }
+      else if(extensionMode == 3){
+        privlyToolbarButton.style.listStyleImage="url('chrome://privly/skin/logo_16_dis.png')";
+        privlyToolbarButton.tooltipText="Privly is disabled.";
+      }
     }
   },
+  
   /* 
-   * inserts a 'privModeElement' with an attribute - 'mode'
+   * inserts a 'privModeElement' with an attribute - 'mode' for
+   * a given document
+   */
+   insertPrivModeElement : function(doc){
+     elements = doc.getElementsByTagName("privModeElement");
+    if(elements != null && elements.length != 0){
+      elements[0].setAttribute("mode", extensionMode);
+    }
+    else{
+      element = doc.createElement("privModeElement");
+      element.setAttribute("mode", extensionMode);
+      doc.documentElement.appendChild(element);
+    } 
+   },
+  /*
+   * updates/inserts the privmodeelement in all iframes
+   * and host page
    */
   updatePrivModeElement : function()
   {
     this.updateToolbarButtonIcon();
     extensionMode = this.preferences.getIntPref("extensionMode");
-    elements = content.document.getElementsByTagName("privModeElement");
-    if(elements != null && elements.length != 0){
-      elements[0].setAttribute("mode", extensionMode);
-    }
-    else{
-      element = content.document.createElement("privModeElement");
-      element.setAttribute("mode", extensionMode);
-      content.document.documentElement.appendChild(element);
+    this.insertPrivModeElement(content.document);
+    iframes = content.document.getElementsByTagName('iframe');
+    if(iframes){
+      for(i in iframes){
+        iframe = iframes[i];
+        privlyExtension.privlyReferencesRegex.lastIndex = 0;
+        if(iframe.src && !privlyExtension.privlyReferencesRegex.test(iframe.src)){
+          if(iframe.contentDocument){
+            privlyExtension.insertPrivModeElement(iframe.contentDocument);
+          }
+        }
+      }
     }
   },
   /* updates the variable in preferences and alerts privly.js about the 
