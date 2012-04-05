@@ -2,7 +2,9 @@ h1. The Privly Protocol
 
 This document details the proof-of-concept (0.1) and working draft (1.0) versions of the Privly protocol-- a method for sharing private content via third-party websites without granting content access to the host page.
 
-Version 0.1 establishes the sharing backbone of the Privly system. It facilitates the private sharing of information, but not the secure sharing of information. Version 1.0 outlines the future development of the system with functionality for client-side cryptography. Version 2.0 is a teaser of future directions.
+Version 0.1 establishes the sharing backbone of the Privly system. It facilitates the private sharing of information, but not the secure sharing of information. Version 1.0 outlines the future development of the system with functionality for client-side cryptography. The principal contribution of Privly to date is a method for injecting content into any website. This is how we want to build on that success.
+
+This draft was prepared a while back and does not have all the sharing concepts we wish to implement, and all of the concepts need rigorous review and specification. This document is in a public repository so anyone can make it better, make your criticism known through improvement or tagging the threats to the sharing model in the document.
 
 h2. Preliminaries
 
@@ -13,6 +15,8 @@ h2. Version 0.1
 The Privly content server is built on a Rails application and follows RESTful principles unless otherwise noted. We assume a familiarity with RESTful principles in this document.
 
 h3. Authentication
+
+Authentication in a distributed setting needs reworking. This section is targeting a single web application install.
 
 Reading protected content and posting content to the server requires a user account, and user accounts are identified by appending all extension requests with an authentication token, "?auth_token=". The content server authenticates using the Rails gem "Devise":https://github.com/plataformatec/devise. "This page":https://priv.ly/token_authentications/new contains two forms that will return new authentication tokens for extensions. You can adapt these forms for your extension. Please note that generating a new token will invalidate your old token.
 
@@ -62,8 +66,6 @@ h3. https://priv.ly/distributed
 * Parameter: Content Host (example: contenthost.org/privly/####?optional_additional_auth=)
 
 # The extension checks the user preferences and the privacy status of contenthost.org
-# The extension decides which identities it will assert for the link and sends them to Privly
-# Privly signs the requested identities and a timestamp and returns the signature to the extension
 # The extension then requests the content from contenthost.org
 
 _______________________________________________
@@ -90,8 +92,6 @@ h3. https://priv.ly/distributed/cipher_text
 * Parameter: PGP Key
 
 # The extension checks the user preferences and the privacy status of contenthost.org
-# The extension decides which identities it will assert for the link and sends them to Privly
-# Privly signs the requested identities and a timestamp and returns the signature to the extension
 # The extension then requests the cipher text from contenthost.org
 # The extension decrypts the content according to the key on the url
 
@@ -101,8 +101,6 @@ h3. https://priv.ly/distributed/private_key
 * Parameter: Cipher Text
 
 # The extension checks the user preferences and the privacy status of keyhost.org
-# The extension decides which identities it will assert for the link and sends them to Privly
-# Privly signs the requested identities and a timestamp and returns the signature to the extension
 # The extension then requests the decryption key from keyhost.org
 # The extension decrypts the content according to the returned key
 
@@ -118,8 +116,6 @@ h3. https://priv.ly/separation
 * Parameter: Cipher Text Identifier
 
 # The extension checks the user preferences and the privacy status of contenthost.org and keyhost.org
-# The extension decides which identities it will assert for the key and/or content and sends them to Privly
-# Privly signs the requested identities and a timestamp and returns the signature to the extension
 # The extension then requests the decryption key from keyhost.org
 # The extension then requests the cipher text from contenthost.org
 # The extension decrypts the content according to the returned key
@@ -127,9 +123,9 @@ h3. https://priv.ly/separation
 _____________________________________
 LEVEL 2 Intermediaries Have no Access
 
-These links have secondary layer of encryption. Private keys are encrypted according to the public key for a user's encryption wallet. No one but the holder of the key for the wallet can access the clear text decryption keys. The procedures below all assume that the extension has checked out the encryption wallet and decrypted it on the extension.
+These links have secondary layer of encryption. Keys are encrypted according to the public key for a user's encryption wallet. No one but the holder of the key for the wallet can access the clear text decryption keys. The procedures below all assume that the extension has checked out the encryption wallet (from somewhere) and decrypted it on the extension.
 
-Sharing procedures in this level are more complex and require the generation of a group key (encrypted and sent to each member's wallet) or keys for every individual that the content is shared with. Sharing procedures will be finalized when the viewing procedures below are finalized. All content can still be viewed on the web server on this level if the user gives the server access to their private keys. Giving the remote server access to private keys is discouraged.
+Sharing procedures in this level are more complex and require encrypting the keys for each shared individual. Sharing procedures will be finalized when the viewing procedures below are finalized. All content can still be viewed on the web server on this level if the user gives the server access to their private keys and the link. Giving the remote server access to private keys is discouraged.
 
 h3. https://priv.ly/cipher_text/
 * Parameter: Post Identifier
@@ -150,8 +146,6 @@ h3. https://priv.ly/distributed/cipher_text
 
 # The extension attempts to decrypt the PGP key in the parameter
 # The extension checks the user preferences and the privacy status of contenthost.org
-# The extension decides which identities it will assert for the link and sends them to Privly
-# Privly signs the requested identities and a timestamp and returns the signature to the extension
 # The extension then requests the cipher text from contenthost.org
 # The extension decrypts the content according to the key on the url
 
@@ -161,8 +155,6 @@ h3. https://priv.ly/distributed/private_key
 * Parameter: Cipher Text
 
 # The extension checks the user preferences and the privacy status of keyhost.org
-# The extension decides which identities it will assert for the link and sends them to Privly
-# Privly signs the requested identities and a timestamp and returns the signature to the extension
 # The extension then requests the decryption key from keyhost.org
 # The extension decrypts the private key
 # The extension decrypts the content according to the decrypted private key
@@ -174,8 +166,6 @@ h3. https://priv.ly/separation
 * Parameter: Cipher Text Identifier
 
 # The extension checks the user preferences and the privacy status of contenthost.org and keyhost.org
-# The extension decides which identities it will assert for the key and/or content and sends them to Privly
-# Privly signs the requested identities and a timestamp and returns the signature to the extension
 # The extension then requests the decryption key from keyhost.org
 # The extension attempts to decrypt the decryption key
 # The extension then requests the cipher text from contenthost.org
