@@ -1,5 +1,5 @@
 /*******************************************************************************
-Open Source Initiative OSI - The MIT License (MIT):Licensing
+ Source Initiative OSI - The MIT License (MIT):Licensing
 [OSI Approved License]
 The MIT License (MIT)
 
@@ -169,8 +169,6 @@ var privly = {
   //Replace all Privly links with their iframe
   replaceLinks: function()
   {
-    var anchors = document.links;
-    var i = anchors.length;
     elements = document.getElementsByTagName("privModeElement");
     if(elements != null && elements.length != 0){
       this.extensionMode = elements[0].getAttribute('mode');
@@ -178,6 +176,9 @@ var privly = {
     else{
       this.extensionMode = 3;
     }
+    var anchors = document.links;
+    var i = anchors.length;
+
     while (--i >= 0){
       var a = anchors[i];
       this.privlyReferencesRegex.lastIndex = 0;
@@ -194,10 +195,12 @@ var privly = {
           }
           else if(this.extensionMode == 2){
             a.innerHTML = "Privly is in sleep mode so it can catch up with demand. The content may still be viewable by clicking this link";
+            a.setAttribute('target','_blank');
             a.removeEventListener("mousedown",privly.makePassive,true);
           }
           else if(this.extensionMode == 3){
             a.innerHTML = "Privly temporarily disabled all requests to its servers. Please try again later.";
+            a.removeAttribute('target');
             a.removeEventListener("mousedown",privly.makePassive,true);
           }
         }
@@ -220,7 +223,6 @@ var privly = {
   //indicates whether the extension shoud immediatly replace all Privly
   //links it encounters
   extensionMode: 0,
-  
   //prevents DOMNodeInserted from sending hundreds of extension runsmake
   runPending: false,
   
@@ -241,7 +243,7 @@ var privly = {
   //for dynamic pages
   listeners: function(){
     //don't recursively replace links
-    if(document.URL.indexOf('priv.ly') != -1 || document.URL.indexOf('localhost:3000') != -1)
+    if(typeof(document.URL) != 'undefined' && document.URL.indexOf('priv.ly') != -1 || document.URL.indexOf('localhost:3000') != -1)
       return;
       
     //The content's iframe will post a message to the hosting document. This listener sets the height 
@@ -254,7 +256,7 @@ var privly = {
         privly.runPending=false;
         privly.run();
       },
-      100);
+    100);
     
     //Everytime the page is updated via javascript, we have to check
     //for new Privly content. This might not be supported on other platforms

@@ -25,18 +25,17 @@ var privlyObservers =
       if (topic == "http-on-modify-request") 
       {
         var httpChannel = subject.QueryInterface(Components.interfaces.nsIHttpChannel);
+        
         //cancel iframe requests to priv.ly when extensionMode is set to 2.
         //cancel all requests to priv.ly when extensionMode is set to 3
         extensionMode = this.preferences.getIntPref("extensionMode");
-        
-        if (extensionMode == 3 || extensionMode == 2)
+        if (extensionMode == 3)
         {
           if ((/priv.ly/.test(httpChannel.originalURI.host) || (/localhost/.test(httpChannel.originalURI.host))))
           {
             if(extensionMode == 3 || (/.iframe/g).test(httpChannel.originalURI.path))
             {
               subject.cancel(Components.results.NS_BINDING_ABORTED);
-              privlyExtension.convertIframesToLinks();
             }
           }
         }
@@ -97,13 +96,11 @@ var privlyObservers =
                 command.noRequests);
             }
             if(command && command.disablePosts){
-              privlySettings.disablePosts = true;
-              setTimeout(function(){privlySettings.disablePosts=false;},
+              this.preferences.setBoolPref('disablePosts',true);
+              setTimeout(function(){this.preferences.setBoolPref('disablePosts',false);},
                 command.disablePosts);
             } 
-            if(command && command.requireClickthrough){
-              privlySettings.requireClickthrough = true;
-              
+            if(command && command.requireClickthrough){              
               /* set the extension mode to require-through. in the setTimeout function, set the
                * mode back to active.
                */
