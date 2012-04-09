@@ -35,6 +35,7 @@ var privlyExtension =
       return extensionVersion;
   },
   */
+  // legacy method. not used. TBD: to remove
   loadLibraries : function(evt)
   {
     var doc = evt.originalTarget;
@@ -53,10 +54,7 @@ var privlyExtension =
     document.getElementById("nav-bar").setAttribute("currentset",currentset);
     document.getElementById("nav-bar").currentSet = currentset;
     document.persist("nav-bar","currentset");
-    var menu = document.getElementById("privly-tlbr-menu");
     var tlbrbtn = document.getElementById("privly-tlbr-btn");
-    if(menu && tlbrbtn)
-      tlbrbtn.appendChild(menu);
   },
   
   checkToolbarButton : function()
@@ -186,6 +184,7 @@ var privlyExtension =
         privlyToolbarButton.style.listStyleImage="url('chrome://privly/skin/logo_16_dis.png')";
         privlyToolbarButton.tooltipText="Privly is disabled.";
       }
+      
     }
   },
   
@@ -253,6 +252,7 @@ var privlyExtension =
 Components.classes["@mozilla.org/moz/jssubscript-loader;1"].getService(Components.interfaces.mozIJSSubScriptLoader).loadSubScript("chrome://privly/content/jquery-1.7.1.min.js",window);
 jQ = window.jQuery.noConflict();
 
+// TBD : to remove this listener - this is taken care in gBrowser.addEventListener("load", function(event) ...
 window.addEventListener("load", function (e){
 
   var appcontent = document.getElementById("appcontent");
