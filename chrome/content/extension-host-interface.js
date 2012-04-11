@@ -3,6 +3,14 @@ var privlyExtension =
   //https://developer.mozilla.org/en/Code_snippets/Preferences#Where_the_default_values_are_read_from
   preferences : Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.privly."),
   
+  //Matches:
+  //              http://
+  //              https://
+  //                        priv.ly/textAndNumbers/any/number/of/times
+  //                                                                          
+  //also matches localhost:3000
+  privlyReferencesRegex: /\b(https?:\/\/){0,1}(priv\.ly|localhost:3000)(\/posts)(\/\w*){1,}\b/gi,
+
   extensionModeEnum : {
     ACTIVE : 0,
     PASSIVE : 1,
@@ -27,6 +35,7 @@ var privlyExtension =
       return extensionVersion;
   },
   */
+  // legacy method. not used. TBD: to remove
   loadLibraries : function(evt)
   {
     var doc = evt.originalTarget;
@@ -35,7 +44,7 @@ var privlyExtension =
     preferences = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.privly.");
     //load the script running on the host page
     if(doc.URL){
-      loader.loadSubScript("chrome://privly/content/privly.js", wnd); 
+      loader.loadSubScript("chrome://privly/content/privly.js", wnd);
     }
   },
   
@@ -45,10 +54,7 @@ var privlyExtension =
     document.getElementById("nav-bar").setAttribute("currentset",currentset);
     document.getElementById("nav-bar").currentSet = currentset;
     document.persist("nav-bar","currentset");
-    var menu = document.getElementById("privly-tlbr-menu");
     var tlbrbtn = document.getElementById("privly-tlbr-btn");
-    if(menu && tlbrbtn)
-      tlbrbtn.appendChild(menu);
   },
   
   checkToolbarButton : function()
@@ -99,32 +105,6 @@ var privlyExtension =
           }
         }
       );
-    }
-  },
-  
-  /*
-   *when the server is down/busy, this function is called to convert the privly iframes to anchors on the web page 
-   *depending upon the settings set in the extensionCommand header.
-   */
-  convertIframesToLinks : function()
-  {
-    var privlyIframes = content.document.getElementsByName("privlyiframe");
-    extensionMode = this.preferences.getIntPref("extensionMode");
-    if((extensionMode == 2 || extensionMode == 1) && privlyIframes != null && privlyIframes.length > 0){
-      for(var i = 0; i < privlyIframes.length; i++){
-        var anchor = content.document.createElement("a");
-        var href = privlyIframes[i].src;
-        href = href.substring(0,href.indexOf(".iframe"));
-        anchor.setAttribute('href',href);
-        if(extensionMode == 3){
-            anchor.innerHTML = "Privly temporarily disabled all requests to its servers. Please try again later.";
-        }
-        else if(extensionMode == 2){
-            anchor.innerHTML = "Privly is in sleep mode so it can catch up with demand. The content may still be viewable by clicking this link";
-            anchor.setAttribute('target','_blank');
-        }
-        privlyIframes[i].parentNode.replaceChild(anchor,privlyIframes[i]);
-      }
     }
   },
   
@@ -200,23 +180,62 @@ var privlyExtension =
         privlyToolbarButton.style.listStyleImage="url('chrome://privly/skin/logo_16_dis.png')";
         privlyToolbarButton.tooltipText="Privly is in require-clickthrough mode";
       }
+      else if(extensionMode == 3){
+        privlyToolbarButton.style.listStyleImage="url('chrome://privly/skin/logo_16_dis.png')";
+        privlyToolbarButton.tooltipText="Privly is disabled.";
+      }
+      
     }
   },
+  
   /* 
-   * inserts a 'privModeElement' with an attribute - 'mode'
+   * inserts a 'privModeElement' with an attribute - 'mode' for
+   * a given document
+   */
+   insertPrivModeElement : function(doc,extensionMode){
+     elements = doc.getElementsByTagName("privModeElement");
+    if(elements != null && elements.length != 0){
+      elements[0].setAttribute("mode", extensionMode);
+    }
+    else{
+      element = doc.createElement("privModeElement");
+      element.setAttribute("mode", extensionMode);
+      doc.documentElement.appendChild(element);
+    } 
+   },
+  /*
+   * updates/inserts the privmodeelement in all iframes
+   * and host page
    */
   updatePrivModeElement : function()
   {
     this.updateToolbarButtonIcon();
     extensionMode = this.preferences.getIntPref("extensionMode");
-    elements = content.document.getElementsByTagName("privModeElement");
-    if(elements != null && elements.length != 0){
-      elements[0].setAttribute("mode", extensionMode);
-    }
-    else{
-      element = content.document.createElement("privModeElement");
-      element.setAttribute("mode", extensionMode);
-      content.document.documentElement.appendChild(element);
+    this.insertPrivModeElement(content.document,extensionMode);
+    content.document.defaultView.onload = function(event){
+      iframes = content.document.getElementsByTagName('iframe');
+      if(iframes){
+        for(i in iframes){
+          iframe = iframes[i];
+          if(iframe){
+            if(iframe.contentDocument.readyState == 'complete'){
+              privlyExtension.privlyReferencesRegex.lastIndex = 0;
+                if(iframe.src && !privlyExtension.privlyReferencesRegex.test(iframe.src)){
+                  privlyExtension.insertPrivModeElement(iframe.contentDocument,extensionMode);
+                }
+            }
+            else{
+              iframe.contentDocument.defaultView.onload = function(event){
+                privlyExtension.privlyReferencesRegex.lastIndex = 0;
+                if(iframe.src && !privlyExtension.privlyReferencesRegex.test(iframe.src)){
+                  privlyExtension.insertPrivModeElement(iframe.contentDocument,extensionMode);
+                }
+              }
+            }
+            
+          }
+        }
+      }
     }
   },
   /* updates the variable in preferences and alerts privly.js about the 
@@ -233,15 +252,17 @@ var privlyExtension =
 Components.classes["@mozilla.org/moz/jssubscript-loader;1"].getService(Components.interfaces.mozIJSSubScriptLoader).loadSubScript("chrome://privly/content/jquery-1.7.1.min.js",window);
 jQ = window.jQuery.noConflict();
 
+// TBD : to remove this listener - this is taken care in gBrowser.addEventListener("load", function(event) ...
 window.addEventListener("load", function (e){
 
   var appcontent = document.getElementById("appcontent");
   if( appcontent) {
+  /*
     appcontent.addEventListener("DOMContentLoaded", privlyExtension.loadLibraries, true);
     privlyExtension.updatePrivModeElement();
-    setTimeout("privlyExtension.checkToolbarButton()",3000); 
+    setTimeout("privlyExtension.checkToolbarButton()",3000);
+    */ 
   }
-
 }, false);
 
 
@@ -255,11 +276,22 @@ window.addEventListener("contextmenu", function(e) { privlyExtension.checkContex
  */
 gBrowser.addEventListener("select", function(event){
   privlyExtension.updatePrivModeElement();
-}, false);
+}, true);
 
 gBrowser.addEventListener("load", function(event){
-  if ((event.originalTarget.nodeName == '#document') && 
-    (event.originalTarget.defaultView.location.href == gBrowser.currentURI.spec)){
+    var doc = event.originalTarget;
+    var wnd = doc.defaultView;
+    var loader = Components.classes["@mozilla.org/moz/jssubscript-loader;1"].getService(Components.interfaces.mozIJSSubScriptLoader);
+    //load the script running on the host page
+    
+    if (doc.nodeName == '#document'){
+      extensionMode = privlyExtension.preferences.getIntPref("extensionMode");
+      privlyExtension.insertPrivModeElement(doc,extensionMode);
+      loader.loadSubScript("chrome://privly/content/privly.js", wnd);
+    }
+  if ((doc.nodeName == '#document') && (wnd.location.href == gBrowser.currentURI.spec)){
+      setTimeout("privlyExtension.checkToolbarButton()",3000); 
       privlyExtension.updatePrivModeElement();
     }
+    
 }, true);
