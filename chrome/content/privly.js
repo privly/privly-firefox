@@ -1,5 +1,5 @@
 /*******************************************************************************
-Open Source Initiative OSI - The MIT License (MIT):Licensing
+ Source Initiative OSI - The MIT License (MIT):Licensing
 [OSI Approved License]
 The MIT License (MIT)
 
@@ -94,18 +94,14 @@ var privly = {
           }
       }
   },
-
   //Kill default link behaviour on Privly Links
-  makePassive: function(anchor) 
-  {    
+  makePassive: function(e) 
+  {
     //Preventing the default link behavior
-    anchor.addEventListener("mousedown", function(e){
-        e.cancelBubble = true;
-        e.stopPropagation();
-        e.preventDefault();
-        privly.replaceLink(anchor);
-      }, 
-      true);
+    e.cancelBubble = true;
+    e.stopPropagation();
+    e.preventDefault();
+    privly.replaceLink(e.target);
   },
   
   //Checks link attributes and text for privly links without the proper href attribute.
@@ -149,41 +145,40 @@ var privly = {
   // Replace an anchor element with its referenced content.
   replaceLink: function(object) 
   {
-    var iFrame = document.createElement('iframe');
-    iFrame.setAttribute("frameborder","0");
-    iFrame.setAttribute("vspace","0");
-    iFrame.setAttribute("hspace","0");
-    iFrame.setAttribute("name","privlyiframe");
-    iFrame.setAttribute("width","100%");
-    iFrame.setAttribute("marginwidth","0");
-    iFrame.setAttribute("marginheight","0");
-    iFrame.setAttribute("height","1px");
-    iFrame.setAttribute("src",object.href + ".iframe?frame_id=" + privly.nextAvailableFrameID);
-    iFrame.setAttribute("id","ifrm"+privly.nextAvailableFrameID);
-    iFrame.setAttribute("frameborder","0");
-    privly.nextAvailableFrameID++;
-    iFrame.setAttribute("style","width: 100%; height: 32px; overflow: hidden;");
-    iFrame.setAttribute("scrolling","no");
-    iFrame.setAttribute("overflow","hidden");
-    
-    object.parentNode.replaceChild(iFrame, object);
+    if(object.parentNode != null){
+      var iFrame = document.createElement('iframe');
+      iFrame.setAttribute("frameborder","0");
+      iFrame.setAttribute("vspace","0");
+      iFrame.setAttribute("hspace","0");
+      iFrame.setAttribute("name","privlyiframe");
+      iFrame.setAttribute("width","100%");
+      iFrame.setAttribute("marginwidth","0");
+      iFrame.setAttribute("marginheight","0");
+      iFrame.setAttribute("height","1px");
+      iFrame.setAttribute("src",object.href + ".iframe?frame_id=" + privly.nextAvailableFrameID);
+      iFrame.setAttribute("id","ifrm"+privly.nextAvailableFrameID);
+      iFrame.setAttribute("frameborder","0");
+      privly.nextAvailableFrameID++;
+      iFrame.setAttribute("style","width: 100%; height: 32px; overflow: hidden;");
+      iFrame.setAttribute("scrolling","no");
+      iFrame.setAttribute("overflow","hidden");
+      object.parentNode.replaceChild(iFrame, object);
+    }
   },
-
+  
   //Replace all Privly links with their iframe
   replaceLinks: function()
   {
-    var anchors = document.links;
-    var i = anchors.length;
     elements = document.getElementsByTagName("privModeElement");
     if(elements != null && elements.length != 0){
       this.extensionMode = elements[0].getAttribute('mode');
     }
     else{
-      /* if there is no privModeElement tag in DOM, then the extension is probably
-      * disabled. so set the mode accordingly.
-      */
       this.extensionMode = 3;
     }
+    var anchors = document.links;
+    var i = anchors.length;
+
     while (--i >= 0){
       var a = anchors[i];
       this.privlyReferencesRegex.lastIndex = 0;
@@ -196,13 +191,17 @@ var privly = {
           }
           else if(this.extensionMode == 1){
             a.innerHTML = 'Privly is currently experiencing heavy traffic. Click here to see privly content';
-            privly.makePassive(a);
+            a.addEventListener("mousedown",privly.makePassive,true);
           }
           else if(this.extensionMode == 2){
             a.innerHTML = "Privly is in sleep mode so it can catch up with demand. The content may still be viewable by clicking this link";
+            a.setAttribute('target','_blank');
+            a.removeEventListener("mousedown",privly.makePassive,true);
           }
           else if(this.extensionMode == 3){
             a.innerHTML = "Privly temporarily disabled all requests to its servers. Please try again later.";
+            a.removeAttribute('target');
+            a.removeEventListener("mousedown",privly.makePassive,true);
           }
         }
       }
@@ -224,8 +223,7 @@ var privly = {
   //indicates whether the extension shoud immediatly replace all Privly
   //links it encounters
   extensionMode: 0,
-  
-  //prevents DOMNodeInserted from sending hundreds of extension runs
+  //prevents DOMNodeInserted from sending hundreds of extension runsmake
   runPending: false,
   
   //prep the page and replace the links if it is in active mode
@@ -245,7 +243,7 @@ var privly = {
   //for dynamic pages
   listeners: function(){
     //don't recursively replace links
-    if(document.URL.indexOf('priv.ly') != -1 || document.URL.indexOf('localhost:3000') != -1)
+    if(typeof(document.URL) != 'undefined' && document.URL.indexOf('priv.ly') != -1 || document.URL.indexOf('localhost:3000') != -1)
       return;
       
     //The content's iframe will post a message to the hosting document. This listener sets the height 
@@ -258,7 +256,7 @@ var privly = {
         privly.runPending=false;
         privly.run();
       },
-      100);
+    100);
     
     //Everytime the page is updated via javascript, we have to check
     //for new Privly content. This might not be supported on other platforms
