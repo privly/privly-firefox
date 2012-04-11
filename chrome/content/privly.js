@@ -190,7 +190,7 @@ var privly = {
             this.replaceLink(a);
           }
           else if(this.extensionMode == 1){
-            a.innerHTML = 'Privly is currently experiencing heavy traffic. Click here to see privly content';
+            a.innerHTML = 'Read in Place';
             a.addEventListener("mousedown",privly.makePassive,true);
           }
           else if(this.extensionMode == 2){
