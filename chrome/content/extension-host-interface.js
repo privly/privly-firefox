@@ -11,43 +11,17 @@ var privlyExtension =
   //also matches localhost:3000
   privlyReferencesRegex: /\b(https?:\/\/){0,1}(priv\.ly|localhost:3000)(\/posts)(\/\w*){1,}\b/gi,
 
+  /*
+   * enum to hold various extension modes and their value. extension modes are set through firefox's
+   * extension api. https://developer.mozilla.org/en/Code_snippets/Preferences
+   */ 
   extensionModeEnum : {
     ACTIVE : 0,
     PASSIVE : 1,
-    CLICKTHROUGH : 2,
-    DISABLED:3
-  },
-  /*
-  getExtensionVersion : function(){
-    var extensionVersion = "";
-      try{
-        //for firefox versions >= 4
-        Components.utils.import("resource://gre/modules/AddonManager.jsm");
-        AddonManager.getAddonByID("privly@priv.ly", function(addon) {
-          extensionVersion = addon['version'];
-        });
-      }
-      catch(ex){
-        //for firefox versions < 4
-        var gExtensionManager = Components.classes["@mozilla.org/extensions/manager;1"].getService(Components.interfaces.nsIExtensionManager);
-        extensionVersion = gExtensionManager.getItemForID("privly@priv.ly").version;
-      }
-      return extensionVersion;
-  },
-  */
-  // legacy method. not used. TBD: to remove
-  loadLibraries : function(evt)
-  {
-    var doc = evt.originalTarget;
-    var wnd = doc.defaultView;
-    var loader = Components.classes["@mozilla.org/moz/jssubscript-loader;1"].getService(Components.interfaces.mozIJSSubScriptLoader);
-    preferences = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.privly.");
-    //load the script running on the host page
-    if(doc.URL){
-      loader.loadSubScript("chrome://privly/content/privly.js", wnd);
-    }
+    CLICKTHROUGH : 2
   },
   
+  // installs toolbar button in the navigation bar
   installToolbarButton : function(){
     var currentset = document.getElementById("nav-bar").currentSet;
     currentset = currentset+",privly-tlbr-btn";
@@ -56,22 +30,21 @@ var privlyExtension =
     document.persist("nav-bar","currentset");
     var tlbrbtn = document.getElementById("privly-tlbr-btn");
   },
-  
+ 
+  /* 
+   * checks if toolbar button is installed or not. This function is called only once
+   * immediately after the extension is installed
+   */
   checkToolbarButton : function()
   {
-    /*
-    version = privlyExtension.getExtensionVersion();
-    alert(version);
-    firstRun = "firstRun_v"+version;
-    alert(firstRun);
-    */
     firstRun = "firstRunDone";
     if(!this.preferences.prefHasUserValue(firstRun)){
       setTimeout("privlyExtension.installToolbarButton()",2000);
-      this.preferences.setBoolPref(firstRun,false);
+      this.preferences.setBoolPref(firstRun,true);
     }
   },
   
+  // function called when the user uses ctrl+alt+P - executes runPrivly function in privly.js
   runPrivly : function()
   {
     var pwbutton = content.document.getElementById('pwbtn');
@@ -79,12 +52,17 @@ var privlyExtension =
       pwbutton.click();
   },
   
+  /* 
+   * function that posts content to privly's content server with the data in the 
+   * 'form' html element
+   */
   postToPrivly : function(privacySetting)
   {
     var target = document.popupNode;
     var value = target.value;
     var allPostsPublic = this.preferences.getBoolPref("allPostsPublic");
     var contentServerUrl = this.preferences.getCharPref("contentServerUrl");
+    // the post can be either public or private (shared only with specific users)
     var postPrivacySetting = allPostsPublic || (privacySetting == 'public');
     if(value == "")
       alert("Sorry. You can not post empty content to Privly");
@@ -120,13 +98,18 @@ var privlyExtension =
     //ifr.style.height = iframeHeight+'px';
   },
   
+  /* 
+   * function that gets called when the user right-clicks and opens the context menu.
+   * this function determines options to be shown in the content menu based on whether
+   * the user is signed in or not.
+   */
   checkContextForPrivly : function(evt)
   {
     var loginToPrivlyMenuItem = document.getElementById('loginToPrivlyMenuItem'); 
     var logoutFromPrivlyMenuItem = document.getElementById('logoutFromPrivlyMenuItem');   
     var publicPostToPrivlyMenuItem = document.getElementById('publicPostToPrivlyMenuItem');
     var privatePostToPrivlyMenuItem = document.getElementById('privatePostToPrivlyMenuItem');
-  
+    //check if the user is signed in
     if(privlyAuthentication.authToken)
     {
       loginToPrivlyMenuItem.hidden = true;
@@ -150,47 +133,49 @@ var privlyExtension =
       privatePostToPrivlyMenuItem.hidden = true;
     }
   },
+  
   //toggle extension mode when toolbar button is clicked
   toggleExtensionMode : function()
   {
     extensionMode = this.preferences.getIntPref("extensionMode");
-    if(extensionMode == 0){
-      extensionMode = 1;
+    //when the extension is in active mode and user clicks the toolbar button toggle to passive mode
+    if(extensionMode == privlyExtension.extensionModeEnum.ACTIVE){
+      extensionMode = privlyExtension.extensionModeEnum.PASSIVE;
     }
-    else if(extensionMode == 1 || extensionMode == 2){
-      extensionMode = 0;
+    //when the extension is in either click through or passive mode and user clicks the toolbar button toggle to active mode
+    else if(extensionMode == privlyExtension.extensionModeEnum.PASSIVE || extensionMode == privlyExtension.extensionModeEnum.CLICKTHROUGH){
+      extensionMode = privlyExtension.extensionModeEnum.ACTIVE;
     }
     this.updateExtensionMode(extensionMode);
   },
-  
+ 
+  /*
+   * update the toolbar button's image and tool tip based on the new extension mode
+   * after the user updates it.
+   */
   updateToolbarButtonIcon : function()
   {
     privlyToolbarButton = document.getElementById('privly-tlbr-btn');
     extensionMode = this.preferences.getIntPref("extensionMode");
     if(privlyToolbarButton){
-      if(extensionMode == 0){
+      if(extensionMode == privlyExtension.extensionModeEnum.ACTIVE){
         privlyToolbarButton.style.listStyleImage="url('chrome://privly/skin/logo_16.png')";
         privlyToolbarButton.tooltipText="Privly is in active mode";
       }
-      else if(extensionMode == 1){
+      else if(extensionMode == privlyExtension.extensionModeEnum.PASSIVE){
         privlyToolbarButton.style.listStyleImage="url('chrome://privly/skin/logo_16_dis.png')";
         privlyToolbarButton.tooltipText="Privly is in passive mode";
       }
-      else if(extensionMode == 2){
+      else if(extensionMode == privlyExtension.extensionModeEnum.CLICKTHROUGH){
         privlyToolbarButton.style.listStyleImage="url('chrome://privly/skin/logo_16_dis.png')";
         privlyToolbarButton.tooltipText="Privly is in require-clickthrough mode";
       }
-      else if(extensionMode == 3){
-        privlyToolbarButton.style.listStyleImage="url('chrome://privly/skin/logo_16_dis.png')";
-        privlyToolbarButton.tooltipText="Privly is disabled.";
-      }
-      
     }
   },
   
   /* 
-   * inserts a 'privModeElement' with an attribute - 'mode' for
-   * a given document
+   * inserts an html element - 'privModeElement' with an attribute - 'mode' for
+   * a given document object
    */
    insertPrivModeElement : function(doc,extensionMode){
      elements = doc.getElementsByTagName("privModeElement");
@@ -201,32 +186,39 @@ var privlyExtension =
       element = doc.createElement("privModeElement");
       element.setAttribute("mode", extensionMode);
       doc.documentElement.appendChild(element);
-    } 
+    }
    },
   /*
-   * updates/inserts the privmodeelement in all iframes
-   * and host page
+   * inserts/updates the html element - 'privModeElement' with mode attribute 
+   * on the host page and all iframes
    */
   updatePrivModeElement : function()
   {
     this.updateToolbarButtonIcon();
     extensionMode = this.preferences.getIntPref("extensionMode");
     this.insertPrivModeElement(content.document,extensionMode);
+    //when the host page is done loading
     content.document.defaultView.onload = function(event){
+      //get all iframes on the hostpage.
       iframes = content.document.getElementsByTagName('iframe');
       if(iframes){
+        //loop through each iframe in the host page
         for(i in iframes){
           iframe = iframes[i];
           if(iframe){
+            // if the iframe is done loading, insert the privModeElement into its DOM
             if(iframe.contentDocument.readyState == 'complete'){
               privlyExtension.privlyReferencesRegex.lastIndex = 0;
-                if(iframe.src && !privlyExtension.privlyReferencesRegex.test(iframe.src)){
-                  privlyExtension.insertPrivModeElement(iframe.contentDocument,extensionMode);
-                }
+              // test if the iframe is not one of our own iframes from priv.ly or locahost:3000
+              if(iframe.src && !privlyExtension.privlyReferencesRegex.test(iframe.src)){
+                privlyExtension.insertPrivModeElement(iframe.contentDocument,extensionMode);
+              }
             }
+            // else, insert the privModeElement into the iframe's DOM once it is loaded
             else{
               iframe.contentDocument.defaultView.onload = function(event){
                 privlyExtension.privlyReferencesRegex.lastIndex = 0;
+                // test if the iframe is not one of our own iframes from priv.ly or locahost:3000
                 if(iframe.src && !privlyExtension.privlyReferencesRegex.test(iframe.src)){
                   privlyExtension.insertPrivModeElement(iframe.contentDocument,extensionMode);
                 }
@@ -238,10 +230,7 @@ var privlyExtension =
       }
     }
   },
-  /* updates the variable in preferences and alerts privly.js about the 
-   * change. privly.js updates its 'active' variable
-   * accordingly.
-   */
+  
   updateExtensionMode : function(extensionMode)
   {
     this.preferences.setIntPref("extensionMode",extensionMode);
@@ -251,20 +240,6 @@ var privlyExtension =
 
 Components.classes["@mozilla.org/moz/jssubscript-loader;1"].getService(Components.interfaces.mozIJSSubScriptLoader).loadSubScript("chrome://privly/content/jquery-1.7.1.min.js",window);
 jQ = window.jQuery.noConflict();
-
-// TBD : to remove this listener - this is taken care in gBrowser.addEventListener("load", function(event) ...
-window.addEventListener("load", function (e){
-
-  var appcontent = document.getElementById("appcontent");
-  if( appcontent) {
-  /*
-    appcontent.addEventListener("DOMContentLoaded", privlyExtension.loadLibraries, true);
-    privlyExtension.updatePrivModeElement();
-    setTimeout("privlyExtension.checkToolbarButton()",3000);
-    */ 
-  }
-}, false);
-
 
 window.addEventListener("IframeResizeEvent", function(e) { privlyExtension.resizeIframe(e); }, false, true);
 window.addEventListener("contextmenu", function(e) { privlyExtension.checkContextForPrivly(e);}, false);
@@ -282,7 +257,7 @@ gBrowser.addEventListener("load", function(event){
     var doc = event.originalTarget;
     var wnd = doc.defaultView;
     var loader = Components.classes["@mozilla.org/moz/jssubscript-loader;1"].getService(Components.interfaces.mozIJSSubScriptLoader);
-    //load the script running on the host page
+    //load privly.js to all the doms on the host page including iframes
     
     if (doc.nodeName == '#document'){
       extensionMode = privlyExtension.preferences.getIntPref("extensionMode");

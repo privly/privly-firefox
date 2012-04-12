@@ -2,22 +2,25 @@ var privlyPrefPane =
 {
   preferences : Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.privly."),
   
+  extensionModeEnum : {
+    ACTIVE : 0,
+    PASSIVE : 1,
+    CLICKTHROUGH : 2
+  },
+  
   onPaneLoad : function(event)
   {
     //get the extensionmode from preferences if it was modified using the toolbar button
     extensionMode = this.preferences.getIntPref("extensionMode");
     //update the radio buttons to reflect the changes.
-    if(extensionMode == 0){
+    if(extensionMode == privlyPrefPane.extensionModeEnum.ACTIVE){
       document.getElementById('active').selected = true;
     }
-    else if(extensionMode == 1){
+    else if(extensionMode == privlyPrefPane.extensionModeEnum.PASSIVE){
       document.getElementById('passive').selected = true;
     }
-    else if(extensionMode == 2){
+    else if(extensionMode == privlyPrefPane.extensionModeEnum.CLICKTHROUGH){
       document.getElementById('require-clickthrough').selected = true;
-    }
-    else if(extensionMode == 3){
-      document.getElementById('disable').selected = true;
     }
      //get the disable post option from preferences and update the checkbox 
     document.getElementById('disable-post').checked = this.preferences.getBoolPref("disablePosts");
@@ -25,16 +28,13 @@ var privlyPrefPane =
   updateMode : function()
   {
     if(document.getElementById('active').selected == true){
-      mode = 0;
+      mode = privlyPrefPane.extensionModeEnum.ACTIVE;
     }
     else if(document.getElementById('passive').selected == true){
-      mode = 1;
+      mode = privlyPrefPane.extensionModeEnum.PASSIVE;
     }
     else if(document.getElementById('require-clickthrough').selected == true){
-      mode = 2;
-    }
-    else if(document.getElementById('disable').selected == true){
-      mode = 3;
+      mode = privlyPrefPane.extensionModeEnum.CLICKTHROUGH;
     }
     this.preferences.setIntPref("extensionMode",mode);
   },
