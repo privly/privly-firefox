@@ -1,5 +1,5 @@
 /*******************************************************************************
- Source Initiative OSI - The MIT License (MIT):Licensing
+Open Source Initiative OSI - The MIT License (MIT):Licensing
 [OSI Approved License]
 The MIT License (MIT)
 
@@ -32,6 +32,16 @@ var privly = {
   //                                                                          
   //also matches localhost:3000
   privlyReferencesRegex: /\b(https?:\/\/){0,1}(priv\.ly|localhost:3000)(\/posts)(\/\w*){1,}\b/gi,
+  
+  /*
+   * enum to hold various extension modes and their value. extension modes are set through firefox's
+   * extension api. https://developer.mozilla.org/en/Code_snippets/Preferences
+   */ 
+  extensionModeEnum : {
+    ACTIVE : 0,
+    PASSIVE : 1,
+    CLICKTHROUGH : 2
+  },
   
   // Takes a domain with an optional http(s) in front and returns a fully formed domain name
   makeHref: function(domain)
@@ -173,9 +183,6 @@ var privly = {
     if(elements != null && elements.length != 0){
       this.extensionMode = elements[0].getAttribute('mode');
     }
-    else{
-      this.extensionMode = 3;
-    }
     var anchors = document.links;
     var i = anchors.length;
 
@@ -186,21 +193,16 @@ var privly = {
       {
       	var exclude = a.getAttribute("privly");
         if(exclude == null || exclude != "exclude"){
-          if(this.extensionMode == 0){
+          if(this.extensionMode == privly.extensionModeEnum.ACTIVE){
             this.replaceLink(a);
           }
-          else if(this.extensionMode == 1){
+          else if(this.extensionMode == privly.extensionModeEnum.PASSIVE){
             a.innerHTML = 'Read in Place';
             a.addEventListener("mousedown",privly.makePassive,true);
           }
-          else if(this.extensionMode == 2){
+          else if(this.extensionMode == privly.extensionModeEnum.CLICKTHROUGH){
             a.innerHTML = "Privly is in sleep mode so it can catch up with demand. The content may still be viewable by clicking this link";
             a.setAttribute('target','_blank');
-            a.removeEventListener("mousedown",privly.makePassive,true);
-          }
-          else if(this.extensionMode == 3){
-            a.innerHTML = "Privly temporarily disabled all requests to its servers. Please try again later.";
-            a.removeAttribute('target');
             a.removeEventListener("mousedown",privly.makePassive,true);
           }
         }
@@ -213,7 +215,7 @@ var privly = {
     
     if(message.origin !== "https://priv.ly" && message.origin !== "http://localhost:3000")
       return;
-    
+      
     var data = message.data.split(",");
     
     var iframe = document.getElementById("ifrm"+data[0]);
@@ -249,7 +251,6 @@ var privly = {
     //The content's iframe will post a message to the hosting document. This listener sets the height 
     //of the iframe according to the messaged height
     window.addEventListener("message", privly.resizeIframe, false, true);
-    
     privly.runPending=true;
     setTimeout(
       function(){
