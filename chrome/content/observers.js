@@ -1,5 +1,5 @@
 // The request observer sets headers to authenticate the user, and 
-// identify the extension. The headers are only set on requests
+// identify the extension to the server. The headers are only set on requests
 // to priv.ly or the localhost. 
 //
 // The response observer checks whether localhost or priv.ly
@@ -16,38 +16,52 @@
 var privlyObservers = 
 {
     
+  /*
+   * enum to hold various extension modes and their value. extension modes 
+   * are set through firefox's extension api.
+   * https://developer.mozilla.org/en/Code_snippets/Preferences
+   */ 
+  extensionModeEnum : {
+    ACTIVE : 0,
+    PASSIVE : 1,
+    CLICKTHROUGH : 2
+  },
+  
   httpRequestObserver :
   {
-  	preferences : Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.privly."),
+    // get the prefrences data where extension mode is stored
+    preferences : Components.classes["@mozilla.org/preferences-service;1"]
+      .getService(Components.interfaces.nsIPrefService)
+      .getBranch("extensions.privly."),
 
     observe: function(subject, topic, data)
     {
       if (topic == "http-on-modify-request") 
       {
-        var httpChannel = subject.QueryInterface(Components.interfaces.nsIHttpChannel);
+        var httpChannel = subject.QueryInterface(Components.interfaces
+                                                           .nsIHttpChannel);
         
-        //cancel iframe requests to priv.ly when extensionMode is set to 2.
-        //cancel all requests to priv.ly when extensionMode is set to 3
+        /* 
+         * set the extension version and auth_token param on the request headers
+         * the content server uses this authToken to identify a specific user.
+         * TBD: 
+         * 1. version number is hardcoded. write a function to retrieve the 
+         * extension version number automatically
+         * 2. use a regex to match the content server url to eliminate the 
+         * if-else
+         */
         extensionMode = this.preferences.getIntPref("extensionMode");
-        if (extensionMode == 3)
-        {
-          if ((/priv.ly/.test(httpChannel.originalURI.host) || (/localhost/.test(httpChannel.originalURI.host))))
-          {
-            if(extensionMode == 3 || (/.iframe/g).test(httpChannel.originalURI.path))
-            {
-              subject.cancel(Components.results.NS_BINDING_ABORTED);
-            }
-          }
-        }
         if (/priv.ly/.test(httpChannel.originalURI.host))
         {
-          httpChannel.setRequestHeader("Privly-Version", "0.1.2", false);
-          httpChannel.setRequestHeader("auth_token", privlyAuthentication.authToken, false);
+          httpChannel.setRequestHeader("Privly-Version", "0.1.7", false);
+          httpChannel.setRequestHeader("auth_token", 
+                                        privlyAuthentication.authToken, false);
         }
         else if(/localhost/.test(httpChannel.originalURI.host))
         {
-          httpChannel.setRequestHeader("Privly-Version", "0.1.2", false);
-          httpChannel.setRequestHeader("auth_token", privlyAuthentication.authToken, false);
+          httpChannel.setRequestHeader("Privly-Version", "0.1.7", false);
+          httpChannel.setRequestHeader("auth_token", 
+                                        privlyAuthentication.authToken, false);
         }
       }
     },
@@ -67,46 +81,75 @@ var privlyObservers =
       this.observerService.removeObserver(this, "http-on-modify-request");
     }
   },
-  
+  /* 
+   * the content server can set the extension to any one of the three modes.
+   * it can do so by setting a header in the response header called 
+   * 'privlyExtensionCommand'.
+   * in responseObserver, we read this header value and set the extension mode
+   * accordingly
+   */
   httpResponseObserver :
   {
-  	preferences : Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.privly."),
-  
+    preferences : Components.classes["@mozilla.org/preferences-service;1"]
+                            .getService(Components.interfaces.nsIPrefService)
+                            .getBranch("extensions.privly."),
+                            
     observe: function(subject, topic, data)
     {
       if (topic == "http-on-examine-response") {
-        var httpChannel = subject.QueryInterface(Components.interfaces.nsIHttpChannel);
-        //read the extensionCommand header from the response. if the response header is not set or the server 
-        //didn't reply, it will throw an error. so catch it
+        var httpChannel = subject.QueryInterface(Components
+                                                .interfaces.nsIHttpChannel);
+        /*
+         * read the extensionCommand header from the response.
+         * if the response header is not set or the server
+         * didn't reply, it will throw an error. so catch it
+         */
         try{
-          var extensionCommand = httpChannel.getResponseHeader("privlyExtensionCommand");
+          var extensionCommand = httpChannel.
+                                  getResponseHeader("privlyExtensionCommand");
           
-          if (/priv.ly/.test(httpChannel.originalURI.host) || (/localhost/.test(httpChannel.originalURI.host) && /posts/.test(httpChannel.originalURI.path)))
+          if (/priv.ly/.test(httpChannel.originalURI.host) || 
+              (/localhost/.test(httpChannel.originalURI.host) && 
+              /posts/.test(httpChannel.originalURI.path)))
           { 
-            /* the extensioncommand response header will be a json string. So far 3 params are identified.
-             * disableIframes and requireClickthrough are mutually exclusive. Only one should appear in the header string.
-             * eg - extensionCommand = '{"noRequests": 100,"disablePosts" : 200, requireClickthrough:110}';
+            /* 
+             * the extensioncommand response header will be a json string. 
+             * passive and requireClickthrough are mutually exclusive.
+             * eg - extensionCommand = 
+             * '{"disablePosts" : 200, "requireClickthrough":110}';
+             * '{"disablePosts":110,"passive": 100}'
              */
             extensionCommand = '';
             var command = jQ.parseJSON(extensionCommand);
-            if(command && command.noRequests){
-              //disable the extension. in the setTimeout function, enable the extension back.
-              this.preferences.setIntPref("extensionMode",3);
-              setTimeout(function(){this.preferences.setIntPref("extensionMode",0);},
-                command.noRequests);
+            /*
+             * if requireClickthrough/passive field is present, change the extension 
+             * mode to privlyObservers.extensionModeEnum.CLICKTHROUGH/PASSIVE 
+             * accordingly. Set it back to active after the time interval  
+             * specified in the json string.
+             */
+            if(command && command.requireClickthrough){
+              this.preferences.setIntPref("extensionMode",
+                                privlyObservers.extensionModeEnum.CLICKTHROUGH);
+              setTimeout(function(){
+                this.preferences.setIntPref("extensionMode",
+                                    privlyObservers.extensionModeEnum.ACTIVE);},
+                command.requireClickthrough);
             }
+            else if(command && command.passive){
+              this.preferences.setIntPref("extensionMode",
+                privlyObservers.extensionModeEnum.PASSIVE);
+              setTimeout(function(){
+                this.preferences.setIntPref("extensionMode",
+                  privlyObservers.extensionModeEnum.ACTIVE);},
+                command.passive);
+            }
+            // disable the ability to post content to the server, if the 
+            // disablePosts field is present in the header.
             if(command && command.disablePosts){
               this.preferences.setBoolPref('disablePosts',true);
-              setTimeout(function(){this.preferences.setBoolPref('disablePosts',false);},
+              setTimeout(function(){this.preferences.
+                                         setBoolPref('disablePosts',false);},
                 command.disablePosts);
-            } 
-            if(command && command.requireClickthrough){              
-              /* set the extension mode to require-through. in the setTimeout function, set the
-               * mode back to active.
-               */
-              this.preferences.setIntPref("extensionMode",2);
-              setTimeout(function(){this.preferences.setIntPref("extensionMode",0);},
-                command.requireClickthrough);
             }
           }
         }
