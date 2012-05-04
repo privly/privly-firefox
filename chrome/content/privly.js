@@ -31,6 +31,8 @@ DEALINGS IN THE SOFTWARE.
  * For a high level overview of what this script does, see:
  * http://www.privly.org/content/core-functionality-privlyjs
  *
+ ***HOST PAGE CONFIGURATION***
+ *
  * The host page can influence the behaviour of this script by including
  * privly-exclude="true" as an attribute on either the body element,
  * or an individual link element. If the body has the privly-exclude attribute:
@@ -45,8 +47,29 @@ DEALINGS IN THE SOFTWARE.
  *
  * Then it is not replaced with the referenced content.
  *
+ *
+ ****URL PARAMETERS***
+ *
+ * The script also responds to parameters 
+ * and anchors on the URL. 
+ *
+ * burntAfter: specifies a time in seconds in the Unix epoch
+ * until the content is likely destroyed on the remote server
+ * Destruction of the content should result in a change of message,
+ * but not a request to he remote server for the content
+ *
+ *
  **/
 var privly = {
+  
+  //These messages are displayed to users. These strings cannot be in this
+  //script when we start localization.
+  messages: {
+    sleepMode: "Privly is in sleep mode so it can catch up with " + 
+      "demand. The content may still be viewable by clicking this link",
+    passiveModeLink: "Read in Place",
+    contentExpired: "The content behind this link likely expired. Click the link to check."
+  },
   
   // Gives a map of the URL parameters and the anchor
   // Example:
@@ -85,7 +108,7 @@ var privly = {
     "privly\\.com|" +
     "dev\\.privly\\.com|" +
     "localhost:3000" + 
-    ")(\\/posts)(\\/\\w*){1,}\\b","gi"),
+    ")(\\/posts)(\\/\\S*){1,}\\b","gi"),
   
   // enum to hold various extension modes and their value. 
   // extension modes are set through firefox's extension api. 
@@ -262,16 +285,24 @@ var privly = {
       {
         var exclude = a.getAttribute("privly-exclude");
         if(exclude == null || exclude != "true"){
-          if(this.extensionMode == privly.extensionModeEnum.ACTIVE){
+          
+          var burntAfter = privly.getUrlVariables(a.href)["burntAfter"];
+          
+          if(burntAfter != null && parseInt(burntAfter) < Date.now())
+          {
+            a.innerHTML = privly.messages.contentExpired;
+            a.setAttribute('target','_blank');
+            a.removeEventListener("mousedown",privly.makePassive,true);
+          }
+          else if(this.extensionMode == privly.extensionModeEnum.ACTIVE){
             this.replaceLink(a);
           }
           else if(this.extensionMode == privly.extensionModeEnum.PASSIVE){
-            a.innerHTML = 'Read in Place';
+            a.innerHTML = privly.messages.passiveModeLink;
             a.addEventListener("mousedown",privly.makePassive,true);
           }
           else if(this.extensionMode == privly.extensionModeEnum.CLICKTHROUGH){
-            a.innerHTML = "Privly is in sleep mode so it can catch up with " + 
-            "demand. The content may still be viewable by clicking this link";
+            a.innerHTML = privly.messages.sleepMode;
             a.setAttribute('target','_blank');
             a.removeEventListener("mousedown",privly.makePassive,true);
           }
