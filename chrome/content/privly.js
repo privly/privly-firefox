@@ -24,26 +24,64 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
 *******************************************************************************/
-var privly = {	
-  //Matches:
+
+
+
+/**
+ * For a high level overview of what this script does, see:
+ * http://www.privly.org/content/core-functionality-privlyjs
+ *
+ * The host page can influence the behaviour of this script by including
+ * privly-exclude="true" as an attribute on either the body element,
+ * or an individual link element. If the body has the privly-exclude attribute:
+ *
+ * <body privly-exclude="true">
+ *
+ * Then the script will only respond to resize messages.
+ *
+ * If a link has the attribute, as in here:
+ *
+ * <a href="https://example.com" privly-exclude="true">
+ *
+ * Then it is not replaced with the referenced content.
+ *
+ **/
+var privly = {
+  
+  // The Privly RegExp determines which links are eligible for 
+  // replacing with their referenced content.
+  // This system will need to change so we can move to a white
+  // list approach. See: http://www.privly.org/content/why-privly-server
+  //
+  // Matches:
   //              http://
   //              https://
-  //                        priv.ly/textAndNumbers/any/number/of/times
+  //                        DOMAIN/textAndNumbers/any/number/of/times
   //                                                                          
-  //also matches localhost:3000
-  privlyReferencesRegex: /\b(https?:\/\/){0,1}(priv\.ly|localhost:3000)(\/posts)(\/\w*){1,}\b/gi,
+  privlyReferencesRegex: new RegExp("\\b(https?:\\/\\/){0,1}(" + 
+    "priv\\.ly|" +
+    "dev\\.privly\\.org|" +
+    "privly\\.org|" +
+    "privly\\.com|" +
+    "dev\\.privly\\.com|" +
+    "localhost:3000" + 
+    ")(\\/posts)(\\/\\w*){1,}\\b","gi"),
   
-  /*
-   * enum to hold various extension modes and their value. extension modes are set through firefox's
-   * extension api. https://developer.mozilla.org/en/Code_snippets/Preferences
-   */ 
+  // enum to hold various extension modes and their value. 
+  // extension modes are set through firefox's extension api. 
+  // https://developer.mozilla.org/en/Code_snippets/Preferences
   extensionModeEnum : {
     ACTIVE : 0,
     PASSIVE : 1,
     CLICKTHROUGH : 2
   },
   
-  // Takes a domain with an optional http(s) in front and returns a fully formed domain name
+  //indicates whether the extension shoud immediatly replace all Privly
+  //links it encounters
+  extensionMode: 0,
+  
+  // Takes a domain with an optional http(s) 
+  // in front and returns a fully formed domain name
   makeHref: function(domain)
   {
     var hasHTTPRegex = /^((https?)\:\/\/)/i;
@@ -55,23 +93,24 @@ var privly = {
   //Make plain text links into anchor elements
   createLinks: function() 
   {
-      /*************************************************************************
+      /***********************************************************************
       Inspired by Linkify script:
         http://downloads.mozdev.org/greasemonkey/linkify.user.js
 
       Originally written by Anthony Lieuallen of http://arantius.com/
       Licensed for unlimited modification and redistribution as long as
       this notice is kept intact.
-      **************************************************************************/
+      ************************************************************************/
 
       var excludeParents = ["a", "applet", "button", "code", "form",
                              "input", "option", "script", "select", "meta", 
                              "style", "textarea", "title", "div","span"];
       var excludedParentsString = excludeParents.join(" or parent::");
-      var xpathExpression = ".//text()[not(parent:: " + excludedParentsString +")]";
+      var xpathExpression = ".//text()[not(parent:: " + 
+          excludedParentsString +")]";
 
       textNodes = document.evaluate(xpathExpression, document.body, null, 
-                                    XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+          XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
 
       for(var i=0; i < textNodes.snapshotLength; i++){
           item = textNodes.snapshotItem(i);
@@ -83,9 +122,12 @@ var privly = {
               var span = document.createElement("span");    
               var lastLastIndex = 0;
               privly.privlyReferencesRegex.lastIndex = 0;
-              for(var results = null; results = privly.privlyReferencesRegex.exec(itemText); ){
+              
+              for(var results = null; 
+                results = privly.privlyReferencesRegex.exec(itemText); ){
                   var href = results[0];
-                  span.appendChild(document.createTextNode(itemText.substring(lastLastIndex, results.index)));
+                  span.appendChild(document.createTextNode(
+                    itemText.substring(lastLastIndex, results.index)));
 
                   var text = (href.indexOf(" ")==0)?href.substring(1):href;
 
@@ -93,17 +135,20 @@ var privly = {
 
                   var a = document.createElement("a");
                   a.setAttribute("href", href);
-                  a.appendChild(document.createTextNode(text.substring(0,4).toLowerCase()+text.substring(4)));
+                  a.appendChild(document.createTextNode(
+                    text.substring(0,4).toLowerCase() + text.substring(4)));
                   if(href.indexOf(" ")==0) 
                       span.appendChild(document.createTextNode(" "));
                   span.appendChild(a);
                   lastLastIndex = privly.privlyReferencesRegex.lastIndex;
               }
-              span.appendChild(document.createTextNode(itemText.substring(lastLastIndex)));
+              span.appendChild(document.createTextNode(
+                itemText.substring(lastLastIndex)));
               item.parentNode.replaceChild(span, item);
           }
       }
   },
+  
   //Kill default link behaviour on Privly Links
   makePassive: function(e) 
   {
@@ -114,8 +159,9 @@ var privly = {
     privly.replaceLink(e.target);
   },
   
-  //Checks link attributes and text for privly links without the proper href attribute.
-  //Twitter and other hosts change links so they can collect click events.
+  //Checks link attributes and text for privly links without the proper href
+  //attribute. Twitter and other hosts change links so they can collect
+  //click events.
   correctIndirection: function() 
   {
     var anchors = document.links;
@@ -123,7 +169,8 @@ var privly = {
     while (i--){
       var a = anchors[i];
       
-      if(a.href && (a.href.indexOf("priv.ly/posts/") == -1 || a.href.indexOf("priv.ly/posts/") > 9))
+      if(a.href && (a.href.indexOf("priv.ly/posts/") == -1 || 
+        a.href.indexOf("priv.ly/posts/") > 9))
       {
         //check if Privly is in the body of the text
         privly.privlyReferencesRegex.lastIndex = 0;
@@ -165,11 +212,13 @@ var privly = {
       iFrame.setAttribute("marginwidth","0");
       iFrame.setAttribute("marginheight","0");
       iFrame.setAttribute("height","1px");
-      iFrame.setAttribute("src",object.href + ".iframe?frame_id=" + privly.nextAvailableFrameID);
+      iFrame.setAttribute("src",object.href + ".iframe?frame_id=" + 
+        privly.nextAvailableFrameID);
       iFrame.setAttribute("id","ifrm"+privly.nextAvailableFrameID);
       iFrame.setAttribute("frameborder","0");
       privly.nextAvailableFrameID++;
-      iFrame.setAttribute("style","width: 100%; height: 32px; overflow: hidden;");
+      iFrame.setAttribute("style","width: 100%; height: 32px; " + 
+        "overflow: hidden;");
       iFrame.setAttribute("scrolling","no");
       iFrame.setAttribute("overflow","hidden");
       object.parentNode.replaceChild(iFrame, object);
@@ -191,8 +240,8 @@ var privly = {
       this.privlyReferencesRegex.lastIndex = 0;
       if(a.href && this.privlyReferencesRegex.test(a.href))
       {
-      	var exclude = a.getAttribute("privly");
-        if(exclude == null || exclude != "exclude"){
+        var exclude = a.getAttribute("privly-exclude");
+        if(exclude == null || exclude != "true"){
           if(this.extensionMode == privly.extensionModeEnum.ACTIVE){
             this.replaceLink(a);
           }
@@ -201,7 +250,8 @@ var privly = {
             a.addEventListener("mousedown",privly.makePassive,true);
           }
           else if(this.extensionMode == privly.extensionModeEnum.CLICKTHROUGH){
-            a.innerHTML = "Privly is in sleep mode so it can catch up with demand. The content may still be viewable by clicking this link";
+            a.innerHTML = "Privly is in sleep mode so it can catch up with " + 
+            "demand. The content may still be viewable by clicking this link";
             a.setAttribute('target','_blank');
             a.removeEventListener("mousedown",privly.makePassive,true);
           }
@@ -213,7 +263,12 @@ var privly = {
   //resize the iframe using a posted message
   resizeIframe: function(message){
     
-    if(message.origin !== "https://priv.ly" && message.origin !== "http://localhost:3000")
+    if(message.origin !== "https://priv.ly" && 
+      message.origin !== "http://localhost:3000" &&
+      message.origin !== "http://dev.privly.org" && 
+      message.origin !== "http://dev.privly.com" && 
+      message.origin !== "https://privly.org" && 
+      message.origin !== "https://privly.com")
       return;
       
     var data = message.data.split(",");
@@ -222,9 +277,6 @@ var privly = {
     iframe.style.height = data[1]+'px';
   },
   
-  //indicates whether the extension shoud immediatly replace all Privly
-  //links it encounters
-  extensionMode: 0,
   //prevents DOMNodeInserted from sending hundreds of extension runsmake
   runPending: false,
   
@@ -244,36 +296,44 @@ var privly = {
   //runs privly once then registers the update listener
   //for dynamic pages
   listeners: function(){
-    //don't recursively replace links
-    if(typeof(document.URL) != 'undefined' && document.URL.indexOf('priv.ly') != -1 || document.URL.indexOf('localhost:3000') != -1)
-      return;
-      
-    //The content's iframe will post a message to the hosting document. This listener sets the height 
-    //of the iframe according to the messaged height
+    //The content's iframe will post a message to the hosting document.
+    //This listener sets the height  of the iframe according to the messaged
+    //height
     window.addEventListener("message", privly.resizeIframe, false, true);
-    privly.runPending=true;
-    setTimeout(
-      function(){
-        privly.runPending=false;
-        privly.run();
-      },
-    100);
     
-    //Everytime the page is updated via javascript, we have to check
-    //for new Privly content. This might not be supported on other platforms
-    document.addEventListener("DOMNodeInserted", function(event) {
-      //we check the page a maximum of two times a second
-      if(privly.runPending)
-        return;
+    //respect the settings of the host page. 
+    //If the body element has privly-exclude=true
+    if(document.getElementsByTagName("body")[0]
+        .getAttribute("privly-exclude")=="true")
+    {
+      return;
+    }
+    else
+    {
       privly.runPending=true;
-      
       setTimeout(
         function(){
           privly.runPending=false;
           privly.run();
         },
-        500);
-    });
+        100);
+
+      //Everytime the page is updated via javascript, we have to check
+      //for new Privly content. This might not be supported on other platforms
+      document.addEventListener("DOMNodeInserted", function(event) {
+        //we check the page a maximum of two times a second
+        if(privly.runPending)
+          return;
+        privly.runPending=true;
+
+        setTimeout(
+          function(){
+            privly.runPending=false;
+            privly.run();
+          },
+          500);
+      });
+    }
   },
   
   // cross platform onload event
