@@ -48,6 +48,26 @@ DEALINGS IN THE SOFTWARE.
  **/
 var privly = {
   
+  // Gives a map of the URL parameters and the anchor
+  // Example:
+  // var url = https://priv.ly/posts/1?example=Hello#World
+  // privly.getUrlVariables(url)["example"] is "Hello"
+  // privly.getUrlVariables(url)["anchor"] is "World"
+  getUrlVariables: function(url) {
+      var vars = {};
+      if(url.indexOf("#",0) > 0)
+      {
+        var anchor = url.substring(url.indexOf("#",0) + 1, url.length);
+        vars["anchor"] = anchor;
+        url = url.split("#",1)[0];
+      }
+      var parts = url.replace(/[?&]+([^=&]+)=([^&]*)/gi, 
+        function(m,key,value) {
+          vars[key] = value;
+      });
+      return vars;
+  },
+  
   // The Privly RegExp determines which links are eligible for 
   // replacing with their referenced content.
   // This system will need to change so we can move to a white
