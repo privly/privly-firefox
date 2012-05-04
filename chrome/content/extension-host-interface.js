@@ -3,14 +3,6 @@ var privlyExtension =
   //https://developer.mozilla.org/en/Code_snippets/Preferences#Where_the_default_values_are_read_from
   preferences : Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.privly."),
   
-  //Matches:
-  //              http://
-  //              https://
-  //                        priv.ly/textAndNumbers/any/number/of/times
-  //                                                                          
-  //also matches localhost:3000
-  privlyReferencesRegex: /\b(https?:\/\/){0,1}(priv\.ly|localhost:3000)(\/posts)(\/\w*){1,}\b/gi,
-
   /*
    * enum to hold various extension modes and their value. extension modes are set through firefox's
    * extension api. https://developer.mozilla.org/en/Code_snippets/Preferences
@@ -208,20 +200,12 @@ var privlyExtension =
           if(iframe){
             // if the iframe is done loading, insert the privModeElement into its DOM
             if(iframe.contentDocument.readyState == 'complete'){
-              privlyExtension.privlyReferencesRegex.lastIndex = 0;
-              // test if the iframe is not one of our own iframes from priv.ly or locahost:3000
-              if(iframe.src && !privlyExtension.privlyReferencesRegex.test(iframe.src)){
-                privlyExtension.insertPrivModeElement(iframe.contentDocument,extensionMode);
-              }
+              privlyExtension.insertPrivModeElement(iframe.contentDocument,extensionMode);
             }
             // else, insert the privModeElement into the iframe's DOM once it is loaded
             else{
               iframe.contentDocument.defaultView.onload = function(event){
-                privlyExtension.privlyReferencesRegex.lastIndex = 0;
-                // test if the iframe is not one of our own iframes from priv.ly or locahost:3000
-                if(iframe.src && !privlyExtension.privlyReferencesRegex.test(iframe.src)){
-                  privlyExtension.insertPrivModeElement(iframe.contentDocument,extensionMode);
-                }
+                privlyExtension.insertPrivModeElement(iframe.contentDocument,extensionMode);
               }
             }
             
