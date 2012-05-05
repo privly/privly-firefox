@@ -58,6 +58,15 @@ DEALINGS IN THE SOFTWARE.
  * Destruction of the content should result in a change of message,
  * but not a request to he remote server for the content
  *
+ * burntMessage: Display this message if the content was burnt, as
+ * indicated by the burnAfter parameter.
+ *
+ * passiveMessage: Display this message when the extension is in
+ * passive mode.
+ *
+ * passive: Forces the link into passive mode
+ * exclude: Force the link to not be replaced or put into passive
+ * mode
  *
  **/
 var privly = {
@@ -68,7 +77,9 @@ var privly = {
     sleepMode: "Privly is in sleep mode so it can catch up with " + 
       "demand. The content may still be viewable by clicking this link",
     passiveModeLink: "Read in Place",
-    contentExpired: "The content behind this link likely expired. Click the link to check."
+    contentExpired: "The content behind this link likely expired. Click the link to check.",
+    privlyContent: "Privly Content: ",
+    burntPrivlyContent: "Burnt Privly Content: "
   },
   
   // Gives a map of the URL parameters and the anchor
@@ -84,6 +95,7 @@ var privly = {
         vars["anchor"] = anchor;
         url = url.split("#",1)[0];
       }
+      url = url.replace("&amp;", "&")
       var parts = url.replace(/[?&]+([^=&]+)=([^&]*)/gi, 
         function(m,key,value) {
           vars[key] = value;
@@ -255,8 +267,16 @@ var privly = {
       iFrame.setAttribute("marginwidth","0");
       iFrame.setAttribute("marginheight","0");
       iFrame.setAttribute("height","1px");
-      iFrame.setAttribute("src",object.href + ".iframe?frame_id=" + 
-        privly.nextAvailableFrameID);
+      if(object.href.indexOf("?") > 0){
+        var iframeUrl = object.href.replace("?",".iframe?frame_id="+
+          privly.nextAvailableFrameID+"&");
+        iFrame.setAttribute("src",iframeUrl);
+      }
+      else
+      {
+        iFrame.setAttribute("src",object.href + ".iframe?frame_id=" + 
+          privly.nextAvailableFrameID);
+      }
       iFrame.setAttribute("id","ifrm"+privly.nextAvailableFrameID);
       iFrame.setAttribute("frameborder","0");
       privly.nextAvailableFrameID++;
@@ -284,22 +304,42 @@ var privly = {
       if(a.href && this.privlyReferencesRegex.test(a.href))
       {
         var exclude = a.getAttribute("privly-exclude");
-        if(exclude == null || exclude != "true"){
+        var params = privly.getUrlVariables(a.href);
+        
+        if(exclude == null && params["exclude"] == null){
           
-          var burntAfter = privly.getUrlVariables(a.href)["burntAfter"];
+          var burntAfter = params["burntAfter"];
           
           if(burntAfter != null && parseInt(burntAfter) < Date.now())
           {
-            a.innerHTML = privly.messages.contentExpired;
+            if(params["burntMessage"] != null)
+            {
+              var burntMessage = params["burntMessage"].replace(/\+/g, " ");
+              a.innerHTML = privly.messages.burntPrivlyContent + burntMessage;
+            }
+            else
+            {
+              a.innerHTML = privly.messages.contentExpired;
+            }
             a.setAttribute('target','_blank');
             a.removeEventListener("mousedown",privly.makePassive,true);
           }
+          else if(this.extensionMode == privly.extensionModeEnum.PASSIVE ||
+            params["passive"] != null){
+            if(params["passiveMessage"] != null)
+            {
+              var passiveMessage = params["passiveMessage"].replace(/\+/g, " ");
+              a.innerHTML = privly.messages.privlyContent + passiveMessage;
+            }
+            else
+            {
+              a.innerHTML = privly.messages.privlyContent + 
+                privly.messages.passiveModeLink;
+            }
+            a.addEventListener("mousedown",privly.makePassive,true);
+          }
           else if(this.extensionMode == privly.extensionModeEnum.ACTIVE){
             this.replaceLink(a);
-          }
-          else if(this.extensionMode == privly.extensionModeEnum.PASSIVE){
-            a.innerHTML = privly.messages.passiveModeLink;
-            a.addEventListener("mousedown",privly.makePassive,true);
           }
           else if(this.extensionMode == privly.extensionModeEnum.CLICKTHROUGH){
             a.innerHTML = privly.messages.sleepMode;
