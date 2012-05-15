@@ -56,7 +56,7 @@ DEALINGS IN THE SOFTWARE.
  * burntAfter: specifies a time in seconds in the Unix epoch
  * until the content is likely destroyed on the remote server
  * Destruction of the content should result in a change of message,
- * but not a request to he remote server for the content
+ * but not a request to the remote server for the content
  *
  * burntMessage: Display this message if the content was burnt, as
  * indicated by the burnAfter parameter.
@@ -111,16 +111,21 @@ var privly = {
   // Matches:
   //              http://
   //              https://
-  //                        DOMAIN/textAndNumbers/any/number/of/times
-  //                                                                          
+  //                        DOMAIN/number
+  //                                      
+  //                                  ?any_number_of_parameters=value#anchors
   privlyReferencesRegex: new RegExp("\\b(https?:\\/\\/){0,1}(" + 
-    "priv\\.ly|" +
-    "dev\\.privly\\.org|" +
-    "privly\\.org|" +
-    "privly\\.com|" +
-    "dev\\.privly\\.com|" +
-    "localhost:3000" + 
-    ")(\\/posts)(\\/\\S*){1,}\\b","gi"),
+    "priv\\.ly\\/posts\\/\\d+|" +
+    "dev\\.privly\\.org\\/posts\\/\\d+|" +
+    "privly\\.org\\/posts\\/\\d+|" +
+    "privly\\.com\\/posts\\/\\d+|" +
+    "dev\\.privly\\.com\\/posts\\/\\d+|" +
+    "localhost:3000\\/posts\\/\\d+" + 
+    ")(\\b|\\?(\\S)*|#(\\S)*)$","gi"),
+    //the final line matches 
+    //end of word OR
+    //the parameter string to the end of the word OR
+    //the anchor string to the end of the word
   
   // enum to hold various extension modes and their value. 
   // extension modes are set through firefox's extension api. 
@@ -224,8 +229,8 @@ var privly = {
     while (i--){
       var a = anchors[i];
       
-      if(a.href && (a.href.indexOf("priv.ly/posts/") == -1 || 
-        a.href.indexOf("priv.ly/posts/") > 9))
+      privly.privlyReferencesRegex.lastIndex = 0;
+      if(a.href && !privly.privlyReferencesRegex.test(a.href))
       {
         //check if Privly is in the body of the text
         privly.privlyReferencesRegex.lastIndex = 0;
@@ -272,6 +277,12 @@ var privly = {
           privly.nextAvailableFrameID+"&");
         iFrame.setAttribute("src",iframeUrl);
       }
+      else if(object.href.indexOf("#") > 0)
+      {
+        var iframeUrl = object.href.replace("#",".iframe?frame_id="+
+          privly.nextAvailableFrameID+"#");
+        iFrame.setAttribute("src",iframeUrl);
+      }
       else
       {
         iFrame.setAttribute("src",object.href + ".iframe?frame_id=" + 
@@ -306,7 +317,7 @@ var privly = {
         var exclude = a.getAttribute("privly-exclude");
         var params = privly.getUrlVariables(a.href);
         
-        if(exclude == null && params["exclude"] == null){
+        if(!exclude && !params["exclude"]){
           
           var burntAfter = params["burntAfter"];
           
