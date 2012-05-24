@@ -45,6 +45,39 @@ var privlyExtension =
   },
   
   /* 
+   * This function posts content to the current content server, then places
+   * the returned link into the form element. The function assumes that it was
+   * called by a context menu (right click menu).
+   */
+  postAnonymouslyToPrivly : function()
+  {
+    var target = document.popupNode;
+    var value = target.value;
+    var contentServerUrl = this.preferences.getCharPref("contentServerUrl");
+    // the post can be either public or private (shared only with specific users)
+    if(value == "")
+      alert("Sorry. You can not post empty content to Privly");
+    else{
+      jQ.ajax(
+        {
+          data: { "post[content]":value, 
+            "post[public]":true,
+            endpoint:"extension", browser:"firefox", version:"0.1.1.1"
+          },
+          type: "POST",
+          url: contentServerUrl+"/posts/posts_anonymous.json",
+          contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+          dataType: "json",
+          accepts: "json",
+          success: function(data, textStatus, jqXHR){
+            target.value=jqXHR.getResponseHeader("privlyurl");
+          }
+        }
+      );
+    }
+  },
+  
+  /* 
    * function that posts content to privly's content server with the data in the 
    * 'form' html element
    */
@@ -101,6 +134,10 @@ var privlyExtension =
     var logoutFromPrivlyMenuItem = document.getElementById('logoutFromPrivlyMenuItem');   
     var publicPostToPrivlyMenuItem = document.getElementById('publicPostToPrivlyMenuItem');
     var privatePostToPrivlyMenuItem = document.getElementById('privatePostToPrivlyMenuItem');
+    var anonymousPostToPrivlyMenuItem = document.getElementById('privatePostToPrivlyMenuItem');
+    
+    anonymousPostToPrivlyMenuItem.hidden = false;
+    
     //check if the user is signed in
     if(privlyAuthentication.authToken)
     {

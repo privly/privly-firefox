@@ -6,7 +6,6 @@
 	<script src="extension-host-interface.js" />
 	<script src="observers.js" />
 	<script src="authentication.js" />
-	<script src="settings.js" />
 
 	<menupopup id="menu_ToolsPopup"> 
 		<menuitem label="&runPrivly;" key="privly-run-key" oncommand="privlyExtension.runPrivly()"/> 
@@ -24,6 +23,9 @@
 		<menuitem id="privatePostToPrivlyMenuItem" label="Post Private Content to Privly" oncommand="privlyExtension.postToPrivly('private')"/>  
 	</menupopup>
 
+	<menupopup id="contentAreaContextMenu">  
+		<menuitem id="anonymousPostToPrivlyMenuItem" label="Post Anonymous Content to Privly (lasts one day then destroyed)" oncommand="privlyExtension.postAnonymouslyToPrivly()"/>  
+	</menupopup>
 
 	<menupopup id="contentAreaContextMenu">  
 		<menuitem id="loginToPrivlyMenuItem" label="Login to Privly" oncommand="privlyAuthentication.loginToPrivly()"/>  

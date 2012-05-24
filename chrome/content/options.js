@@ -39,9 +39,23 @@ var privlyPrefPane =
     this.preferences.setIntPref("extensionMode",mode);
   },
   updatePostMode : function()
-	{
-	  if(document.getElementById('disable-post').checked == true){
-	    this.preferences.setBoolPref('disablePosts',true);
-	  }
-	}
+  {
+    if(document.getElementById('disable-post').checked == true){
+      this.preferences.setBoolPref('disablePosts',true);
+    }
+  },
+  updateContentServerURL : function()
+  {
+    var contentServerURL = "";
+    if(document.getElementById('contentServerPrivly').selected == true){
+      contentServerURL = "https://priv.ly";
+    }
+    else if(document.getElementById('contentServerDev').selected == true){
+      contentServerURL = "https://dev.privly.org";
+    }
+    else if(document.getElementById('contentServerLocalhost').selected == true){
+      contentServerURL = "http://localhost:3000";
+    }
+    this.preferences.setStringPref("contentServerUrl",contentServerURL);
+  }
 }
