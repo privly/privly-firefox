@@ -54,7 +54,6 @@ var privlyExtension =
     var target = document.popupNode;
     var value = target.value;
     var contentServerUrl = this.preferences.getCharPref("contentServerUrl");
-    // the post can be either public or private (shared only with specific users)
     if(value == "")
       alert("Sorry. You can not post empty content to Privly");
     else{
