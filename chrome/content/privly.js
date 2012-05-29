@@ -320,8 +320,7 @@ var privly = {
         if(!exclude && !params["exclude"]){
           
           var burntAfter = params["burntAfter"];
-          
-          if(burntAfter != null && parseInt(burntAfter) < Date.now())
+          if(burntAfter != null && parseInt(burntAfter) < Date.now()/1000)
           {
             if(params["burntMessage"] != null)
             {
@@ -333,7 +332,7 @@ var privly = {
               a.innerHTML = privly.messages.contentExpired;
             }
             a.setAttribute('target','_blank');
-            a.removeEventListener("mousedown",privly.makePassive,true);
+            a.addEventListener("mousedown",privly.makePassive,true);
           }
           else if(this.extensionMode == privly.extensionModeEnum.PASSIVE ||
             params["passive"] != null){
