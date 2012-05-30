@@ -79,6 +79,7 @@ var privly = {
     passiveModeLink: "Read in Place",
     contentExpired: "The content behind this link likely expired. Click the link to check.",
     privlyContent: "Privly Content: ",
+    injectableContent: "Injectable Content: ",
     burntPrivlyContent: "Burnt Privly Content: "
   },
   
@@ -258,7 +259,7 @@ var privly = {
   },
 
   nextAvailableFrameID: 0,
-
+  
   // Replace an anchor element with its referenced content.
   replaceLink: function(object) 
   {
@@ -299,7 +300,73 @@ var privly = {
     }
   },
   
-  //Replace all Privly links with their iframe
+  //Process a link according to its parameters and whitelist status
+  //if the link is in active mode and is whitelisted, it will replace 
+  //the link with the referenced content. If the link is in passive mode
+  //or it is not a whitelisted link, the link will be clickable to replace
+  //the content.
+  processLink: function(anchorElement, whitelist)
+  {
+    var exclude = anchorElement.getAttribute("privly-exclude");
+    var params = privly.getUrlVariables(anchorElement.href);
+    
+    if(!exclude && !params["exclude"]){
+      
+      var passive = this.extensionMode == privly.extensionModeEnum.PASSIVE ||
+        params["passive"] != null || !whitelist;
+      var burnt = params["burntAfter"] != null && parseInt(params["burntAfter"]) < 
+        Date.now()/1000;
+      var active = this.extensionMode == privly.extensionModeEnum.ACTIVE && 
+        whitelist;
+      var sleepMode = this.extensionMode == privly.extensionModeEnum.CLICKTHROUGH && 
+        whitelist;
+      
+      if(!whitelist){
+        anchorElement.innerHTML = privly.messages.injectableContent + 
+          privly.messages.passiveModeLink;
+        anchorElement.addEventListener("mousedown",privly.makePassive,true);
+      }
+      else if(passive){
+        if(params["passiveMessage"] != null)
+        {
+          var passiveMessage = params["passiveMessage"].replace(/\+/g, " ");
+          anchorElement.innerHTML = privly.messages.privlyContent + passiveMessage;
+        }
+        else
+        {
+          anchorElement.innerHTML = privly.messages.privlyContent + 
+            privly.messages.passiveModeLink;
+        }
+        anchorElement.addEventListener("mousedown",privly.makePassive,true);
+      }
+      else if(burnt)
+      {
+        if(params["burntMessage"] != null)
+        {
+          var burntMessage = params["burntMessage"].replace(/\+/g, " ");
+          anchorElement.innerHTML = privly.messages.burntPrivlyContent + burntMessage;
+        }
+        else
+        {
+          anchorElement.innerHTML = privly.messages.contentExpired;
+        }
+        anchorElement.setAttribute('target','_blank');
+        anchorElement.addEventListener("mousedown",privly.makePassive,true);
+      }
+      else if(active){
+        this.replaceLink(anchorElement);
+      }
+      else if(sleepMode){
+        anchorElement.innerHTML = privly.messages.sleepMode;
+        anchorElement.setAttribute('target','_blank');
+        anchorElement.removeEventListener("mousedown",privly.makePassive,true);
+      }
+    }
+  },
+  
+  //Replace all Privly links with their iframe or
+  //a new link, which when clicked will be replaced
+  //by the iframe
   replaceLinks: function()
   {
     elements = document.getElementsByTagName("privModeElement");
@@ -314,49 +381,11 @@ var privly = {
       this.privlyReferencesRegex.lastIndex = 0;
       if(a.href && this.privlyReferencesRegex.test(a.href))
       {
-        var exclude = a.getAttribute("privly-exclude");
-        var params = privly.getUrlVariables(a.href);
-        
-        if(!exclude && !params["exclude"]){
-          
-          var burntAfter = params["burntAfter"];
-          if(burntAfter != null && parseInt(burntAfter) < Date.now()/1000)
-          {
-            if(params["burntMessage"] != null)
-            {
-              var burntMessage = params["burntMessage"].replace(/\+/g, " ");
-              a.innerHTML = privly.messages.burntPrivlyContent + burntMessage;
-            }
-            else
-            {
-              a.innerHTML = privly.messages.contentExpired;
-            }
-            a.setAttribute('target','_blank');
-            a.addEventListener("mousedown",privly.makePassive,true);
-          }
-          else if(this.extensionMode == privly.extensionModeEnum.PASSIVE ||
-            params["passive"] != null){
-            if(params["passiveMessage"] != null)
-            {
-              var passiveMessage = params["passiveMessage"].replace(/\+/g, " ");
-              a.innerHTML = privly.messages.privlyContent + passiveMessage;
-            }
-            else
-            {
-              a.innerHTML = privly.messages.privlyContent + 
-                privly.messages.passiveModeLink;
-            }
-            a.addEventListener("mousedown",privly.makePassive,true);
-          }
-          else if(this.extensionMode == privly.extensionModeEnum.ACTIVE){
-            this.replaceLink(a);
-          }
-          else if(this.extensionMode == privly.extensionModeEnum.CLICKTHROUGH){
-            a.innerHTML = privly.messages.sleepMode;
-            a.setAttribute('target','_blank');
-            a.removeEventListener("mousedown",privly.makePassive,true);
-          }
-        }
+        privly.processLink(a, true);
+      }
+      else if(a.href && a.href.indexOf("#INJECTCONTENT0",0) > 0)
+      {
+        privly.processLink(a, false);
       }
     }
   },
