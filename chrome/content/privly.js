@@ -90,6 +90,9 @@ var privly = {
   // privly.getUrlVariables(url)["example"] is "Hello"
   // privly.getUrlVariables(url)["anchor"] is "World"
   getUrlVariables: function(url) {
+    
+    "use strict";
+    
       var vars = {};
       if (url.indexOf("#",0) > 0)
       {
@@ -146,6 +149,7 @@ var privly = {
   // in front and returns a fully formed domain name
   makeHref: function(domain)
   {
+    "use strict";
     var hasHTTPRegex = /^((https?)\:\/\/)/i;
     if (!hasHTTPRegex.test(domain)) {
       domain = "http://" + domain;
@@ -156,6 +160,7 @@ var privly = {
   //Make plain text links into anchor elements
   createLinks: function()
   {
+      "use strict";
       /***********************************************************************
       Inspired by Linkify script:
         http://downloads.mozdev.org/greasemonkey/linkify.user.js
@@ -217,6 +222,7 @@ var privly = {
   //Kill default link behaviour on Privly Links
   makePassive: function(e)
   {
+    "use strict";
     //Preventing the default link behavior
     e.cancelBubble = true;
     e.stopPropagation();
@@ -229,6 +235,7 @@ var privly = {
   //click events.
   correctIndirection: function()
   {
+    "use strict";
     var anchors = document.links;
     var i = anchors.length;
     while (i--){
@@ -267,6 +274,8 @@ var privly = {
   // Replace an anchor element with its referenced content.
   replaceLink: function(object)
   {
+    "use strict";
+    
     var iFrame = document.createElement('iframe');
     iFrame.setAttribute("frameborder","0");
     iFrame.setAttribute("vspace","0");
@@ -312,6 +321,8 @@ var privly = {
   //the content.
   processLink: function(anchorElement, whitelist)
   {
+    "use strict";
+    
     var exclude = anchorElement.getAttribute("privly-exclude");
     var params = privly.getUrlVariables(anchorElement.href);
     
@@ -374,6 +385,8 @@ var privly = {
   //by the iframe
   replaceLinks: function()
   {
+    "use strict";
+    
     var elements = document.getElementsByTagName("privModeElement");
     if (elements.length > 0){
       this.extensionMode = parseInt(elements[0].getAttribute('mode'), 10);
@@ -398,6 +411,8 @@ var privly = {
   //resize the iframe using a posted message
   resizeIframe: function(message){
     
+    "use strict";
+    
     if (message.origin !== "https://priv.ly" &&
       message.origin !== "http://localhost:3000" &&
       message.origin !== "http://dev.privly.org" &&
@@ -419,6 +434,8 @@ var privly = {
   //prep the page and replace the links if it is in active mode
   run: function()
   {
+    "use strict";
+    
     //create and correct the links pointing
     //to Privly content
     privly.createLinks();
@@ -432,6 +449,9 @@ var privly = {
   //runs privly once then registers the update listener
   //for dynamic pages
   listeners: function(){
+    
+    "use strict";
+    
     //The content's iframe will post a message to the hosting document.
     //This listener sets the height  of the iframe according to the messaged
     //height
@@ -478,6 +498,9 @@ var privly = {
   // won't attach anything on IE
   // on macintosh systems.
   addEvent: function(obj, evType, fn){
+    
+    "use strict";
+    
     if (obj.addEventListener){
       obj.addEventListener(evType, fn, false);
       return true;
