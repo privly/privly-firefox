@@ -94,10 +94,10 @@ var privly = {
       if (url.indexOf("#",0) > 0)
       {
         var anchor = url.substring(url.indexOf("#",0) + 1, url.length);
-        vars["anchor"] = anchor;
+        vars.anchor = anchor;
         url = url.split("#",1)[0];
       }
-      url = url.replace("&amp;", "&")
+      url = url.replace("&amp;", "&");
       var parts = url.replace(/[?&]+([^=&]+)=([^&]*)/gi,
         function(m,key,value) {
           vars[key] = value;
@@ -147,8 +147,9 @@ var privly = {
   makeHref: function(domain)
   {
     var hasHTTPRegex = /^((https?)\:\/\/)/i;
-    if (!hasHTTPRegex.test(domain))
-        domain = "http://" + domain;
+    if (!hasHTTPRegex.test(domain)) {
+      domain = "http://" + domain;
+    }
     return domain;
   },
   
@@ -171,11 +172,11 @@ var privly = {
       var xpathExpression = ".//text()[not(parent:: " +
           excludedParentsString +")]";
           
-      textNodes = document.evaluate(xpathExpression, document.body, null,
+      var textNodes = document.evaluate(xpathExpression, document.body, null,
           XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
           
       for (var i=0; i < textNodes.snapshotLength; i++){
-          item = textNodes.snapshotItem(i);
+          var item = textNodes.snapshotItem(i);
           
           var itemText = item.nodeValue;
           
@@ -185,13 +186,13 @@ var privly = {
               var lastLastIndex = 0;
               privly.privlyReferencesRegex.lastIndex = 0;
               
-              for (var results = null;
-                results = privly.privlyReferencesRegex.exec(itemText); ){
-                  var href = results[0];
+              var results = privly.privlyReferencesRegex.exec(itemText);
+              while ( results ){
                   span.appendChild(document.createTextNode(
                     itemText.substring(lastLastIndex, results.index)));
                     
-                  var text = (href.indexOf(" ")==0)?href.substring(1):href;
+                  var rawHref = results[0];
+                  var text = (rawHref.indexOf(" ") === 0)?rawHref.substring(1):rawHref;
                   
                   var href = privly.makeHref(text);
                   
@@ -199,10 +200,12 @@ var privly = {
                   a.setAttribute("href", href);
                   a.appendChild(document.createTextNode(
                     text.substring(0,4).toLowerCase() + text.substring(4)));
-                  if (href.indexOf(" ") == 0)
-                      span.appendChild(document.createTextNode(" "));
+                  if (href.indexOf(" ") === 0) {
+                    span.appendChild(document.createTextNode(" "));
+                  }
                   span.appendChild(a);
                   lastLastIndex = privly.privlyReferencesRegex.lastIndex;
+                  results = privly.privlyReferencesRegex.exec(itemText);
               }
               span.appendChild(document.createTextNode(
                 itemText.substring(lastLastIndex)));
@@ -247,7 +250,7 @@ var privly = {
         //check if Privly was moved to another attribute
         for (var y = 0; y < a.attributes.length; y++) {
           var attrib = a.attributes[y];
-          if (attrib.specified == true) {
+          if (attrib.specified === true) {
             privly.privlyReferencesRegex.lastIndex = 0;
             if (privly.privlyReferencesRegex.test(attrib.value)) {
               a.setAttribute("href", attrib.value);
@@ -264,41 +267,42 @@ var privly = {
   // Replace an anchor element with its referenced content.
   replaceLink: function(object)
   {
-    if (object.parentNode != null){
-      var iFrame = document.createElement('iframe');
-      iFrame.setAttribute("frameborder","0");
-      iFrame.setAttribute("vspace","0");
-      iFrame.setAttribute("hspace","0");
-      iFrame.setAttribute("name","privlyiframe");
-      iFrame.setAttribute("width","100%");
-      iFrame.setAttribute("marginwidth","0");
-      iFrame.setAttribute("marginheight","0");
-      iFrame.setAttribute("height","1px");
-      if (object.href.indexOf("?") > 0){
-        var iframeUrl = object.href.replace("?",".iframe?frame_id="+
-          privly.nextAvailableFrameID+"&");
-        iFrame.setAttribute("src",iframeUrl);
-      }
-      else if (object.href.indexOf("#") > 0)
-      {
-        var iframeUrl = object.href.replace("#",".iframe?frame_id="+
-          privly.nextAvailableFrameID+"#");
-        iFrame.setAttribute("src",iframeUrl);
-      }
-      else
-      {
-        iFrame.setAttribute("src",object.href + ".iframe?frame_id=" +
-          privly.nextAvailableFrameID);
-      }
-      iFrame.setAttribute("id","ifrm"+privly.nextAvailableFrameID);
-      iFrame.setAttribute("frameborder","0");
-      privly.nextAvailableFrameID++;
-      iFrame.setAttribute("style","width: 100%; height: 32px; " +
-        "overflow: hidden;");
-      iFrame.setAttribute("scrolling","no");
-      iFrame.setAttribute("overflow","hidden");
-      object.parentNode.replaceChild(iFrame, object);
+    var iFrame = document.createElement('iframe');
+    iFrame.setAttribute("frameborder","0");
+    iFrame.setAttribute("vspace","0");
+    iFrame.setAttribute("hspace","0");
+    iFrame.setAttribute("name","privlyiframe");
+    iFrame.setAttribute("width","100%");
+    iFrame.setAttribute("marginwidth","0");
+    iFrame.setAttribute("marginheight","0");
+    iFrame.setAttribute("height","1px");
+    
+    var iframeUrl = object.href;
+    
+    if (object.href.indexOf("?") > 0){
+      iframeUrl = iframeUrl.replace("?",".iframe?frame_id="+
+        privly.nextAvailableFrameID+"&");
+      iFrame.setAttribute("src",iframeUrl);
     }
+    else if (object.href.indexOf("#") > 0)
+    {
+      iframeUrl = iframeUrl.replace("#",".iframe?frame_id="+
+        privly.nextAvailableFrameID+"#");
+      iFrame.setAttribute("src",iframeUrl);
+    }
+    else
+    {
+      iFrame.setAttribute("src",object.href + ".iframe?frame_id=" +
+        privly.nextAvailableFrameID);
+    }
+    iFrame.setAttribute("id","ifrm"+privly.nextAvailableFrameID);
+    iFrame.setAttribute("frameborder","0");
+    privly.nextAvailableFrameID++;
+    iFrame.setAttribute("style","width: 100%; height: 32px; " +
+      "overflow: hidden;");
+    iFrame.setAttribute("scrolling","no");
+    iFrame.setAttribute("overflow","hidden");
+    object.parentNode.replaceChild(iFrame, object);
   },
   
   //Process a link according to its parameters and whitelist status
@@ -311,15 +315,15 @@ var privly = {
     var exclude = anchorElement.getAttribute("privly-exclude");
     var params = privly.getUrlVariables(anchorElement.href);
     
-    if (!exclude && !params["exclude"]){
+    if (!exclude && params.exclude === undefined){
       
-      var passive = this.extensionMode == privly.extensionModeEnum.PASSIVE ||
-        params["passive"] != null || !whitelist;
-      var burnt = params["burntAfter"] != null && parseInt(params["burntAfter"]) <
+      var passive = this.extensionMode === privly.extensionModeEnum.PASSIVE ||
+        params.passive !== undefined || !whitelist;
+      var burnt = params.burntAfter !== undefined && parseInt(params.burntAfter, 10) <
         Date.now()/1000;
-      var active = this.extensionMode == privly.extensionModeEnum.ACTIVE &&
+      var active = this.extensionMode === privly.extensionModeEnum.ACTIVE &&
         whitelist;
-      var sleepMode = this.extensionMode == privly.extensionModeEnum.CLICKTHROUGH &&
+      var sleepMode = this.extensionMode === privly.extensionModeEnum.CLICKTHROUGH &&
         whitelist;
       
       if (!whitelist){
@@ -328,9 +332,9 @@ var privly = {
         anchorElement.addEventListener("mousedown",privly.makePassive,true);
       }
       else if (passive){
-        if (params["passiveMessage"] != null)
+        if (params.passiveMessage !== undefined)
         {
-          var passiveMessage = params["passiveMessage"].replace(/\+/g, " ");
+          var passiveMessage = params.passiveMessage.replace(/\+/g, " ");
           anchorElement.innerHTML = privly.messages.privlyContent + passiveMessage;
         }
         else
@@ -342,9 +346,9 @@ var privly = {
       }
       else if (burnt)
       {
-        if (params["burntMessage"] != null)
+        if (params.burntMessage !== undefined)
         {
-          var burntMessage = params["burntMessage"].replace(/\+/g, " ");
+          var burntMessage = params.burntMessage.replace(/\+/g, " ");
           anchorElement.innerHTML = privly.messages.burntPrivlyContent + burntMessage;
         }
         else
@@ -352,7 +356,7 @@ var privly = {
           anchorElement.innerHTML = privly.messages.contentExpired;
         }
         anchorElement.setAttribute('target','_blank');
-        anchorElement.addEventListener("mousedown",privly.makePassive,true);
+        anchorElement.addEventListener("mousedown", privly.makePassive, true);
       }
       else if (active){
         this.replaceLink(anchorElement);
@@ -360,7 +364,7 @@ var privly = {
       else if (sleepMode){
         anchorElement.innerHTML = privly.messages.sleepMode;
         anchorElement.setAttribute('target','_blank');
-        anchorElement.removeEventListener("mousedown",privly.makePassive,true);
+        anchorElement.removeEventListener("mousedown", privly.makePassive, true);
       }
     }
   },
@@ -370,9 +374,9 @@ var privly = {
   //by the iframe
   replaceLinks: function()
   {
-    elements = document.getElementsByTagName("privModeElement");
-    if (elements != null && elements.length != 0){
-      this.extensionMode = elements[0].getAttribute('mode');
+    var elements = document.getElementsByTagName("privModeElement");
+    if (elements.length > 0){
+      this.extensionMode = parseInt(elements[0].getAttribute('mode'), 10);
     }
     var anchors = document.links;
     var i = anchors.length;
@@ -399,9 +403,10 @@ var privly = {
       message.origin !== "http://dev.privly.org" &&
       message.origin !== "http://dev.privly.com" &&
       message.origin !== "https://privly.org" &&
-      message.origin !== "https://privly.com")
-      return;
-      
+      message.origin !== "https://privly.com") {
+        return;
+    }
+    
     var data = message.data.split(",");
     
     var iframe = document.getElementById("ifrm"+data[0]);
@@ -435,7 +440,7 @@ var privly = {
     //respect the settings of the host page.
     //If the body element has privly-exclude=true
     if (document.getElementsByTagName("body")[0]
-        .getAttribute("privly-exclude")=="true")
+        .getAttribute("privly-exclude")==="true")
     {
       return;
     }
@@ -453,8 +458,10 @@ var privly = {
       //for new Privly content. This might not be supported on other platforms
       document.addEventListener("DOMNodeInserted", function(event) {
         //we check the page a maximum of two times a second
-        if (privly.runPending)
+        if (privly.runPending) {
           return;
+        }
+        
         privly.runPending=true;
         
         setTimeout(
@@ -483,6 +490,6 @@ var privly = {
       return false;
     }
   }
-}
+};
 
 privly.addEvent(window, 'load', privly.listeners);
