@@ -26,13 +26,17 @@ DEALINGS IN THE SOFTWARE.
 *******************************************************************************/
 
 
-
 /**
- *
- * For a high level overview of what this script does, see:
+ * @fileOverview For a high level overview of what this script does, see:
  * http://www.privly.org/content/core-functionality-privlyjs
- *
- ***HOST PAGE CONFIGURATION***
+ * @author Sean McGregor
+ * @version 0.2-dev
+ **/
+ 
+/**
+ * @namespace
+ * @description
+ * HOST PAGE CONFIGURATION
  *
  * The host page can influence the behaviour of this script by including
  * privly-exclude="true" as an attribute on either the body element,
@@ -49,7 +53,7 @@ DEALINGS IN THE SOFTWARE.
  * Then it is not replaced with the referenced content.
  *
  *
- ****URL PARAMETERS***
+ * URL PARAMETERS
  *
  * The script also responds to parameters
  * and anchors on the URL.
@@ -68,12 +72,13 @@ DEALINGS IN THE SOFTWARE.
  * passive: Forces the link into passive mode
  * exclude: Force the link to not be replaced or put into passive
  * mode
- *
- **/
+ */
 var privly = {
   
-  //These messages are displayed to users. These strings cannot be in this
-  //script when we start localization.
+  /**
+   * These messages are displayed to users. All messages should be placed 
+   * here to assist in the localization process.
+   */
   messages: {
     sleepMode: "Privly is in sleep mode so it can catch up with " +
       "demand. The content may still be viewable by clicking this link",
@@ -84,11 +89,12 @@ var privly = {
     burntPrivlyContent: "Burnt Privly Content: "
   },
   
-  // Gives a map of the URL parameters and the anchor
-  // Example:
-  // var url = https://priv.ly/posts/1?example=Hello#World
-  // privly.getUrlVariables(url)["example"] is "Hello"
-  // privly.getUrlVariables(url)["anchor"] is "World"
+  /**
+   * Gives a map of the URL parameters and the anchor. 
+   * This method includes the anchor element under the binding 'anchor'
+   *
+   * @param {string} url The url you need a map of parameters from.
+   */
   getUrlVariables: function(url) {
     
     "use strict";
@@ -105,48 +111,60 @@ var privly = {
         function(m,key,value) {
           vars[key] = value;
       });
+      
+      //Example:
+      //https://priv.ly/posts/1?example=Hello#World
+      //privly.getUrlVariables(url).example is "Hello"
+      //privly.getUrlVariables(url).anchor is "World"
       return vars;
   },
   
-  // The Privly RegExp determines which links are eligible for
-  // replacing with their referenced content.
-  // This system will need to change so we can move to a white
-  // list approach. See: http://www.privly.org/content/why-privly-server
-  //
-  // Matches:
-  //              http://
-  //              https://
-  //                        DOMAIN/number
-  //
-  //                                  ?any_number_of_parameters=value#anchors
-  privlyReferencesRegex: new RegExp("\\b(https?:\\/\\/){0,1}(" +
-    "priv\\.ly\\/posts\\/\\d+|" +
-    "dev\\.privly\\.org\\/posts\\/\\d+|" +
-    "privly\\.org\\/posts\\/\\d+|" +
-    "privly\\.com\\/posts\\/\\d+|" +
-    "dev\\.privly\\.com\\/posts\\/\\d+|" +
-    "localhost:3000\\/posts\\/\\d+" +
+  /** The Privly RegExp determines which links are eligible for
+   * replacing with their referenced content.
+   * This system will need to change so we can move to a whitelist 
+   * approach. See: http://www.privly.org/content/why-privly-server
+   *
+   * Currently matched domains are priv.ly, dev.privly.org, dev.privly.com, 
+   * privly.com, pivly.org, privly.com, and localhost
+   *
+   */
+  privlyReferencesRegex: new RegExp(
+    "\\b(https?:\\/\\/){0,1}(" + //protocol
+    "priv\\.ly\\/posts\\/\\d+|" + //priv.ly/posts/
+    "dev\\.privly\\.org\\/posts\\/\\d+|" + //dev.privly.org/posts/
+    "privly\\.org\\/posts\\/\\d+|" + //privly.org/posts/
+    "privly\\.com\\/posts\\/\\d+|" + //privly.com/posts/
+    "dev\\.privly\\.com\\/posts\\/\\d+|" + //dev.privly.com/posts/
+    "localhost:3000\\/posts\\/\\d+" + //localhost:3000/posts/
     ")(\\b|\\?(\\S)*|#(\\S)*)$","gi"),
     //the final line matches
     //end of word OR
     //the parameter string to the end of the word OR
     //the anchor string to the end of the word
   
-  // enum to hold various extension modes and their value.
-  // extension modes are set through firefox's extension api.
-  // https://developer.mozilla.org/en/Code_snippets/Preferences
+  /** 
+   * Holds the identifiers for each of the modes of operation.
+   * Extension modes are set through firefox's extension api.
+   * https://developer.mozilla.org/en/Code_snippets/Preferences
+   */
   extensionModeEnum : {
     ACTIVE : 0,
     PASSIVE : 1,
     CLICKTHROUGH : 2
   },
   
-  //indicates whether the extension shoud immediatly replace all Privly
-  //links it encounters
+  /**
+   * Sets a mode of operation found in extensionModeEnum.
+   */
   extensionMode: 0,
   
-  // Takes a domain with an optional http(s)
-  // in front and returns a fully formed domain name
+  /** 
+   * Adds 'http' to strings if it is not already present
+   *
+   * @param {string} domain the domain potentially needing a protocol.
+   *
+   * @returns {string} The corresponding URL
+   */
   makeHref: function(domain)
   {
     "use strict";
@@ -157,7 +175,9 @@ var privly = {
     return domain;
   },
   
-  //Make plain text links into anchor elements
+  /**
+   * Make plain text links into anchor elements.
+   */
   createLinks: function()
   {
       "use strict";
@@ -219,7 +239,13 @@ var privly = {
       }
   },
   
-  //Kill default link behaviour on Privly Links
+  /**
+   * Kill default link behaviour on Privly Link, which was clicked, and
+   * replace the link with the referenced content.
+   *
+   * @param {event} e An event triggered by clicking a link, which needs
+   * replacing
+   */
   makePassive: function(e)
   {
     "use strict";
@@ -230,9 +256,11 @@ var privly = {
     privly.replaceLink(e.target);
   },
   
-  //Checks link attributes and text for privly links without the proper href
-  //attribute. Twitter and other hosts change links so they can collect
-  //click events.
+  /**
+   * Changes hyperlinks to reference the proper url.
+   * Twitter and other hosts change links so they can collect
+   * click events.
+   */
   correctIndirection: function()
   {
     "use strict";
@@ -269,9 +297,17 @@ var privly = {
     }
   },
   
+  /**
+   * Counter for injected frame identifiers.
+   */
   nextAvailableFrameID: 0,
   
-  // Replace an anchor element with its referenced content.
+  /**
+   * Replace an anchor element with its referenced content.
+   *
+   * @param {object} object A hyperlink element to be replaced
+   * with an iframe referencing its content
+   */
   replaceLink: function(object)
   {
     "use strict";
@@ -314,11 +350,18 @@ var privly = {
     object.parentNode.replaceChild(iFrame, object);
   },
   
-  //Process a link according to its parameters and whitelist status
-  //if the link is in active mode and is whitelisted, it will replace
-  //the link with the referenced content. If the link is in passive mode
-  //or it is not a whitelisted link, the link will be clickable to replace
-  //the content.
+  /**
+   * Process a link according to its parameters and whitelist status.
+   * If the link is in active mode and is whitelisted, it will replace
+   * the link with the referenced content. If the link is in passive mode
+   * or it is not a whitelisted link, the link will be clickable to replace
+   * the content.
+   *
+   * @param {object} anchorElement A hyperlink element eligible for processessing by 
+   * Privly.
+   *
+   * @param {boolean} whitelist Indicates whether the link is on the whitelist.
+   */
   processLink: function(anchorElement, whitelist)
   {
     "use strict";
@@ -380,9 +423,11 @@ var privly = {
     }
   },
   
-  //Replace all Privly links with their iframe or
-  //a new link, which when clicked will be replaced
-  //by the iframe
+  /**
+   * Replace all Privly links with their iframe or
+   * a new link, which when clicked will be replaced
+   * by the iframe
+   */
   replaceLinks: function()
   {
     "use strict";
@@ -408,7 +453,12 @@ var privly = {
     }
   },
   
-  //resize the iframe using a posted message
+  /**
+   * Receive an iframe resize message sent by the iframe using postMessage.
+   * Injected iframe elements need to know the height of the iframe's contents.
+   * This message receives a message containing the height of the iframe, and
+   * resizes the iframe accordingly.
+   */
   resizeIframe: function(message){
     
     "use strict";
@@ -428,10 +478,15 @@ var privly = {
     iframe.style.height = data[1]+'px';
   },
   
-  //prevents DOMNodeInserted from sending hundreds of extension runsmake
+  /** 
+   * Indicates whether the script is waiting to run again.
+   * This prevents DOMNodeInserted from sending hundreds of extension runs
+   */
   runPending: false,
   
-  //prep the page and replace the links if it is in active mode
+  /**
+   * Perform the current mode of operation on the page.
+   */
   run: function()
   {
     "use strict";
@@ -446,8 +501,10 @@ var privly = {
     privly.replaceLinks();
   },
   
-  //runs privly once then registers the update listener
-  //for dynamic pages
+  /**
+   * runs privly once then registers the update listener
+   * for dynamic pages
+   */
   listeners: function(){
     
     "use strict";
@@ -494,9 +551,18 @@ var privly = {
     }
   },
   
-  // cross platform onload event
-  // won't attach anything on IE
-  // on macintosh systems.
+  /** 
+   * Cross platform onload event. 
+   * won't attach anything on IE on macintosh systems.
+   *
+   * @param {object} obj The object we are goingt to add 
+   * a listener to.
+   *
+   * @param {string} evType The name of the event to listen for
+   *
+   * @param {function} fn The handler of the event.
+   *
+   */
   addEvent: function(obj, evType, fn){
     
     "use strict";
@@ -515,4 +581,5 @@ var privly = {
   }
 };
 
+//attach listeners for running Privly
 privly.addEvent(window, 'load', privly.listeners);
