@@ -99,24 +99,24 @@ var privly = {
     
     "use strict";
     
-      var vars = {};
-      if (url.indexOf("#",0) > 0)
-      {
-        var anchor = url.substring(url.indexOf("#",0) + 1, url.length);
-        vars.anchor = anchor;
-        url = url.split("#",1)[0];
-      }
-      url = url.replace("&amp;", "&");
-      var parts = url.replace(/[?&]+([^=&]+)=([^&]*)/gi,
-        function(m,key,value) {
-          vars[key] = value;
-      });
+    var vars = {};
+    if (url.indexOf("#",0) > 0)
+    {
+      var anchor = url.substring(url.indexOf("#",0) + 1, url.length);
+      vars.anchor = anchor;
+      url = url.split("#",1)[0];
+    }
+    url = url.replace("&amp;", "&");
+    var parts = url.replace(/[?&]+([^=&]+)=([^&]*)/gi,
+      function(m,key,value) {
+        vars[key] = value;
+    });
       
-      //Example:
-      //https://priv.ly/posts/1?example=Hello#World
-      //privly.getUrlVariables(url).example is "Hello"
-      //privly.getUrlVariables(url).anchor is "World"
-      return vars;
+    //Example:
+    //https://priv.ly/posts/1?example=Hello#World
+    //privly.getUrlVariables(url).example is "Hello"
+    //privly.getUrlVariables(url).anchor is "World"
+    return vars;
   },
   
   /** The Privly RegExp determines which links are eligible for
@@ -180,63 +180,63 @@ var privly = {
    */
   createLinks: function()
   {
-      "use strict";
-      /***********************************************************************
-      Inspired by Linkify script:
-        http://downloads.mozdev.org/greasemonkey/linkify.user.js
-        
-      Originally written by Anthony Lieuallen of http://arantius.com/
-      Licensed for unlimited modification and redistribution as long as
-      this notice is kept intact.
-      ************************************************************************/
+    "use strict";
+    /***********************************************************************
+    Inspired by Linkify script:
+      http://downloads.mozdev.org/greasemonkey/linkify.user.js
       
-      var excludeParents = ["a", "applet", "button", "code", "form",
-                             "input", "option", "script", "select", "meta",
-                             "style", "textarea", "title", "div","span"];
-      var excludedParentsString = excludeParents.join(" or parent::");
-      var xpathExpression = ".//text()[not(parent:: " +
-          excludedParentsString +")]";
+    Originally written by Anthony Lieuallen of http://arantius.com/
+    Licensed for unlimited modification and redistribution as long as
+    this notice is kept intact.
+    ************************************************************************/
+    
+    var excludeParents = ["a", "applet", "button", "code", "form",
+                           "input", "option", "script", "select", "meta",
+                           "style", "textarea", "title", "div","span"];
+    var excludedParentsString = excludeParents.join(" or parent::");
+    var xpathExpression = ".//text()[not(parent:: " +
+        excludedParentsString +")]";
+        
+    var textNodes = document.evaluate(xpathExpression, document.body, null,
+        XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+        
+    for (var i=0; i < textNodes.snapshotLength; i++){
+      var item = textNodes.snapshotItem(i);
+        
+      var itemText = item.nodeValue;
+      
+      privly.privlyReferencesRegex.lastIndex = 0;
+      if (privly.privlyReferencesRegex.test(itemText)){
+        var span = document.createElement("span");
+        var lastLastIndex = 0;
+        privly.privlyReferencesRegex.lastIndex = 0;
+        
+        var results = privly.privlyReferencesRegex.exec(itemText);
+        while ( results ){
+          span.appendChild(document.createTextNode(
+            itemText.substring(lastLastIndex, results.index)));
+            
+          var rawHref = results[0];
+          var text = (rawHref.indexOf(" ") === 0)?rawHref.substring(1):rawHref;
           
-      var textNodes = document.evaluate(xpathExpression, document.body, null,
-          XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+          var href = privly.makeHref(text);
           
-      for (var i=0; i < textNodes.snapshotLength; i++){
-          var item = textNodes.snapshotItem(i);
-          
-          var itemText = item.nodeValue;
-          
-          privly.privlyReferencesRegex.lastIndex = 0;
-          if (privly.privlyReferencesRegex.test(itemText)){
-              var span = document.createElement("span");
-              var lastLastIndex = 0;
-              privly.privlyReferencesRegex.lastIndex = 0;
-              
-              var results = privly.privlyReferencesRegex.exec(itemText);
-              while ( results ){
-                  span.appendChild(document.createTextNode(
-                    itemText.substring(lastLastIndex, results.index)));
-                    
-                  var rawHref = results[0];
-                  var text = (rawHref.indexOf(" ") === 0)?rawHref.substring(1):rawHref;
-                  
-                  var href = privly.makeHref(text);
-                  
-                  var a = document.createElement("a");
-                  a.setAttribute("href", href);
-                  a.appendChild(document.createTextNode(
-                    text.substring(0,4).toLowerCase() + text.substring(4)));
-                  if (href.indexOf(" ") === 0) {
-                    span.appendChild(document.createTextNode(" "));
-                  }
-                  span.appendChild(a);
-                  lastLastIndex = privly.privlyReferencesRegex.lastIndex;
-                  results = privly.privlyReferencesRegex.exec(itemText);
-              }
-              span.appendChild(document.createTextNode(
-                itemText.substring(lastLastIndex)));
-              item.parentNode.replaceChild(span, item);
+          var a = document.createElement("a");
+          a.setAttribute("href", href);
+          a.appendChild(document.createTextNode(
+            text.substring(0,4).toLowerCase() + text.substring(4)));
+          if (href.indexOf(" ") === 0) {
+            span.appendChild(document.createTextNode(" "));
           }
+          span.appendChild(a);
+          lastLastIndex = privly.privlyReferencesRegex.lastIndex;
+          results = privly.privlyReferencesRegex.exec(itemText);
+        }
+        span.appendChild(document.createTextNode(
+          itemText.substring(lastLastIndex)));
+        item.parentNode.replaceChild(span, item);
       }
+    }
   },
   
   /**
