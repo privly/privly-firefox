@@ -6,11 +6,11 @@
 * extensionMode=3 - no requests sent to the server - when the server is down and we don't want any further requests to the server.(disabled)
 */
   
-pref("extensions.privly.extensionMode",0);
-//disablePosts - when we don't want the extension to post content to the server.
-pref("extensions.privly.disablePosts",false);
-//all posts default to public
-pref("extensions.privly.allPostsPublic",false);
-//Where to store posts, for testing use "http://localhost:3000"https://priv.ly
-pref("extensions.privly.contentServerUrl","https://priv.ly");
-//pref("extensions.privly.firstRun",true);
+pref("extensions.privly.extensionMode", 0);
+// disablePosts - when we don't want the extension to post content to the server.
+pref("extensions.privly.disablePosts", false);
+// all posts default to public
+pref("extensions.privly.allPostsPublic", false);
+// Where to store posts, for testing use "http://localhost:3000"https://priv.ly
+pref("extensions.privly.contentServerUrl", "https://priv.ly");
+//pref("extensions.privly.firstRun", true);

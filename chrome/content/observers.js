@@ -13,33 +13,29 @@
 // not once per window. Nils Maier Provided these resoucrces
 // For example: https://gist.github.com/1630169
 // https://developer.mozilla.org/en/JavaScript_modules
-var privlyObservers = 
-{
+var privlyObservers =  {
     
   /*
    * enum to hold various extension modes and their value. extension modes 
    * are set through firefox's extension api.
    * https://developer.mozilla.org/en/Code_snippets/Preferences
    */ 
-  extensionModeEnum : {
-    ACTIVE : 0,
-    PASSIVE : 1,
-    CLICKTHROUGH : 2
+  extensionModeEnum: {
+    ACTIVE: 0,
+    PASSIVE: 1,
+    CLICKTHROUGH: 2
   },
   
-  httpRequestObserver :
-  {
+  httpRequestObserver: {
     // get the prefrences data where extension mode is stored
-    preferences : Components.classes["@mozilla.org/preferences-service;1"]
+    preferences: Components.classes["@mozilla.org/preferences-service;1"]
       .getService(Components.interfaces.nsIPrefService)
       .getBranch("extensions.privly."),
 
-    observe: function(subject, topic, data)
-    {
-      if (topic == "http-on-modify-request") 
-      {
-        var httpChannel = subject.QueryInterface(Components.interfaces
-                                                           .nsIHttpChannel);
+    observe: function(subject, topic, data) {
+      if (topic == "http-on-modify-request") {
+        var httpChannel = subject.QueryInterface(Components
+                                                .interfaces.nsIHttpChannel);
         
         /* 
          * set the extension version and auth_token param on the request headers
@@ -51,14 +47,12 @@ var privlyObservers =
          * if-else
          */
         extensionMode = this.preferences.getIntPref("extensionMode");
-        if (/priv.ly/.test(httpChannel.originalURI.host))
-        {
+        if (/priv.ly/.test(httpChannel.originalURI.host)) {
           httpChannel.setRequestHeader("Privly-Version", "0.1.7", false);
           httpChannel.setRequestHeader("auth_token", 
                                         privlyAuthentication.authToken, false);
         }
-        else if(/localhost/.test(httpChannel.originalURI.host))
-        {
+        else if (/localhost/.test(httpChannel.originalURI.host)) {
           httpChannel.setRequestHeader("Privly-Version", "0.1.7", false);
           httpChannel.setRequestHeader("auth_token", 
                                         privlyAuthentication.authToken, false);
@@ -71,13 +65,11 @@ var privlyObservers =
                       .getService(Components.interfaces.nsIObserverService);
     },
   
-    register: function()
-    {
+    register: function() {
       this.observerService.addObserver(this, "http-on-modify-request", false);
     },
   
-    unregister: function()
-    {
+    unregister: function() {
       this.observerService.removeObserver(this, "http-on-modify-request");
     }
   },
@@ -88,14 +80,12 @@ var privlyObservers =
    * in responseObserver, we read this header value and set the extension mode
    * accordingly
    */
-  httpResponseObserver :
-  {
-    preferences : Components.classes["@mozilla.org/preferences-service;1"]
+  httpResponseObserver: {
+    preferences: Components.classes["@mozilla.org/preferences-service;1"]
                             .getService(Components.interfaces.nsIPrefService)
                             .getBranch("extensions.privly."),
                             
-    observe: function(subject, topic, data)
-    {
+    observe: function(subject, topic, data) {
       if (topic == "http-on-examine-response") {
         var httpChannel = subject.QueryInterface(Components
                                                 .interfaces.nsIHttpChannel);
@@ -104,14 +94,13 @@ var privlyObservers =
          * if the response header is not set or the server
          * didn't reply, it will throw an error. so catch it
          */
-        try{
+        try {
           var extensionCommand = httpChannel.
-                                  getResponseHeader("privlyExtensionCommand");
+                                 getResponseHeader("privlyExtensionCommand");
           
           if (/priv.ly/.test(httpChannel.originalURI.host) || 
-              (/localhost/.test(httpChannel.originalURI.host) && 
-              /posts/.test(httpChannel.originalURI.path)))
-          { 
+             (/localhost/.test(httpChannel.originalURI.host) && 
+                /posts/.test(httpChannel.originalURI.path))) { 
             /* 
              * the extensioncommand response header will be a json string. 
              * passive and requireClickthrough are mutually exclusive.
@@ -127,48 +116,49 @@ var privlyObservers =
              * accordingly. Set it back to active after the time interval  
              * specified in the json string.
              */
-            if(command && command.requireClickthrough){
+            if (command && command.requireClickthrough) {
               this.preferences.setIntPref("extensionMode",
-                                privlyObservers.extensionModeEnum.CLICKTHROUGH);
-              setTimeout(function(){
-                this.preferences.setIntPref("extensionMode",
-                                    privlyObservers.extensionModeEnum.ACTIVE);},
+                               privlyObservers.extensionModeEnum.CLICKTHROUGH);
+              setTimeout(function() {
+                  this.preferences.setIntPref("extensionMode",
+                                     privlyObservers.extensionModeEnum.ACTIVE);
+                },
                 command.requireClickthrough);
             }
-            else if(command && command.passive){
+            else if (command && command.passive) {
               this.preferences.setIntPref("extensionMode",
-                privlyObservers.extensionModeEnum.PASSIVE);
-              setTimeout(function(){
-                this.preferences.setIntPref("extensionMode",
-                  privlyObservers.extensionModeEnum.ACTIVE);},
+                                    privlyObservers.extensionModeEnum.PASSIVE);
+              setTimeout(function() {
+                  this.preferences.setIntPref("extensionMode",
+                                     privlyObservers.extensionModeEnum.ACTIVE);
+                },
                 command.passive);
             }
             // disable the ability to post content to the server, if the 
             // disablePosts field is present in the header.
-            if(command && command.disablePosts){
-              this.preferences.setBoolPref('disablePosts',true);
-              setTimeout(function(){this.preferences.
-                                         setBoolPref('disablePosts',false);},
+            if (command && command.disablePosts) {
+              this.preferences.setBoolPref('disablePosts', true);
+              setTimeout(function() {
+                  this.preferences.setBoolPref('disablePosts', false);
+                },
                 command.disablePosts);
             }
           }
         }
-        catch(err){}
+        catch (err) {}
       }
     },
   
     get observerService() {
       return Components.classes["@mozilla.org/observer-service;1"]
-                      .getService(Components.interfaces.nsIObserverService);
+                       .getService(Components.interfaces.nsIObserverService);
     },
   
-    register: function()
-    {
+    register: function() {
       this.observerService.addObserver(this, "http-on-examine-response", false);
     },
   
-    unregister: function()
-    {
+    unregister: function() {
       this.observerService.removeObserver(this, "http-on-examine-response");
     }
   }
