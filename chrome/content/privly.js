@@ -371,8 +371,8 @@ var privly = {
    * or it is not a whitelisted link, the link will be clickable to replace
    * the content.
    *
-   * @param {object} anchorElement A hyperlink element eligible for processessing by 
-   * Privly.
+   * @param {object} anchorElement A hyperlink element eligible for 
+   * processessing by Privly.
    *
    * @param {boolean} whitelist Indicates whether the link is on the whitelist.
    */
@@ -387,8 +387,8 @@ var privly = {
       
       var passive = this.extensionMode === privly.extensionModeEnum.PASSIVE ||
         params.passive !== undefined || !whitelist;
-      var burnt = params.burntAfter !== undefined && parseInt(params.burntAfter, 10) <
-        Date.now()/1000;
+      var burnt = params.burntAfter !== undefined && 
+        parseInt(params.burntAfter, 10) < Date.now()/1000;
       var active = this.extensionMode === privly.extensionModeEnum.ACTIVE &&
         whitelist;
       var sleepMode = this.extensionMode === privly.extensionModeEnum.CLICKTHROUGH &&
@@ -417,7 +417,8 @@ var privly = {
         if (params.burntMessage !== undefined)
         {
           var burntMessage = params.burntMessage.replace(/\+/g, " ");
-          anchorElement.innerHTML = privly.messages.burntPrivlyContent + burntMessage;
+          anchorElement.innerHTML = privly.messages.burntPrivlyContent + 
+            burntMessage;
         }
         else
         {
@@ -482,7 +483,7 @@ var privly = {
     
     "use strict";
     
-    if (message.origin === "null") {
+    if (message.origin === "null" || message.data.indexOf(',') === 0) {
       return;
     }
     
@@ -500,7 +501,8 @@ var privly = {
     // All iframes eligible for resize have a custom attribute,
     // acceptresize, set to true.
     var acceptresize = iframe.getAttribute("acceptresize");
-    if (acceptresize === undefined || acceptresize === null || acceptresize !== "true") {
+    if (acceptresize === undefined || acceptresize === null || 
+      acceptresize !== "true") {
       return;
     }
     
@@ -550,7 +552,8 @@ var privly = {
     //The content's iframe will post a message to the hosting document.
     //This listener sets the height  of the iframe according to the messaged
     //height
-    window.addEventListener("message", privly.resizeIframePostedMessage, false, true);
+    window.addEventListener("message", privly.resizeIframePostedMessage, 
+      false, true);
     
     //respect the settings of the host page.
     //If the body element has privly-exclude=true
@@ -652,6 +655,14 @@ var privly = {
   }
 };
 
-//attach listeners for running Privly
-privly.addEvent(window, 'load', privly.listeners);
-privly.addEvent(window, 'load', privly.dispatchResize);
+//This is mostly here for Google Chrome.
+//Google Chrome will inject the top level script after the load event,
+//and subsequent iframes after before the load event.
+if (document.readyState === "complete") {
+  privly.listeners();
+  privly.dispatchResize();
+} else {
+  //attach listeners for running Privly
+  privly.addEvent(window, 'load', privly.listeners);
+  privly.addEvent(window, 'load', privly.dispatchResize);
+}
