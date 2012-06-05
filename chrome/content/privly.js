@@ -119,8 +119,9 @@ var privly = {
     return vars;
   },
   
-  /** The Privly RegExp determines which links are eligible for
-   * replacing with their referenced content.
+  /** 
+   * The Privly RegExp determines which links are eligible for
+   * automatic injection.
    * This system will need to change so we can move to a whitelist 
    * approach. See: http://www.privly.org/content/why-privly-server
    *
@@ -313,40 +314,53 @@ var privly = {
     "use strict";
     
     var iFrame = document.createElement('iframe');
+    
+    //Styling and display attributes
     iFrame.setAttribute("frameborder","0");
     iFrame.setAttribute("vspace","0");
     iFrame.setAttribute("hspace","0");
-    iFrame.setAttribute("name","privlyiframe");
     iFrame.setAttribute("width","100%");
     iFrame.setAttribute("marginwidth","0");
     iFrame.setAttribute("marginheight","0");
     iFrame.setAttribute("height","1px");
+    iFrame.setAttribute("frameborder","0");
+    iFrame.setAttribute("style","width: 100%; height: 32px; " +
+      "overflow: hidden;");
+    iFrame.setAttribute("scrolling","no");
+    iFrame.setAttribute("overflow","hidden");
     
+    //Custom attribute indicating this iframe is eligible for being resized by
+    //its contents
+    iFrame.setAttribute("acceptresize","true");
+    
+    //Sets content URLs. Content specifically formatted for Privly use the
+    //iframe format. The frame_id parameter is deprecated.
     var iframeUrl = object.href;
-    
     if (object.href.indexOf("?") > 0){
-      iframeUrl = iframeUrl.replace("?",".iframe?frame_id="+
+      iframeUrl = iframeUrl.replace("?","?format=iframe&frame_id="+
         privly.nextAvailableFrameID+"&");
       iFrame.setAttribute("src",iframeUrl);
     }
     else if (object.href.indexOf("#") > 0)
     {
-      iframeUrl = iframeUrl.replace("#",".iframe?frame_id="+
+      iframeUrl = iframeUrl.replace("#","?format=iframe&frame_id="+
         privly.nextAvailableFrameID+"#");
       iFrame.setAttribute("src",iframeUrl);
     }
     else
     {
-      iFrame.setAttribute("src",object.href + ".iframe?frame_id=" +
+      iFrame.setAttribute("src",object.href + "?format=iframe&frame_id=" +
         privly.nextAvailableFrameID);
     }
-    iFrame.setAttribute("id","ifrm"+privly.nextAvailableFrameID);
-    iFrame.setAttribute("frameborder","0");
+    
+    //The id and the name are the same so that the iframe can be 
+    //uniquely identified and resized
+    var frameIdAndName = "ifrm"+privly.nextAvailableFrameID;
+    iFrame.setAttribute("id", frameIdAndName);
+    iFrame.setAttribute("name", frameIdAndName);
     privly.nextAvailableFrameID++;
-    iFrame.setAttribute("style","width: 100%; height: 32px; " +
-      "overflow: hidden;");
-    iFrame.setAttribute("scrolling","no");
-    iFrame.setAttribute("overflow","hidden");
+
+    //put the iframe into the page
     object.parentNode.replaceChild(iFrame, object);
   },
   
@@ -456,26 +470,50 @@ var privly = {
   /**
    * Receive an iframe resize message sent by the iframe using postMessage.
    * Injected iframe elements need to know the height of the iframe's contents.
-   * This message receives a message containing the height of the iframe, and
+   * This function receives a message containing the height of the iframe, and
    * resizes the iframe accordingly.
+   *
+   * @param {message} message A posted message from one of the trusted domains
+   * it contains the name or id of the iframe, and height of the iframe's 
+   * contents
+   *
    */
-  resizeIframe: function(message){
+  resizeIframePostedMessage: function(message){
     
     "use strict";
     
-    if (message.origin !== "https://priv.ly" &&
-      message.origin !== "http://localhost:3000" &&
-      message.origin !== "http://dev.privly.org" &&
-      message.origin !== "http://dev.privly.com" &&
-      message.origin !== "https://privly.org" &&
-      message.origin !== "https://privly.com") {
-        return;
+    if (message.origin === "null") {
+      return;
     }
     
     var data = message.data.split(",");
+    var iframeIdOrName = "ifrm" + data[0];
     
-    var iframe = document.getElementById("ifrm"+data[0]);
-    iframe.style.height = data[1]+'px';
+    //Get the element by id (deprecated), then get it by name if that fails.
+    var iframe = document.getElementById(iframeIdOrName);
+    if (iframe === null) {
+      iframeIdOrName = data[0];
+      iframe = document.getElementsByName(iframeIdOrName)[0];
+    }
+    
+    // Only resize iframes eligible for resize.
+    // All iframes eligible for resize have a custom attribute,
+    // acceptresize, set to true.
+    var acceptresize = iframe.getAttribute("acceptresize");
+    if (acceptresize === undefined || acceptresize === null || acceptresize !== "true") {
+      return;
+    }
+    
+    var sourceURL = iframe.getAttribute("src");
+    var originDomain = message.origin;
+    sourceURL = sourceURL.replace("http://", "https://");
+    originDomain = originDomain.replace("http://", "https://");
+    
+    //make sure the message comes from the expected domain
+    if (sourceURL.indexOf(originDomain) === 0)
+    {
+      iframe.style.height = data[1]+'px';
+    }
   },
   
   /** 
@@ -512,7 +550,7 @@ var privly = {
     //The content's iframe will post a message to the hosting document.
     //This listener sets the height  of the iframe according to the messaged
     //height
-    window.addEventListener("message", privly.resizeIframe, false, true);
+    window.addEventListener("message", privly.resizeIframePostedMessage, false, true);
     
     //respect the settings of the host page.
     //If the body element has privly-exclude=true
@@ -551,6 +589,39 @@ var privly = {
     }
   },
   
+  /**
+   * Sends the parent iframe the height of this iframe, only if the "wrapper"
+   * div is not specified. 
+   */
+  dispatchResize: function() {
+    
+    "use strict";
+    
+    //don't send a message if it is the top window
+    if (top === this.self) {
+      return;
+    }
+    
+    //Only send the message if there is no "wrapper" div element.
+    //If there is a wrapper element it might already be a privly
+    //iframe, which will send the resize command. I added the wrapper
+    //div because its height is the most accurate reflection of the
+    //content's height. Future version may remove this element. 
+    var wrapper = document.getElementById("wrapper");
+    if (wrapper === null) {
+      var D = document;
+      var newHeight = Math.max(
+              D.body.scrollHeight, 
+              D.documentElement.scrollHeight, 
+              D.body.offsetHeight, 
+              D.documentElement.offsetHeight, 
+              D.body.clientHeight, 
+              D.documentElement.clientHeight
+          );
+      parent.postMessage(window.name + "," + newHeight, "*");
+    }
+  },
+  
   /** 
    * Cross platform onload event. 
    * won't attach anything on IE on macintosh systems.
@@ -583,3 +654,4 @@ var privly = {
 
 //attach listeners for running Privly
 privly.addEvent(window, 'load', privly.listeners);
+privly.addEvent(window, 'load', privly.dispatchResize);
