@@ -1,13 +1,3 @@
-// The request observer sets headers to authenticate the user, and 
-// identify the extension to the server. The headers are only set on requests
-// to priv.ly or the localhost. 
-//
-// The response observer checks whether localhost or priv.ly
-// set operation flags. These are usually set in instances
-// of high content server load. The extension will notify
-// the user of the issue, and switch into passive mode. 
-
-
 // We need to refactor this functionality into a JS module.
 // Observers should be registered once per application,
 // not once per window. Nils Maier Provided these resoucrces
@@ -15,7 +5,7 @@
 // https://developer.mozilla.org/en/JavaScript_modules
 var privlyObservers =  {
     
-  /*
+  /**
    * enum to hold various extension modes and their value. extension modes 
    * are set through firefox's extension api.
    * https://developer.mozilla.org/en/Code_snippets/Preferences
@@ -26,13 +16,38 @@ var privlyObservers =  {
     CLICKTHROUGH: 2
   },
   
+  /**
+   * @namespace
+   * Sets headers on requests to Privly servers.
+   */
   httpRequestObserver: {
-    // get the prefrences data where extension mode is stored
+    
+    "use strict";
+    
+    /**
+     * Interface object to the extension preferences.
+     */
     preferences: Components.classes["@mozilla.org/preferences-service;1"]
       .getService(Components.interfaces.nsIPrefService)
       .getBranch("extensions.privly."),
-
+    
+    /** 
+     * Add headers to Privly requests containing the extension version
+     * and the authentication token.
+     *
+     * @param {http subject} subject the interface for accessing the http
+     * channel.
+     *
+     * @param {string} topic The name of the object being examined.
+     * "http-on-modify-request" is expected, otherwise nothing is done.
+     *
+     * @param {data} data The response data. This variable is currently unused.
+     *
+     */
     observe: function(subject, topic, data) {
+      
+      "use strict";
+      
       if (topic == "http-on-modify-request") {
         var httpChannel = subject.QueryInterface(Components
                                                 .interfaces.nsIHttpChannel);
@@ -64,28 +79,66 @@ var privlyObservers =  {
       return Components.classes["@mozilla.org/observer-service;1"]
                       .getService(Components.interfaces.nsIObserverService);
     },
-  
+    
+    /**
+     * Add the request observer to the overlay
+     */
     register: function() {
+      
+      "use strict";
+      
       this.observerService.addObserver(this, "http-on-modify-request", false);
     },
-  
+    
+    /**
+     * Remove this request observer from the overlay
+     */
     unregister: function() {
+      
+      "use strict";
+      
       this.observerService.removeObserver(this, "http-on-modify-request");
     }
   },
-  /* 
-   * the content server can set the extension to any one of the three modes.
+  
+  /**
+   * @namespace
+   * The response observer checks whether localhost or priv.ly
+   * set operation flags. These are usually set in instances
+   * of high content server load. The extension will notify
+   * the user of the issue, and switch into passive mode.
+   *
+   * The content server can set the extension to any one of the three modes.
    * it can do so by setting a header in the response header called 
    * 'privlyExtensionCommand'.
    * in responseObserver, we read this header value and set the extension mode
    * accordingly
    */
   httpResponseObserver: {
+    
+    /**
+     * Interface object to the extension preferences.
+     */
     preferences: Components.classes["@mozilla.org/preferences-service;1"]
                             .getService(Components.interfaces.nsIPrefService)
                             .getBranch("extensions.privly."),
-                            
+    
+    /** 
+     * Respond to mode changes from the server.
+     *
+     * @param {http subject} subject the interface for accessing the http
+     * channel.
+     *
+     * @param {string} topic The name of the object being examined.
+     * "http-on-examine-response" is expected, otherwise nothing is done.
+     *
+     * @param {data} data The response data. This variable is currently unused.
+     *
+     */
     observe: function(subject, topic, data) {
+      
+      "use strict";
+      
       if (topic == "http-on-examine-response") {
         var httpChannel = subject.QueryInterface(Components
                                                 .interfaces.nsIHttpChannel);
@@ -153,16 +206,28 @@ var privlyObservers =  {
       return Components.classes["@mozilla.org/observer-service;1"]
                        .getService(Components.interfaces.nsIObserverService);
     },
-  
+    
+    /**
+     * Add the response observer to the overlay
+     */
     register: function() {
+      
+      "use strict";
+      
       this.observerService.addObserver(this, "http-on-examine-response", false);
     },
-  
+    
+    /**
+     * Remove the response observer from the overlay
+     */
     unregister: function() {
+      
+      "use strict";
+      
       this.observerService.removeObserver(this, "http-on-examine-response");
     }
   }
-}
+};
 
 privlyObservers.httpRequestObserver.register();
 privlyObservers.httpResponseObserver.register();

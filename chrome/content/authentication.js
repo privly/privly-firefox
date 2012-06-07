@@ -1,13 +1,30 @@
-// Manages sessions for the content server
+/**
+ * @fileOverview This file manages authentication with the Privly server.
+ * This file needs to be reformatted into a module, and it needs support for
+ * multiple content server auth tokens.
+ * @author Balaji Athreya, Sean McGregor
+ **/
 
+/**
+ * @namespace
+ * Handles authentication with the remote server.
+ * 
+ */
 var privlyAuthentication = {
   //When added to every request to the content server
   //as the parameter auth_token, the extension has access
   //to the referenced user account
   authToken: "",
   
-  //get a new auth token
+  /**
+   * Prompt the user for their email and password, and attempt to log them
+   * into a content server. If successful, this function assigns the 
+   * auth_token. If it fails, an error message is displayed.
+   */
   loginToPrivly: function() {
+    
+    "use strict";
+    
     var prompts = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
                           .getService(Components.interfaces.nsIPromptService);
     var email = { value: "" };
@@ -44,8 +61,13 @@ var privlyAuthentication = {
     });
   },
   
-  //destroy the auth token
+  /**
+   * Destroys the auth_token locally and on the remote server.
+   */
   logoutFromPrivly: function() {
+    
+    "use strict";
+    
     jQ.ajax({
       data: { _method: "delete", endpoint:"extension", browser:"firefox", 
         version:"0.1.1.1", auth_token: privlyAuthentication.authToken

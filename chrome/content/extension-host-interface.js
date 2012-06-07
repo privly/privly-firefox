@@ -1,7 +1,7 @@
 /**
  * @namespace
- * @description
- * Handles interaction with the host page.
+ * Handles interaction with the host page, including injecting the content
+ * script, privly.js.
  */
 var privlyExtension = {
   

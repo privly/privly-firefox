@@ -35,7 +35,8 @@ DEALINGS IN THE SOFTWARE.
  
 /**
  * @namespace
- * @description
+ * Script injected into the host page.
+ *
  * HOST PAGE CONFIGURATION
  *
  * The host page can influence the behaviour of this script by including
