@@ -22,8 +22,6 @@ var privlyObservers =  {
    */
   httpRequestObserver: {
     
-    "use strict";
-    
     /**
      * Interface object to the extension preferences.
      */
@@ -48,7 +46,7 @@ var privlyObservers =  {
       
       "use strict";
       
-      if (topic == "http-on-modify-request") {
+      if (topic === "http-on-modify-request") {
         var httpChannel = subject.QueryInterface(Components
                                                 .interfaces.nsIHttpChannel);
         
@@ -76,6 +74,9 @@ var privlyObservers =  {
     },
   
     get observerService() {
+      
+      "use strict";
+      
       return Components.classes["@mozilla.org/observer-service;1"]
                       .getService(Components.interfaces.nsIObserverService);
     },
@@ -139,7 +140,7 @@ var privlyObservers =  {
       
       "use strict";
       
-      if (topic == "http-on-examine-response") {
+      if (topic === "http-on-examine-response") {
         var httpChannel = subject.QueryInterface(Components
                                                 .interfaces.nsIHttpChannel);
         /*
@@ -203,6 +204,9 @@ var privlyObservers =  {
     },
   
     get observerService() {
+      
+      "use strict";
+      
       return Components.classes["@mozilla.org/observer-service;1"]
                        .getService(Components.interfaces.nsIObserverService);
     },

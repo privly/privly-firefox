@@ -87,4 +87,4 @@ var privlyAuthentication = {
       }
     });
   }
-}
+};

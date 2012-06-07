@@ -34,13 +34,13 @@ var privlyPrefPane =
     //get the extensionmode from preferences if it was modified using the toolbar button
     extensionMode = this.preferences.getIntPref("extensionMode");
     //update the radio buttons to reflect the changes.
-    if (extensionMode == privlyPrefPane.extensionModeEnum.ACTIVE) {
+    if (extensionMode === privlyPrefPane.extensionModeEnum.ACTIVE) {
       document.getElementById('active').selected = true;
     }
-    else if (extensionMode == privlyPrefPane.extensionModeEnum.PASSIVE) {
+    else if (extensionMode === privlyPrefPane.extensionModeEnum.PASSIVE) {
       document.getElementById('passive').selected = true;
     }
-    else if (extensionMode == privlyPrefPane.extensionModeEnum.CLICKTHROUGH) {
+    else if (extensionMode === privlyPrefPane.extensionModeEnum.CLICKTHROUGH) {
       document.getElementById('require-clickthrough').selected = true;
     }
      //get the disable post option from preferences and update the checkbox 
@@ -57,13 +57,14 @@ var privlyPrefPane =
     
     "use strict";
     
-    if (document.getElementById('active').selected == true) {
+    var mode = 0;
+    if (document.getElementById('active').selected === true) {
       mode = privlyPrefPane.extensionModeEnum.ACTIVE;
     }
-    else if (document.getElementById('passive').selected == true) {
+    else if (document.getElementById('passive').selected === true) {
       mode = privlyPrefPane.extensionModeEnum.PASSIVE;
     }
-    else if (document.getElementById('require-clickthrough').selected == true) {
+    else if (document.getElementById('require-clickthrough').selected === true) {
       mode = privlyPrefPane.extensionModeEnum.CLICKTHROUGH;
     }
     this.preferences.setIntPref("extensionMode", mode);
@@ -79,7 +80,7 @@ var privlyPrefPane =
     
     "use strict";
     
-    if (document.getElementById('disable-post').checked == true) {
+    if (document.getElementById('disable-post').checked === true) {
       this.preferences.setBoolPref('disablePosts', true);
     }
   },
@@ -95,15 +96,15 @@ var privlyPrefPane =
     "use strict";
     
     var contentServerURL = "";
-    if (document.getElementById('contentServerPrivly').selected == true) {
+    if (document.getElementById('contentServerPrivly').selected === true) {
       contentServerURL = "https://priv.ly";
     }
-    else if (document.getElementById('contentServerDev').selected == true) {
+    else if (document.getElementById('contentServerDev').selected === true) {
       contentServerURL = "https://dev.privly.org";
     }
-    else if (document.getElementById('contentServerLocalhost').selected == true) {
+    else if (document.getElementById('contentServerLocalhost').selected === true) {
       contentServerURL = "http://localhost:3000";
     }
     this.preferences.setStringPref("contentServerUrl", contentServerURL);
   }
-}
+};
