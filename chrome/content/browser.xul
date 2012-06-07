@@ -7,14 +7,6 @@
 	<script src="observers.js" />
 	<script src="authentication.js" />
 
-	<menupopup id="menu_ToolsPopup"> 
-		<menuitem label="&runPrivly;" key="privly-run-key" oncommand="privlyExtension.runPrivly()"/> 
-	</menupopup>
-
-	<keyset>
-		<key id="privly-run-key" modifiers="accel alt" key="P" oncommand="privlyExtension.runPrivly()"/>
-	</keyset>
-
 	<menupopup id="contentAreaContextMenu">  
 		<menuitem id="publicPostToPrivlyMenuItem" label="Post Public Content to Privly" oncommand="privlyExtension.postToPrivly('public')"/>  
 	</menupopup>
