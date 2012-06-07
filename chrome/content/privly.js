@@ -448,10 +448,6 @@ var privly = {
   {
     "use strict";
     
-    var elements = document.getElementsByTagName("privModeElement");
-    if (elements.length > 0){
-      this.extensionMode = parseInt(elements[0].getAttribute('mode'), 10);
-    }
     var anchors = document.links;
     var i = anchors.length;
     
@@ -532,14 +528,23 @@ var privly = {
   {
     "use strict";
     
-    //create and correct the links pointing
-    //to Privly content
-    privly.createLinks();
-    privly.correctIndirection();
+    var elements = document.getElementsByTagName("privModeElement");
+    if (elements.length > 0){
+      this.extensionMode = parseInt(elements[0].getAttribute('mode'), 10);
+    }
     
-    //replace all available links on load, if in active mode,
-    //otherwise replace all links default behavior
-    privly.replaceLinks();
+    if (this.extensionMode === privly.extensionModeEnum.CLICKTHROUGH) {
+      return;
+    } else {
+      //create and correct the links pointing
+      //to Privly content
+      privly.createLinks();
+      privly.correctIndirection();
+      
+      //replace all available links on load, if in active mode,
+      //otherwise replace all links default behavior
+      privly.replaceLinks();
+    }
   },
   
   /**
@@ -553,7 +558,7 @@ var privly = {
     //The content's iframe will post a message to the hosting document.
     //This listener sets the height  of the iframe according to the messaged
     //height
-    window.addEventListener("message", privly.resizeIframePostedMessage, 
+    window.addEventListener("message", privly.resizeIframePostedMessage,
       false, true);
     
     //respect the settings of the host page.

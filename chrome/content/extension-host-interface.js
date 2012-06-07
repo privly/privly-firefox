@@ -189,7 +189,7 @@ var privlyExtension = {
     //when the extension is in active mode and user clicks the toolbar 
     //button toggle to passive mode
     if (extensionMode === privlyExtension.extensionModeEnum.ACTIVE) {
-      extensionMode = privlyExtension.extensionModeEnum.PASSIVE;
+      extensionMode = privlyExtension.extensionModeEnum.CLICKTHROUGH;
     }
     //when the extension is in either click through or passive mode and user
     //clicks the toolbar button toggle to active mode
@@ -242,6 +242,10 @@ var privlyExtension = {
     var elements = doc.getElementsByTagName("privModeElement");
     if (elements !== undefined && elements !== null && elements.length !== 0) {
       elements[0].setAttribute("mode", extensionMode);
+      
+      //Trigger a mutation event, which will make privly.js run
+      var modeChange = doc.createElement("modeChange");
+      elements[0].appendChild(modeChange);
     }
     else {
       var element = doc.createElement("privModeElement");
@@ -329,12 +333,11 @@ gBrowser.addEventListener("load",
     
     "use strict";
     
+    //load privly.js to all the doms on the host page including iframes
     var doc = event.originalTarget;
     var wnd = doc.defaultView;
     var loader = Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
                       .getService(Components.interfaces.mozIJSSubScriptLoader);
-    //load privly.js to all the doms on the host page including iframes
-
     if (doc.nodeName === '#document') {
       privlyExtension.insertPrivModeElement(doc);
       loader.loadSubScript("chrome://privly/content/privly.js", wnd);
