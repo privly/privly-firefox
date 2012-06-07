@@ -400,19 +400,6 @@ var privly = {
           privly.messages.passiveModeLink;
         anchorElement.addEventListener("mousedown",privly.makePassive,true);
       }
-      else if (passive){
-        if (params.passiveMessage !== undefined)
-        {
-          var passiveMessage = params.passiveMessage.replace(/\+/g, " ");
-          anchorElement.innerHTML = privly.messages.privlyContent + passiveMessage;
-        }
-        else
-        {
-          anchorElement.innerHTML = privly.messages.privlyContent +
-            privly.messages.passiveModeLink;
-        }
-        anchorElement.addEventListener("mousedown",privly.makePassive,true);
-      }
       else if (burnt)
       {
         if (params.burntMessage !== undefined)
@@ -427,6 +414,19 @@ var privly = {
         }
         anchorElement.setAttribute('target','_blank');
         anchorElement.addEventListener("mousedown", privly.makePassive, true);
+      }
+      else if (passive){
+        if (params.passiveMessage !== undefined)
+        {
+          var passiveMessage = params.passiveMessage.replace(/\+/g, " ");
+          anchorElement.innerHTML = privly.messages.privlyContent + passiveMessage;
+        }
+        else
+        {
+          anchorElement.innerHTML = privly.messages.privlyContent +
+            privly.messages.passiveModeLink;
+        }
+        anchorElement.addEventListener("mousedown",privly.makePassive,true);
       }
       else if (active){
         this.replaceLink(anchorElement);
