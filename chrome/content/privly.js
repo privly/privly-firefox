@@ -36,43 +36,6 @@ DEALINGS IN THE SOFTWARE.
 /**
  * @namespace
  * Script injected into the host page.
- *
- * HOST PAGE CONFIGURATION
- *
- * The host page can influence the behaviour of this script by including
- * privly-exclude="true" as an attribute on either the body element,
- * or an individual link element. If the body has the privly-exclude attribute:
- *
- * <body privly-exclude="true">
- *
- * Then the script will only respond to resize messages.
- *
- * If a link has the attribute, as in here:
- *
- * <a href="https://example.com" privly-exclude="true">
- *
- * Then it is not replaced with the referenced content.
- *
- *
- * URL PARAMETERS
- *
- * The script also responds to parameters
- * and anchors on the URL.
- *
- * burntAfter: specifies a time in seconds in the Unix epoch
- * until the content is likely destroyed on the remote server
- * Destruction of the content should result in a change of message,
- * but not a request to the remote server for the content
- *
- * burntMessage: Display this message if the content was burnt, as
- * indicated by the burnAfter parameter.
- *
- * passiveMessage: Display this message when the extension is in
- * passive mode.
- *
- * passive: Forces the link into passive mode
- * exclude: Force the link to not be replaced or put into passive
- * mode
  */
 var privly = {
   
@@ -370,12 +333,30 @@ var privly = {
    * If the link is in active mode and is whitelisted, it will replace
    * the link with the referenced content. If the link is in passive mode
    * or it is not a whitelisted link, the link will be clickable to replace
-   * the content.
+   * the content. Parameters on the link can also affect how the link is
+   * processed. All link parameters are optional.
    *
    * @param {object} anchorElement A hyperlink element eligible for 
-   * processessing by Privly.
+   * processessing by Privly. The link may define the following parameters
+   * which this function will check
+   * burntAfter: specifies a time in seconds in the Unix epoch
+   * until the content is likely destroyed on the remote server
+   * Destruction of the content should result in a change of message,
+   * but not a request to the remote server for the content
+   *
+   * burntMessage: Display this message if the content was burnt, as
+   * indicated by the burnAfter parameter.
+   *
+   * passiveMessage: Display this message when the extension is in
+   * passive mode.
+   *
+   * passive: Forces the link into passive mode
+   * exclude: Force the link to not be replaced or put into passive
+   * mode
    *
    * @param {boolean} whitelist Indicates whether the link is on the whitelist.
+   *
+   * @see privly.getUrlVariables
    */
   processLink: function(anchorElement, whitelist)
   {
@@ -442,7 +423,11 @@ var privly = {
   /**
    * Replace all Privly links with their iframe or
    * a new link, which when clicked will be replaced
-   * by the iframe
+   * by the iframe.
+   *
+   * If a link has the attribute privly-exclude, as in here:
+   *
+   * <a href="https://example.com" privly-exclude="true">
    */
   replaceLinks: function()
   {
@@ -518,11 +503,13 @@ var privly = {
   /** 
    * Indicates whether the script is waiting to run again.
    * This prevents DOMNodeInserted from sending hundreds of extension runs
+   * @see privly.run
    */
   runPending: false,
   
   /**
    * Perform the current mode of operation on the page.
+   * @see privly.runPending
    */
   run: function()
   {
@@ -536,20 +523,20 @@ var privly = {
     if (this.extensionMode === privly.extensionModeEnum.CLICKTHROUGH) {
       return;
     } else {
-      //create and correct the links pointing
-      //to Privly content
       privly.createLinks();
       privly.correctIndirection();
-      
-      //replace all available links on load, if in active mode,
-      //otherwise replace all links default behavior
       privly.replaceLinks();
     }
   },
   
   /**
-   * runs privly once then registers the update listener
-   * for dynamic pages
+   * Runs privly once then registers the update listener
+   * for dynamic pages.
+   *
+   * The host page can prevent the non-resize functionality on the page
+   * by defining privly-exclude="true" as an attribute on either
+   * the body element.
+   *
    */
   listeners: function(){
     
@@ -600,7 +587,9 @@ var privly = {
   
   /**
    * Sends the parent iframe the height of this iframe, only if the "wrapper"
-   * div is not specified. 
+   * div is not specified. Note: This function does not work on Google Chrome
+   * due to content script sandboxing. Currently all injected content on
+   * Google Chrome is expected to fire its own postMessage event.
    */
   dispatchResize: function() {
     
