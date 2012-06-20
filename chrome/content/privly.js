@@ -377,8 +377,8 @@ var privly = {
         whitelist;
       
       if (!whitelist){
-        anchorElement.innerHTML = privly.messages.injectableContent +
-          privly.messages.passiveModeLink;
+        anchorElement.firstChild.data = privly.messages.injectableContent +
+          privly.messages.passiveModeLink;  
         anchorElement.addEventListener("mousedown",privly.makePassive,true);
       }
       else if (burnt)
@@ -386,12 +386,12 @@ var privly = {
         if (params.burntMessage !== undefined)
         {
           var burntMessage = params.burntMessage.replace(/\+/g, " ");
-          anchorElement.innerHTML = privly.messages.burntPrivlyContent + 
+          anchorElement.firstChild.data = privly.messages.burntPrivlyContent + 
             burntMessage;
         }
         else
         {
-          anchorElement.innerHTML = privly.messages.contentExpired;
+          anchorElement.firstChild.data = privly.messages.contentExpired;
         }
         anchorElement.setAttribute('target','_blank');
         anchorElement.addEventListener("mousedown", privly.makePassive, true);
@@ -400,11 +400,11 @@ var privly = {
         if (params.passiveMessage !== undefined)
         {
           var passiveMessage = params.passiveMessage.replace(/\+/g, " ");
-          anchorElement.innerHTML = privly.messages.privlyContent + passiveMessage;
+          anchorElement.firstChild.data = privly.messages.privlyContent + passiveMessage;
         }
         else
         {
-          anchorElement.innerHTML = privly.messages.privlyContent +
+          anchorElement.firstChild.data = privly.messages.privlyContent +
             privly.messages.passiveModeLink;
         }
         anchorElement.addEventListener("mousedown",privly.makePassive,true);
@@ -413,7 +413,7 @@ var privly = {
         this.replaceLink(anchorElement);
       }
       else if (sleepMode){
-        anchorElement.innerHTML = privly.messages.sleepMode;
+        anchorElement.firstChild.data = privly.messages.sleepMode;
         anchorElement.setAttribute('target','_blank');
         anchorElement.removeEventListener("mousedown", privly.makePassive, true);
       }
