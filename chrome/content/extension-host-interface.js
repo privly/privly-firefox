@@ -68,6 +68,9 @@ var privlyExtension = {
     
     var target = document.popupNode;
     var value = target.value;
+    if (value === undefined) {
+      value = target.textContent
+    }
     var contentServerUrl = this.preferences.getCharPref("contentServerUrl");
     if (value === "") {
       alert("Sorry. You can not post empty content to Privly");
@@ -85,6 +88,7 @@ var privlyExtension = {
         accepts: "json",
         success: function (data, textStatus, jqXHR) {
           target.value = jqXHR.getResponseHeader("privlyurl");
+          target.textContent = jqXHR.getResponseHeader("privlyurl");
         }
       });
     }
@@ -156,10 +160,20 @@ var privlyExtension = {
     
     var disablePosts = this.preferences.getBoolPref("disablePosts");
     var loggedIn = privlyAuthentication.authToken !== "";
-    var postable = !disablePosts && evt.target.nodeName !== null &&
-        (evt.target.nodeName.toLowerCase() === 'input' ||
-          evt.target.nodeName.toLowerCase() === 'textarea');
-          
+        
+    var postable = false;
+    if (!disablePosts && evt.target.nodeName !== null) {
+      if (evt.target.nodeName.toLowerCase() === 'input' ||
+        evt.target.nodeName.toLowerCase() === 'textarea') {
+          postable = true;
+      }
+      else if(evt.target.nodeName.toLowerCase() === 'div') {
+        if (evt.target.getAttribute("contenteditable") === 'true') {
+          postable = true;
+        }
+      }
+    }
+    
     if (postable) {
       anonymousPostToPrivlyMenuItem.hidden = false;
     }
