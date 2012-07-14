@@ -377,7 +377,7 @@ var privly = {
         whitelist;
       
       if (!whitelist){
-        anchorElement.firstChild.data = privly.messages.injectableContent +
+        anchorElement.textContent = privly.messages.injectableContent +
           privly.messages.passiveModeLink;  
         anchorElement.addEventListener("mousedown",privly.makePassive,true);
       }
@@ -386,12 +386,12 @@ var privly = {
         if (params.burntMessage !== undefined)
         {
           var burntMessage = params.burntMessage.replace(/\+/g, " ");
-          anchorElement.firstChild.data = privly.messages.burntPrivlyContent + 
+          anchorElement.textContent = privly.messages.burntPrivlyContent + 
             burntMessage;
         }
         else
         {
-          anchorElement.firstChild.data = privly.messages.contentExpired;
+          anchorElement.textContent = privly.messages.contentExpired;
         }
         anchorElement.setAttribute('target','_blank');
         anchorElement.addEventListener("mousedown", privly.makePassive, true);
@@ -400,11 +400,11 @@ var privly = {
         if (params.passiveMessage !== undefined)
         {
           var passiveMessage = params.passiveMessage.replace(/\+/g, " ");
-          anchorElement.firstChild.data = privly.messages.privlyContent + passiveMessage;
+          anchorElement.textContent = privly.messages.privlyContent + passiveMessage;
         }
         else
         {
-          anchorElement.firstChild.data = privly.messages.privlyContent +
+          anchorElement.textContent = privly.messages.privlyContent +
             privly.messages.passiveModeLink;
         }
         anchorElement.addEventListener("mousedown",privly.makePassive,true);
@@ -413,7 +413,7 @@ var privly = {
         this.replaceLink(anchorElement);
       }
       else if (sleepMode){
-        anchorElement.firstChild.data = privly.messages.sleepMode;
+        anchorElement.textContent = privly.messages.sleepMode;
         anchorElement.setAttribute('target','_blank');
         anchorElement.removeEventListener("mousedown", privly.makePassive, true);
       }
