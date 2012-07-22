@@ -95,17 +95,16 @@ var privly = {
    */
   privlyReferencesRegex: new RegExp(
     "\\b(https?:\\/\\/){0,1}(" + //protocol
-    "priv\\.ly\\/posts\\/\\d+|" + //priv.ly/posts/
-    "dev\\.privly\\.org\\/posts\\/\\d+|" + //dev.privly.org/posts/
-    "privly\\.org\\/posts\\/\\d+|" + //privly.org/posts/
-    "privly\\.com\\/posts\\/\\d+|" + //privly.com/posts/
-    "dev\\.privly\\.com\\/posts\\/\\d+|" + //dev.privly.com/posts/
-    "localhost:3000\\/posts\\/\\d+" + //localhost:3000/posts/
-    ")(\\b|\\?(\\S)*|#(\\S)*)$","gi"),
+    "priv\\.ly|" + //priv.ly
+    "dev\\.privly\\.org|" + //dev.privly.org
+    "privly\\.org|" + //privly.org
+    "privly\\.com|" + //privly.com
+    "localhost|" + //localhost
+    "dev\\.privly\\.com|" + //dev.privly.com
+    "localhost:3000" + //localhost:3000
+    ")(\\S){3,}$","gi"),
     //the final line matches
-    //end of word OR
-    //the parameter string to the end of the word OR
-    //the anchor string to the end of the word
+    //end of word
   
   /** 
    * Holds the identifiers for each of the modes of operation.
@@ -354,13 +353,14 @@ var privly = {
    * exclude: Force the link to not be replaced or put into passive
    * mode
    *
-   * @param {boolean} whitelist Indicates whether the link is on the whitelist.
-   *
    * @see privly.getUrlVariables
    */
-  processLink: function(anchorElement, whitelist)
+  processLink: function(anchorElement)
   {
     "use strict";
+    
+    this.privlyReferencesRegex.lastIndex = 0;
+    var whitelist = this.privlyReferencesRegex.test(anchorElement.href);
     
     var exclude = anchorElement.getAttribute("privly-exclude");
     var params = privly.getUrlVariables(anchorElement.href);
@@ -438,14 +438,13 @@ var privly = {
     
     while (--i >= 0){
       var a = anchors[i];
-      this.privlyReferencesRegex.lastIndex = 0;
-      if (a.href && this.privlyReferencesRegex.test(a.href))
+      if (a.href && a.href.indexOf("privlyinject1",0) > 0)
       {
-        privly.processLink(a, true);
+        privly.processLink(a);
       }
-      else if (a.href && a.href.indexOf("#INJECTCONTENT0",0) > 0)
+      else if (a.href && a.href.indexOf("INJECTCONTENT0",0) > 0)
       {
-        privly.processLink(a, false);
+        privly.processLink(a);
       }
     }
   },
