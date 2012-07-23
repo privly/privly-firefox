@@ -55,7 +55,9 @@ var privly = {
   
   /**
    * Gives a map of the URL parameters and the anchor. 
-   * This method includes the anchor element under the binding 'anchor'
+   * This method assumes the parameters and the anchor are encoded
+   * with encodeURIcomponent. Parameters present in both the anchor text
+   * and the parameter section will default to the server parameters.
    *
    * @param {string} url The url you need a map of parameters from.
    */
@@ -64,22 +66,35 @@ var privly = {
     "use strict";
     
     var vars = {};
+    
     if (url.indexOf("#",0) > 0)
     {
-      var anchor = url.substring(url.indexOf("#",0) + 1, url.length);
-      vars.anchor = anchor;
-      url = url.split("#",1)[0];
-    }
-    url = url.replace("&amp;", "&");
-    var parts = url.replace(/[?&]+([^=&]+)=([^&]*)/gi,
-      function(m,key,value) {
+      var anchorString = url.substring(url.indexOf("#") + 1);
+      var parameterArray = anchorString.split("&");
+      for (var i = 0; i < parameterArray.length; i++) {
+        var pair = parameterArray[i].split("=");
+        var key = decodeURIComponent(pair[0]);
+        var value = decodeURIComponent(pair[1]);
         vars[key] = value;
-    });
-      
+      }
+    }
+    
+    if (url.indexOf("?",0) > 0)
+    {
+      var anchorIndex = url.indexOf("#");
+      var anchorString = url.substring(url.indexOf("?") + 1, anchorIndex);
+      var parameterArray = anchorString.split("&");
+      for (var i = 0; i < parameterArray.length; i++) {
+        var pair = parameterArray[i].split("=");
+        var key = decodeURIComponent(pair[0]);
+        var value = decodeURIComponent(pair[1]);
+        vars[key] = value;
+      }
+    } 
     //Example:
-    //https://priv.ly/posts/1?example=Hello#World
-    //privly.getUrlVariables(url).example is "Hello"
-    //privly.getUrlVariables(url).anchor is "World"
+    //https://priv.ly/posts/1?hello=world#fu=bar
+    //privly.getUrlVariables(url).hello is "world"
+    //privly.getUrlVariables(url).fu is "bar"
     return vars;
   },
   
@@ -365,12 +380,18 @@ var privly = {
     var exclude = anchorElement.getAttribute("privly-exclude");
     var params = privly.getUrlVariables(anchorElement.href);
     
-    if (!exclude && params.exclude === undefined){
+    var privlyExclude = (params.exclude === undefined && params.privlyExclude === undefined);
+    
+    if (!exclude && privlyExclude){
       
       var passive = this.extensionMode === privly.extensionModeEnum.PASSIVE ||
-        params.passive !== undefined || !whitelist;
+        params.passive !== undefined ||  params.privlyPassive !== undefined || !whitelist;
       var burnt = params.burntAfter !== undefined && 
         parseInt(params.burntAfter, 10) < Date.now()/1000;
+      if (!burnt) {
+        params.privlyBurntAfter !== undefined && 
+          parseInt(params.privlyBurntAfter, 10) < Date.now()/1000;
+      }
       var active = this.extensionMode === privly.extensionModeEnum.ACTIVE &&
         whitelist;
       var sleepMode = this.extensionMode === privly.extensionModeEnum.CLICKTHROUGH &&
@@ -389,6 +410,11 @@ var privly = {
           anchorElement.textContent = privly.messages.burntPrivlyContent + 
             burntMessage;
         }
+        else if(params.privlyBurntMessage !== undefined)
+        {
+          anchorElement.textContent = privly.messages.burntPrivlyContent + 
+            params.privlyBurntMessage;
+        }
         else
         {
           anchorElement.textContent = privly.messages.contentExpired;
@@ -401,6 +427,10 @@ var privly = {
         {
           var passiveMessage = params.passiveMessage.replace(/\+/g, " ");
           anchorElement.textContent = privly.messages.privlyContent + passiveMessage;
+        }
+        else if(params.privlyPassiveMessage !== undefined)
+        {
+          anchorElement.textContent = privly.messages.privlyContent + params.privlyPassiveMessage;
         }
         else
         {
@@ -438,7 +468,7 @@ var privly = {
     
     while (--i >= 0){
       var a = anchors[i];
-      if (a.href && a.href.indexOf("privlyinject1",0) > 0)
+      if (a.href && a.href.indexOf("privlyInject1",0) > 0)
       {
         privly.processLink(a);
       }
@@ -514,6 +544,16 @@ var privly = {
   {
     "use strict";
     
+    privly.dispatchResize();
+    
+    //respect the settings of the host page.
+    //If the body element has privly-exclude=true
+    if (document.getElementsByTagName("body")[0]
+        .getAttribute("privly-exclude")==="true")
+    {
+      return;
+    }
+    
     var elements = document.getElementsByTagName("privModeElement");
     if (elements.length > 0){
       this.extensionMode = parseInt(elements[0].getAttribute('mode'), 10);
@@ -547,41 +587,32 @@ var privly = {
     window.addEventListener("message", privly.resizeIframePostedMessage,
       false, true);
     
-    //respect the settings of the host page.
-    //If the body element has privly-exclude=true
-    if (document.getElementsByTagName("body")[0]
-        .getAttribute("privly-exclude")==="true")
-    {
-      return;
-    }
-    else
-    {
+    privly.runPending=true;
+    setTimeout(
+      function(){
+        privly.runPending=false;
+        privly.run();
+      },
+      100);
+      
+    //Everytime the page is updated via javascript, we have to check
+    //for new Privly content. This might not be supported on other platforms
+    document.addEventListener("DOMNodeInserted", function(event) {
+      //we check the page a maximum of two times a second
+      if (privly.runPending) {
+        return;
+      }
+      
       privly.runPending=true;
+      
       setTimeout(
         function(){
           privly.runPending=false;
           privly.run();
         },
-        100);
-        
-      //Everytime the page is updated via javascript, we have to check
-      //for new Privly content. This might not be supported on other platforms
-      document.addEventListener("DOMNodeInserted", function(event) {
-        //we check the page a maximum of two times a second
-        if (privly.runPending) {
-          return;
-        }
-        
-        privly.runPending=true;
-        
-        setTimeout(
-          function(){
-            privly.runPending=false;
-            privly.run();
-          },
-          500);
-      });
-    }
+        500);
+    });
+    
   },
   
   /**
