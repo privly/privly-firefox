@@ -1,4 +1,8 @@
 /**
+ * import the module containing definition of all privly constants
+ */
+Components.utils.import("resource://privly_modules/constants.jsm");
+/**
  * @namespace
  * Handles changes to the extension's preferences.
  */
@@ -12,17 +16,7 @@ var privlyPrefPane =
                          .getService(Components.interfaces.nsIPrefService)
                          .getBranch("extensions.privly."),
 
-  /**
-   * enum to hold various extension modes and their value. extension modes 
-   * are set through firefox's extension api.
-   * https://developer.mozilla.org/en/Code_snippets/Preferences
-   */
-  extensionModeEnum: {
-    ACTIVE: 0,
-    PASSIVE: 1,
-    CLICKTHROUGH: 2
-  },
-  
+
   /**
    * Handler for the loading of the extension preference pane.
    * @param {event} event The load event. Not currently used.
@@ -65,7 +59,7 @@ var privlyPrefPane =
       mode = privlyPrefPane.extensionModeEnum.PASSIVE;
     }
     else if (document.getElementById('require-clickthrough').selected === true) {
-      mode = privlyPrefPane.extensionModeEnum.CLICKTHROUGH;
+      mode = privlyConstants.extensionModeEnum.CLICKTHROUGH;
     }
     this.preferences.setIntPref("extensionMode", mode);
   },

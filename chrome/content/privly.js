@@ -507,7 +507,9 @@ var privly = {
       iframeIdOrName = data[0];
       iframe = document.getElementsByName(iframeIdOrName)[0];
     }
-    
+    if (iframe == undefined)
+		return;
+		
     // Only resize iframes eligible for resize.
     // All iframes eligible for resize have a custom attribute,
     // acceptresize, set to true.

@@ -3,19 +3,25 @@
 // not once per window. Nils Maier Provided these resoucrces
 // For example: https://gist.github.com/1630169
 // https://developer.mozilla.org/en/JavaScript_modules
+
+
+/**
+ * import privly constants
+ */
+Components.utils.import("resource://privly/constants.jsm");
+
+/**
+ * see https://developer.mozilla.org/en/using_xmlhttprequest#Using_XMLHttpRequest_from_JavaScript_modules_.2F_XPCOM.C2.A0components
+ * xmlhttprequest in javascript modules
+ */ 
+const { XMLHttpRequest } = Components.classes["@mozilla.org/appshell/appShellService;1"]
+                                     .getService(Components.interfaces.nsIAppShellService)
+                                     .hiddenDOMWindow;
+
+var EXPORTED_SYMBOLS = ["privlyObservers"];
+
 var privlyObservers =  {
     
-  /**
-   * enum to hold various extension modes and their value. extension modes 
-   * are set through firefox's extension api.
-   * https://developer.mozilla.org/en/Code_snippets/Preferences
-   */ 
-  extensionModeEnum: {
-    ACTIVE: 0,
-    PASSIVE: 1,
-    CLICKTHROUGH: 2
-  },
-  
   /**
    * @namespace
    * Sets headers on requests to Privly servers.
@@ -59,16 +65,16 @@ var privlyObservers =  {
          * 2. use a regex to match the content server url to eliminate the 
          * if-else
          */
-        extensionMode = this.preferences.getIntPref("extensionMode");
+        var extensionMode = this.preferences.getIntPref("extensionMode");
         if (/priv.ly/.test(httpChannel.originalURI.host)) {
           httpChannel.setRequestHeader("Privly-Version", "0.1.7", false);
-          httpChannel.setRequestHeader("auth_token", 
-                                        privlyAuthentication.authToken, false);
+          httpChannel.setRequestHeader(privlyConstants.Strings.authToken, 
+                                        this.preferences.getCharPref(privlyConstants.Strings.authToken), false);
         }
         else if (/localhost/.test(httpChannel.originalURI.host)) {
           httpChannel.setRequestHeader("Privly-Version", "0.1.7", false);
-          httpChannel.setRequestHeader("auth_token", 
-                                        privlyAuthentication.authToken, false);
+          httpChannel.setRequestHeader(privlyConstants.Strings.authToken, 
+                                        this.preferences.getCharPref(privlyConstants.Strings.authToken), false);
         }
       }
     },
@@ -163,28 +169,28 @@ var privlyObservers =  {
              * '{"disablePosts":110,"passive": 100}'
              */
             extensionCommand = '';
-            var command = jQ.parseJSON(extensionCommand);
+            var command = JSON.parse(extensionCommand);
             /*
              * if requireClickthrough/passive field is present, change the extension 
-             * mode to privlyObservers.extensionModeEnum.CLICKTHROUGH/PASSIVE 
+             * mode to privlyConstants.extensionModeEnum.CLICKTHROUGH/PASSIVE 
              * accordingly. Set it back to active after the time interval  
              * specified in the json string.
              */
             if (command && command.requireClickthrough) {
               this.preferences.setIntPref("extensionMode",
-                               privlyObservers.extensionModeEnum.CLICKTHROUGH);
+                               privlyConstants.extensionModeEnum.CLICKTHROUGH);
               setTimeout(function() {
                   this.preferences.setIntPref("extensionMode",
-                                     privlyObservers.extensionModeEnum.ACTIVE);
+                                     privlyConstants.extensionModeEnum.ACTIVE);
                 },
                 command.requireClickthrough);
             }
             else if (command && command.passive) {
               this.preferences.setIntPref("extensionMode",
-                                    privlyObservers.extensionModeEnum.PASSIVE);
+                                    privlyConstants.extensionModeEnum.PASSIVE);
               setTimeout(function() {
                   this.preferences.setIntPref("extensionMode",
-                                     privlyObservers.extensionModeEnum.ACTIVE);
+                                     privlyConstants.extensionModeEnum.ACTIVE);
                 },
                 command.passive);
             }
@@ -233,5 +239,3 @@ var privlyObservers =  {
   }
 };
 
-privlyObservers.httpRequestObserver.register();
-privlyObservers.httpResponseObserver.register();
