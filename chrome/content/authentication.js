@@ -6,15 +6,24 @@
  **/
 
 /**
+ * import privly constants
+ */
+Components.utils.import("resource://privly/constants.jsm");
+
+
+/**
  * @namespace
  * Handles authentication with the remote server.
  * 
- */
+ */  
 var privlyAuthentication = {
-  //When added to every request to the content server
-  //as the parameter auth_token, the extension has access
-  //to the referenced user account
-  authToken: "",
+
+  /**
+   * Interface object to the extension preferences.
+   */
+  preferences: Components.classes["@mozilla.org/preferences-service;1"]
+                            .getService(Components.interfaces.nsIPrefService)
+                            .getBranch("extensions.privly."),
   
   /**
    * Prompt the user for their email and password, and attempt to log them
@@ -35,56 +44,66 @@ var privlyAuthentication = {
                           email, password, "", {});
     var userEmailAddress = email.value;
     var userPassword = password.value;
-                                                
-    jQ.ajax({
-      data: { email: userEmailAddress, password: userPassword,
+    
+    var data = { email: userEmailAddress, password: userPassword,
         endpoint:"extension", browser:"firefox", version:"0.1.1.1"
-      },
-      type: "POST",
-      url: privlyExtension.preferences
-                .getCharPref("contentServerUrl")+"/token_authentications.json",
-      contentType: "application/x-www-form-urlencoded; charset=UTF-8",
-      dataType: "json",
-      accepts: "json",
-      success: function (data, textStatus, jqXHR) {
-        privlyAuthentication.authToken = data.auth_key;
-        if (privlyAuthentication.authToken) {
-          alert("You are now logged into Privly");
+      };
+    var xmlhttp = XMLHttpRequest();
+    var url = privlyAuthentication.preferences
+                .getCharPref("contentServerUrl")+"/token_authentications.json";
+    xmlhttp.open("POST", url, false);
+    xmlhttp.setRequestHeader("Content-type", "application/json; charset=UTF-8");
+    xmlhttp.setRequestHeader('Accept', 'application/json');
+    xmlhttp.onreadystatechange = function(){
+      // process the server response
+      if(xmlhttp.readyState === 4 ){
+        if(xmlhttp.status === 200){
+          var responseText = xmlhttp.responseText;  
+          var response = JSON.parse(responseText);
+          if(response && response.auth_key){
+            var authToken = response.auth_key;            
+            if (authToken) {
+              privlyAuthentication.preferences.setCharPref(privlyConstants.Strings.authToken,authToken);
+              alert("You are now logged into Privly");
+            }
+            else {
+              privlyAuthentication.preferences.setCharPref(privlyConstants.Strings.authToken,"");
+              alert("Incorrect email or password for Priv.ly login");
+            }
+          return;
+          }   
         }
-        else {
-          alert("Incorrect email or password for Priv.ly login");
-        }
-      },
-      error: function (data, textStatus, jqXHR) {
-        alert("We could not contact the Priv.ly servers. If the problem persists, please file a bug report.");
       }
-    });
+      privlyAuthentication.preferences.setCharPref(privlyConstants.Strings.authToken,"");
+      alert("We could not contact the Priv.ly servers. If the problem persists, please file a bug report.");
+    };
+    xmlhttp.send(JSON.stringify(data));
   },
   
   /**
    * Destroys the auth_token locally and on the remote server.
    */
   logoutFromPrivly: function() {
-    
     "use strict";
-    
-    jQ.ajax({
-      data: { _method: "delete", endpoint:"extension", browser:"firefox", 
-        version:"0.1.1.1", auth_token: privlyAuthentication.authToken
-      },
-      type: "POST",
-      url: privlyExtension.preferences
-                .getCharPref("contentServerUrl")+"/token_authentications.json",
-      contentType: "application/x-www-form-urlencoded; charset=UTF-8",
-      dataType: "json",
-      accepts: "json",
-      success: function(data, textStatus, jqXHR) {
-        privlyAuthentication.authToken = "";
-        alert("You are logged out from Priv.ly");
-      },
-      error: function(data, textStatus, jqXHR) {
-        alert(data.error);
+    var data = { _method: "delete", endpoint:"extension", browser:"firefox", 
+      version:"0.1.1.1", auth_token: privlyAuthentication.preferences.getCharPref(privlyConstants.Strings.authToken)
+    };
+    var xmlhttp = XMLHttpRequest();
+    var url = privlyAuthentication.preferences
+                .getCharPref("contentServerUrl")+"/token_authentications.json";
+    xmlhttp.open("POST", url, false);
+    xmlhttp.setRequestHeader("Content-type", "application/json; charset=UTF-8");
+    xmlhttp.setRequestHeader('Accept', 'application/json');
+    xmlhttp.onreadystatechange = function(){
+      // process the server response
+      if(xmlhttp.readyState === 4 ){
+        if(xmlhttp.status === 200){
+          privlyAuthentication.preferences.setCharPref(privlyConstants.Strings.authToken,"");
+          alert("You are logged out from Priv.ly");
+          return;
+        }
       }
-    });
+    };
+    xmlhttp.send(JSON.stringify(data));	
   }
 };

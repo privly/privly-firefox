@@ -6,3 +6,4 @@ locale	privly	en-US	locale/en-US/
 
 skin	privly	classic/1.0	skin/
 style	chrome://global/content/customizeToolbar.xul	chrome://privly/skin/skin.css
+resource privly modules/

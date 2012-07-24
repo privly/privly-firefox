@@ -1,9 +1,20 @@
 /**
+ * import the http observer module for listening to calls to privly servers
+ */
+Components.utils.import("resource://privly/observers.jsm");
+
+/**
+ * import privly constants
+ */
+Components.utils.import("resource://privly/constants.jsm");		
+
+/**
  * @namespace
  * Handles interaction with the host page, including injecting the content
  * script, privly.js.
  */
 var privlyExtension = {
+
   
   /**
    * Interface object to the extension preferences.
@@ -12,16 +23,6 @@ var privlyExtension = {
                          .getService(Components.interfaces.nsIPrefService)
                          .getBranch("extensions.privly."),
 
-  /**
-   * Enum to hold various extension modes and their value. 
-   * Extension modes are set through firefox's extension api.
-   * https://developer.mozilla.org/en/Code_snippets/Preferences
-   */
-  extensionModeEnum: {
-    ACTIVE: 0,
-    PASSIVE: 1,
-    CLICKTHROUGH: 2
-  },
 
   /**
    * Installs toolbar button in the navigation bar
@@ -76,21 +77,25 @@ var privlyExtension = {
       alert("Sorry. You can not post empty content to Privly");
     }
     else {
-      jQ.ajax({
-        data: { "post[content]": value,
-          "post[public]": true,
-          endpoint: "extension", browser: "firefox", version: "0.1.1.1"
-        },
-        type: "POST",
-        url: contentServerUrl + "/posts/posts_anonymous.json",
-        contentType: "application/x-www-form-urlencoded; charset=UTF-8",
-        dataType: "json",
-        accepts: "json",
-        success: function (data, textStatus, jqXHR) {
-          target.value = jqXHR.getResponseHeader("privlyurl");
-          target.textContent = jqXHR.getResponseHeader("privlyurl");
+      var data = { "post[content]": value,
+            "post[public]": true,endpoint: "extension", 
+            browser: "firefox", version: "0.1.1.1"
+      };
+      var xmlhttp = new XMLHttpRequest();
+      var url = contentServerUrl + "/posts/posts_anonymous.json";
+      xmlhttp.open("POST", url, true);
+      xmlhttp.setRequestHeader("Content-type", "application/json; charset=UTF-8");
+      xmlhttp.setRequestHeader('Accept', 'application/json');
+      xmlhttp.onreadystatechange = function(){
+        // process the server response
+        if(xmlhttp.readyState === 4 ){
+          if(xmlhttp.status === 200){
+            target.value = xmlhttp.getResponseHeader("privlyurl");
+            target.textContent = xmlhttp.getResponseHeader("privlyurl");
+          }
         }
-      });
+      };    
+      xmlhttp.send(JSON.stringify(data));
     }
   },
   
@@ -179,25 +184,31 @@ var privlyExtension = {
     var contentServerUrl = this.preferences.getCharPref("contentServerUrl");
     // the post can be either public or private (shared only with specific users)
     var postPrivacySetting = allPostsPublic || (privacySetting === 'public');
+    var authToken = this.preferences.getCharPref(privlyConstants.Strings.authToken);
     if (value === "") {
       alert("Sorry. You can not post empty content to Privly");
     }
-    else {
-      jQ.ajax({
-        data: { auth_token: privlyAuthentication.authToken,
+    else{
+      var data = { 
+		  auth_token: authToken,
           "post[content]": value,
           "post[public]": postPrivacySetting,
           endpoint: "extension", browser: "firefox", version: "0.1.1.1"
-        },
-        type: "POST",
-        url: contentServerUrl + "/posts.json",
-        contentType: "application/x-www-form-urlencoded; charset=UTF-8",
-        dataType: "json",
-        accepts: "json",
-        success: function (data, textStatus, jqXHR) {
-          target.value = jqXHR.getResponseHeader("privlyurl");
+        };
+      var xmlhttp = new XMLHttpRequest();
+      var url = contentServerUrl + "/posts/posts_anonymous.json";
+      xmlhttp.open("POST", url, true);
+      xmlhttp.setRequestHeader("Content-type", "application/json; charset=UTF-8");
+      xmlhttp.setRequestHeader('Accept', 'application/json');
+      xmlhttp.onreadystatechange = function(){
+        // process the server response
+        if(xmlhttp.readyState === 4 ){
+          if(xmlhttp.status === 200){
+            target.value = xmlhttp.getResponseHeader("privlyurl");
+          }
         }
-      });
+      };    
+      xmlhttp.send(JSON.stringify(data));
     }
   },
   
@@ -226,7 +237,10 @@ var privlyExtension = {
     encryptedPostToPrivlyMenuItem.hidden = true;
     
     var disablePosts = this.preferences.getBoolPref("disablePosts");
-    var loggedIn = privlyAuthentication.authToken !== "";
+    var authToken = this.preferences.prefHasUserValue(privlyConstants.
+					Strings.authToken) ? this.preferences.getCharPref(
+					privlyConstants.Strings.authToken) : ""; 
+    var loggedIn =  (authToken!== "");
         
     var postable = false;
     if (!disablePosts && evt.target.nodeName !== null) {
@@ -270,14 +284,14 @@ var privlyExtension = {
     var extensionMode = this.preferences.getIntPref("extensionMode");
     //when the extension is in active mode and user clicks the toolbar 
     //button toggle to passive mode
-    if (extensionMode === privlyExtension.extensionModeEnum.ACTIVE) {
-      extensionMode = privlyExtension.extensionModeEnum.CLICKTHROUGH;
+    if (extensionMode === privlyConstants.extensionModeEnum.ACTIVE) {
+      extensionMode = privlyConstants.extensionModeEnum.CLICKTHROUGH;
     }
     //when the extension is in either click through or passive mode and user
     //clicks the toolbar button toggle to active mode
-    else if (extensionMode === privlyExtension.extensionModeEnum.PASSIVE ||
-              extensionMode === privlyExtension.extensionModeEnum.CLICKTHROUGH) {
-      extensionMode = privlyExtension.extensionModeEnum.ACTIVE;
+    else if (extensionMode === privlyConstants.extensionModeEnum.PASSIVE ||
+              extensionMode === privlyConstants.extensionModeEnum.CLICKTHROUGH) {
+      extensionMode = privlyConstants.extensionModeEnum.ACTIVE;
     }
     this.updateExtensionMode(extensionMode);
   },
@@ -293,15 +307,15 @@ var privlyExtension = {
     var privlyToolbarButton = document.getElementById('privly-tlbr-btn');
     var extensionMode = this.preferences.getIntPref("extensionMode");
     if (privlyToolbarButton) {
-      if (extensionMode === privlyExtension.extensionModeEnum.ACTIVE) {
+      if (extensionMode === privlyConstants.extensionModeEnum.ACTIVE) {
         privlyToolbarButton.style.listStyleImage = "url('chrome://privly/skin/logo_16.png')";
         privlyToolbarButton.tooltipText = "Privly is in active mode";
       }
-      else if (extensionMode === privlyExtension.extensionModeEnum.PASSIVE) {
+      else if (extensionMode === privlyConstants.extensionModeEnum.PASSIVE) {
         privlyToolbarButton.style.listStyleImage = "url('chrome://privly/skin/logo_16_dis.png')";
         privlyToolbarButton.tooltipText = "Privly is in passive mode";
       }
-      else if (extensionMode === privlyExtension.extensionModeEnum.CLICKTHROUGH) {
+      else if (extensionMode === privlyConstants.extensionModeEnum.CLICKTHROUGH) {
         privlyToolbarButton.style.listStyleImage = "url('chrome://privly/skin/logo_16_dis.png')";
         privlyToolbarButton.tooltipText = "Privly is in require-clickthrough mode";
       }
@@ -353,9 +367,9 @@ var privlyExtension = {
       var iframes = content.document.getElementsByTagName('iframe');
       if (iframes) {
         //loop through each iframe in the host page
-        for (frameIndex in iframes) {
+        for (var frameIndex in iframes) {
           var iframe = iframes[frameIndex];
-          if (iframe) {
+          if (iframe && iframe.contentDocument) {
             // if the iframe is done loading, insert the privModeElement into its DOM
             // else, insert the privModeElement into the iframe's DOM once it is loaded
             if (iframe.contentDocument.readyState === 'complete') {
@@ -384,11 +398,12 @@ var privlyExtension = {
   }
 };
 
-//Load jQuery for the overlay
-Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
-  .getService(Components.interfaces.mozIJSSubScriptLoader)
-  .loadSubScript("chrome://privly/content/jquery-1.7.1.min.js", window);
-jQ = window.jQuery.noConflict();
+/**
+ * register observers for http requests and responses. Handles privly authentication
+ * and setting privly headers
+ */
+privlyObservers.httpRequestObserver.register();
+privlyObservers.httpResponseObserver.register();
 
 //change the displayed menus on right clicks
 window.addEventListener("contextmenu",
