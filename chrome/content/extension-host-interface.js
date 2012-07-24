@@ -93,6 +93,71 @@ var privlyExtension = {
       });
     }
   },
+  
+  /**
+   * Variable used during a posting transaction to save where the 
+   * resulting URL will be pasted to.
+   */
+  currentTargetNode: undefined,
+  
+  /** 
+   * Begins encrypted posting dialog.
+   * This function opens an iframe from the current content server
+   * for the user to type their content into.
+   *
+   * @see privlyExtension.handleEncryptedUrlEvent
+   *
+   * @see privlyExtension.cancelEncryptedPost
+   */
+  postEncryptedToPrivly: function () {
+    
+    "use strict";
+    
+    //Open the form from the selected content server
+    var contentServerUrl = this.preferences.getCharPref("contentServerUrl");
+    document.getElementById('encryption-iframe').setAttribute("src", contentServerUrl + "/zero_bin/");
+    
+    //display the form elements in the bottom of the browser chrome
+    document.getElementById('encryption-splitter').hidden = false;
+    document.getElementById('encryption-iframe-vbox').hidden = false;
+    document.getElementById('encryption-cancel-button').hidden = false;
+    
+    //Save the destination for the encrypted URL
+    privlyExtension.currentTargetNode = document.popupNode;
+  },
+  
+  /**
+   * Receive URL to encrypted post for posting to selected form element.
+   * This function also closes the posting iframe and chnages its source
+   * so it no longer contains the content.
+   * 
+   * @param {event} evt An event dispatched from the encryption application 
+   * containing a string variable, "privlyUrl", bound to the url intended to
+   * be pasted to the relevent form element.
+   */
+  handleEncryptedUrlEvent: function(evt) {
+    
+    privlyExtension.currentTargetNode.value = evt.target.getAttribute("privlyUrl");
+    privlyExtension.currentTargetNode.textContent = evt.target.getAttribute("privlyUrl");
+    
+    document.getElementById('encryption-splitter').hidden = true;
+    document.getElementById('encryption-iframe-vbox').hidden = true;
+    document.getElementById('encryption-cancel-button').hidden = true;
+    document.getElementById('encryption-iframe').setAttribute("src", "");
+    privlyExtension.currentTargetNode = undefined;
+  },
+  
+  /**
+   * Cancel the encrypted post dialog after the form frame popped up. This
+   * should only be called after postEncryptedToPrivly is called.
+   */
+  cancelEncryptedPost: function() {
+    document.getElementById('encryption-splitter').hidden = true;
+    document.getElementById('encryption-iframe-vbox').hidden = true;
+    document.getElementById('encryption-cancel-button').hidden = true;
+    document.getElementById('encryption-iframe').setAttribute("src", "");
+    privlyExtension.currentTargetNode = undefined;
+  },
 
   /** 
    * Send data from the right-clicked form element to the content server, then
@@ -151,12 +216,14 @@ var privlyExtension = {
     var publicPostToPrivlyMenuItem = document.getElementById('publicPostToPrivlyMenuItem');
     var privatePostToPrivlyMenuItem = document.getElementById('privatePostToPrivlyMenuItem');
     var anonymousPostToPrivlyMenuItem = document.getElementById('anonymousPostToPrivlyMenuItem');
+    var encryptedPostToPrivlyMenuItem = document.getElementById('encryptedPostToPrivlyMenuItem');
     
     loginToPrivlyMenuItem.hidden = true;
     logoutFromPrivlyMenuItem.hidden = true;
     publicPostToPrivlyMenuItem.hidden = true;
     privatePostToPrivlyMenuItem.hidden = true;
     anonymousPostToPrivlyMenuItem.hidden = true;
+    encryptedPostToPrivlyMenuItem.hidden = true;
     
     var disablePosts = this.preferences.getBoolPref("disablePosts");
     var loggedIn = privlyAuthentication.authToken !== "";
@@ -176,6 +243,7 @@ var privlyExtension = {
     
     if (postable) {
       anonymousPostToPrivlyMenuItem.hidden = false;
+      encryptedPostToPrivlyMenuItem.hidden = false;
     }
     
     if (loggedIn && postable) {
@@ -368,3 +436,12 @@ gBrowser.addEventListener("load",
     }
   },
   true);
+
+/**
+ * Watch for encrypted URLs sent by the encryption iframe.
+ */
+window.addEventListener("load", function load(event){  
+    document.getElementById('encryption-iframe')
+      .addEventListener("PrivlyUrlEvent", 
+        function(e) { privlyExtension.handleEncryptedUrlEvent(e); }, false, true);   
+  },false);
