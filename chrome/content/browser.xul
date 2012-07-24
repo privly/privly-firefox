@@ -4,7 +4,6 @@
 <overlay id="privly" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
 	<script src="extension-host-interface.js" />
-	<script src="observers.js" />
 	<script src="authentication.js" />
 
 	<menupopup id="contentAreaContextMenu">  

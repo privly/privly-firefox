@@ -3,6 +3,8 @@
 // not once per window. Nils Maier Provided these resoucrces
 // For example: https://gist.github.com/1630169
 // https://developer.mozilla.org/en/JavaScript_modules
+var EXPORTED_SYMBOLS = ["privlyObservers"];
+
 var privlyObservers =  {
     
   /**
