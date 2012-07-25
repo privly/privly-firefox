@@ -1,7 +1,7 @@
 /**
  * import the module containing definition of all privly constants
  */
-Components.utils.import("resource://privly_modules/constants.jsm");
+Components.utils.import("resource://privly/constants.jsm");
 /**
  * @namespace
  * Handles changes to the extension's preferences.
@@ -28,13 +28,13 @@ var privlyPrefPane =
     //get the extensionmode from preferences if it was modified using the toolbar button
     extensionMode = this.preferences.getIntPref("extensionMode");
     //update the radio buttons to reflect the changes.
-    if (extensionMode === privlyPrefPane.extensionModeEnum.ACTIVE) {
+    if (extensionMode === privlyConstants.extensionModeEnum.ACTIVE) {
       document.getElementById('active').selected = true;
     }
-    else if (extensionMode === privlyPrefPane.extensionModeEnum.PASSIVE) {
+    else if (extensionMode === privlyConstants.extensionModeEnum.PASSIVE) {
       document.getElementById('passive').selected = true;
     }
-    else if (extensionMode === privlyPrefPane.extensionModeEnum.CLICKTHROUGH) {
+    else if (extensionMode === privlyConstants.extensionModeEnum.CLICKTHROUGH) {
       document.getElementById('require-clickthrough').selected = true;
     }
      //get the disable post option from preferences and update the checkbox 
@@ -53,10 +53,10 @@ var privlyPrefPane =
     
     var mode = 0;
     if (document.getElementById('active').selected === true) {
-      mode = privlyPrefPane.extensionModeEnum.ACTIVE;
+      mode = privlyConstants.extensionModeEnum.ACTIVE;
     }
     else if (document.getElementById('passive').selected === true) {
-      mode = privlyPrefPane.extensionModeEnum.PASSIVE;
+      mode = privlyConstants.extensionModeEnum.PASSIVE;
     }
     else if (document.getElementById('require-clickthrough').selected === true) {
       mode = privlyConstants.extensionModeEnum.CLICKTHROUGH;
