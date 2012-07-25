@@ -22,6 +22,6 @@ var privlyConstants =  {
    * Misc strings
    */
   Strings:{
-	authToken:"auth_token"
+	authToken:"X-Privly-Auth-Token"
   }
 }
