@@ -26,7 +26,7 @@ var privlyPrefPane =
     "use strict";
     
     //get the extensionmode from preferences if it was modified using the toolbar button
-    extensionMode = this.preferences.getIntPref("extensionMode");
+    var extensionMode = this.preferences.getIntPref("extensionMode");
     //update the radio buttons to reflect the changes.
     if (extensionMode === privlyConstants.extensionModeEnum.ACTIVE) {
       document.getElementById('active').selected = true;

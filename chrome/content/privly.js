@@ -551,7 +551,8 @@ var privly = {
     
     //respect the settings of the host page.
     //If the body element has privly-exclude=true
-    if (document.getElementsByTagName("body")[0]
+    var body = document.getElementsByTagName("body");
+    if (body && body.length > 0 && body[0]
         .getAttribute("privly-exclude")==="true")
     {
       return;
@@ -641,16 +642,18 @@ var privly = {
     var wrapper = document.getElementById("wrapper");
     if (wrapper === null) {
       var D = document;
-      var newHeight = Math.max(
-              D.body.scrollHeight, 
-              D.documentElement.scrollHeight, 
-              D.body.offsetHeight, 
-              D.documentElement.offsetHeight, 
-              D.body.clientHeight, 
-              D.documentElement.clientHeight
-          );
-      parent.postMessage(window.name + "," + newHeight, "*");
-    }
+      if(D.body){
+        var newHeight = Math.max(
+                D.body.scrollHeight, 
+                D.documentElement.scrollHeight, 
+                D.body.offsetHeight, 
+                D.documentElement.offsetHeight, 
+                D.body.clientHeight, 
+                D.documentElement.clientHeight
+            );
+        parent.postMessage(window.name + "," + newHeight, "*");
+      }
+    }    
   },
   
   /** 
