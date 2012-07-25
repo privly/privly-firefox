@@ -54,6 +54,8 @@ var privlyObservers =  {
         var httpChannel = subject.QueryInterface(Components
                                                 .interfaces.nsIHttpChannel);
         
+        // Set the extension version
+        httpChannel.setRequestHeader("X-Privly-Version", "0.1.8", false);
         /* 
          * set the extension version and auth_token param on the request headers
          * the content server uses this authToken to identify a specific user.
@@ -65,12 +67,10 @@ var privlyObservers =  {
          */
         var extensionMode = this.preferences.getIntPref("extensionMode");
         if (/priv.ly/.test(httpChannel.originalURI.host)) {
-          httpChannel.setRequestHeader("Privly-Version", "0.1.8", false);
           httpChannel.setRequestHeader(privlyConstants.Strings.authToken, 
                                         this.preferences.getCharPref(privlyConstants.Strings.authToken), false);
         }
         else if (/localhost/.test(httpChannel.originalURI.host)) {
-          httpChannel.setRequestHeader("Privly-Version", "0.1.8", false);
           httpChannel.setRequestHeader(privlyConstants.Strings.authToken, 
                                         this.preferences.getCharPref(privlyConstants.Strings.authToken), false);
         }
@@ -153,12 +153,18 @@ var privlyObservers =  {
          * didn't reply, it will throw an error. so catch it
          */
         try {
+          
+          //Deprecated
           var extensionCommand = httpChannel.
                                  getResponseHeader("privlyExtensionCommand");
-          
-          if (/priv.ly/.test(httpChannel.originalURI.host) || 
-             (/localhost/.test(httpChannel.originalURI.host) && 
-                /posts/.test(httpChannel.originalURI.path))) { 
+                                 
+          // We are going to remove this functionality in favor of a different
+          // strategy for solving this issue: 
+          // https://github.com/smcgregor/privly-firefox/issues/18
+          if ( false ) {
+          //if (/priv.ly/.test(httpChannel.originalURI.host) || 
+          //   (/localhost/.test(httpChannel.originalURI.host) && 
+          //      /posts/.test(httpChannel.originalURI.path))) { 
             /* 
              * the extensioncommand response header will be a json string. 
              * passive and requireClickthrough are mutually exclusive.
