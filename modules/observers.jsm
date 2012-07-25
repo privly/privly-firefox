@@ -66,13 +66,17 @@ var privlyObservers =  {
          * if-else
          */
         var extensionMode = this.preferences.getIntPref("extensionMode");
+        var authToken = "";
+        if (this.preferences.prefHasUserValue(privlyConstants.Strings.authToken)) {
+          authToken = this.preferences.getCharPref(privlyConstants.Strings.authToken);
+        }
         if (/priv.ly/.test(httpChannel.originalURI.host)) {
           httpChannel.setRequestHeader(privlyConstants.Strings.authToken, 
-                                        this.preferences.getCharPref(privlyConstants.Strings.authToken), false);
+                                        authToken, false);
         }
         else if (/localhost/.test(httpChannel.originalURI.host)) {
           httpChannel.setRequestHeader(privlyConstants.Strings.authToken, 
-                                        this.preferences.getCharPref(privlyConstants.Strings.authToken), false);
+                                        authToken, false);
         }
       }
     },
