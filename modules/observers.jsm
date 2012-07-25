@@ -1,12 +1,10 @@
-// We need to refactor this functionality into a JS module.
-// Observers should be registered once per application,
-// not once per window. Nils Maier Provided these resoucrces
-// For example: https://gist.github.com/1630169
-// https://developer.mozilla.org/en/JavaScript_modules
-
+/**
+ * @namespace
+ * Module for modifying http requests
+ */
 
 /**
- * import privly constants
+ * import Privly constants
  */
 Components.utils.import("resource://privly/constants.jsm");
 
@@ -67,12 +65,12 @@ var privlyObservers =  {
          */
         var extensionMode = this.preferences.getIntPref("extensionMode");
         if (/priv.ly/.test(httpChannel.originalURI.host)) {
-          httpChannel.setRequestHeader("Privly-Version", "0.1.7", false);
+          httpChannel.setRequestHeader("Privly-Version", "0.1.8", false);
           httpChannel.setRequestHeader(privlyConstants.Strings.authToken, 
                                         this.preferences.getCharPref(privlyConstants.Strings.authToken), false);
         }
         else if (/localhost/.test(httpChannel.originalURI.host)) {
-          httpChannel.setRequestHeader("Privly-Version", "0.1.7", false);
+          httpChannel.setRequestHeader("Privly-Version", "0.1.8", false);
           httpChannel.setRequestHeader(privlyConstants.Strings.authToken, 
                                         this.preferences.getCharPref(privlyConstants.Strings.authToken), false);
         }
@@ -170,6 +168,7 @@ var privlyObservers =  {
              */
             extensionCommand = '';
             var command = JSON.parse(extensionCommand);
+            
             /*
              * if requireClickthrough/passive field is present, change the extension 
              * mode to privlyConstants.extensionModeEnum.CLICKTHROUGH/PASSIVE 
@@ -218,7 +217,7 @@ var privlyObservers =  {
     },
     
     /**
-     * Add the response observer to the overlay
+     * Add the response observer
      */
     register: function() {
       
@@ -228,7 +227,7 @@ var privlyObservers =  {
     },
     
     /**
-     * Remove the response observer from the overlay
+     * Remove the response observer
      */
     unregister: function() {
       

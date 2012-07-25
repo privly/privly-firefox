@@ -6,7 +6,7 @@ Components.utils.import("resource://privly/observers.jsm");
 /**
  * import privly constants
  */
-Components.utils.import("resource://privly/constants.jsm");		
+Components.utils.import("resource://privly/constants.jsm");
 
 /**
  * @namespace
@@ -68,19 +68,19 @@ var privlyExtension = {
     "use strict";
     
     var target = document.popupNode;
+    
     var value = target.value;
     if (value === undefined) {
-      value = target.textContent
+      value = target.textContent;
     }
     var contentServerUrl = this.preferences.getCharPref("contentServerUrl");
     if (value === "") {
       alert("Sorry. You can not post empty content to Privly");
     }
     else {
-      var data = { "post[content]": value,
-            "post[public]": true,endpoint: "extension", 
-            browser: "firefox", version: "0.1.1.1"
-      };
+      var data = {"post":{ "content": value,
+            "public": true
+      }};
       var xmlhttp = new XMLHttpRequest();
       var url = contentServerUrl + "/posts/posts_anonymous.json";
       xmlhttp.open("POST", url, true);
@@ -89,9 +89,9 @@ var privlyExtension = {
       xmlhttp.onreadystatechange = function(){
         // process the server response
         if(xmlhttp.readyState === 4 ){
-          if(xmlhttp.status === 200){
-            target.value = xmlhttp.getResponseHeader("privlyurl");
-            target.textContent = xmlhttp.getResponseHeader("privlyurl");
+          if(xmlhttp.status === 200 || xmlhttp.status === 201){
+            target.value = xmlhttp.getResponseHeader("X-Privly-Url");
+            target.textContent = xmlhttp.getResponseHeader("X-Privly-Url");
           }
         }
       };    
@@ -189,22 +189,21 @@ var privlyExtension = {
       alert("Sorry. You can not post empty content to Privly");
     }
     else{
-      var data = { 
-		  auth_token: authToken,
-          "post[content]": value,
-          "post[public]": postPrivacySetting,
-          endpoint: "extension", browser: "firefox", version: "0.1.1.1"
-        };
+      var data = {auth_token: authToken,
+        "post":{ "content": value,
+            "public": postPrivacySetting
+      }};
       var xmlhttp = new XMLHttpRequest();
-      var url = contentServerUrl + "/posts/posts_anonymous.json";
+      var url = contentServerUrl + "/posts.json";
       xmlhttp.open("POST", url, true);
       xmlhttp.setRequestHeader("Content-type", "application/json; charset=UTF-8");
       xmlhttp.setRequestHeader('Accept', 'application/json');
       xmlhttp.onreadystatechange = function(){
         // process the server response
-        if(xmlhttp.readyState === 4 ){
-          if(xmlhttp.status === 200){
-            target.value = xmlhttp.getResponseHeader("privlyurl");
+        if ( xmlhttp.readyState === 4 ) {
+          if ( xmlhttp.status === 200 || xmlhttp.status === 201 ) {
+            target.value = xmlhttp.getResponseHeader("X-Privly-Url");
+            target.textContent = xmlhttp.getResponseHeader("X-Privly-Url");
           }
         }
       };    
@@ -238,8 +237,8 @@ var privlyExtension = {
     
     var disablePosts = this.preferences.getBoolPref("disablePosts");
     var authToken = this.preferences.prefHasUserValue(privlyConstants.
-					Strings.authToken) ? this.preferences.getCharPref(
-					privlyConstants.Strings.authToken) : ""; 
+          Strings.authToken) ? this.preferences.getCharPref(
+          privlyConstants.Strings.authToken) : ""; 
     var loggedIn =  (authToken!== "");
         
     var postable = false;
