@@ -37,7 +37,7 @@
   <vbox id="appcontent">
     <splitter id="encryption-splitter" class="chromeclass-extrachrome" hidden="true"/>
     <vbox id="encryption-iframe-vbox" class="chromeclass-extrachrome" hidden="true" persist="height">
-      <iframe id="encryption-iframe" flex="1" src="http://localhost:3000/zero_bin/" type="content-targetable" />
+      <iframe id="encryption-iframe" flex="1" src="" type="content-targetable" />
     </vbox>
     <button id="encryption-cancel-button" label="Cancel Post"
       oncommand="privlyExtension.cancelEncryptedPost();" hidden="true" />
