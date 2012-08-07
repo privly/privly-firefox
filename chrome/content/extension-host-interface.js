@@ -350,39 +350,48 @@ var privlyExtension = {
   },
   
   /**
-   * Inserts or updates the html element, 'privModeElement' with mode attribute
-   * on the host page and all iframes
-   */
-  updatePrivModeElement: function () {
-    
-    "use strict";
-    
-    this.updateToolbarButtonIcon();
-
-    this.insertPrivModeElement(content.document);
-    //when the host page is done loading
-    content.document.defaultView.onload = function (event) {
-      //get all iframes on the hostpage.
-      var iframes = content.document.getElementsByTagName('iframe');
-      if (iframes) {
-        //loop through each iframe in the host page
-        for (var frameIndex in iframes) {
-          var iframe = iframes[frameIndex];
-          if (iframe && iframe.contentDocument) {
-            // if the iframe is done loading, insert the privModeElement into its DOM
-            // else, insert the privModeElement into the iframe's DOM once it is loaded
-            if (iframe.contentDocument.readyState === 'complete') {
-              privlyExtension.insertPrivModeElement(iframe.contentDocument);
-            } else {
-              iframe.contentDocument.defaultView.onload = function (event) {
-                privlyExtension.insertPrivModeElement(iframe.contentDocument);
-              };
-            }
-          }
-        }
-      }
-    };
-  },
+    * Inserts or updates the html element, 'privModeElement' with mode attribute
+    * on the host page and all iframes
+    */
+   updatePrivModeElement: function () {
+     
+     "use strict";
+     
+     this.updateToolbarButtonIcon();
+     
+     this.insertPrivModeElement(content.document);
+     
+     //when the host page is done loading
+     content.document.defaultView.addEventListener("load",
+       function (e) {
+         
+         "use strict";
+         
+         //get all iframes on the hostpage.
+         var iframes = content.document.getElementsByTagName('iframe');
+         if (iframes) {
+           //loop through each iframe in the host page
+           for (var frameIndex in iframes) {
+             var currentIframe = iframes[frameIndex];
+             if (currentIframe && currentIframe.contentDocument) {
+               // if the iframe is done loading, insert the privModeElement into its DOM
+               // else, insert the privModeElement into the iframe's DOM once it is loaded
+               if (currentIframe.contentDocument.readyState === 'complete') {
+                 privlyExtension.insertPrivModeElement(currentIframe.contentDocument);
+               } else {
+                 //when the host page is done loading
+                 currentIframe.contentDocument.defaultView.addEventListener("load",
+                   function (e) {
+                      privlyExtension.insertPrivModeElement(currentIframe.contentDocument);
+                   },
+                   false);
+               }
+             }
+           }
+         }
+       },
+       false);
+   },
   
   /**
    * Change the mode of operation for the extension.
