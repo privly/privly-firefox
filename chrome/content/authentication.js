@@ -45,9 +45,7 @@ var privlyAuthentication = {
     var userEmailAddress = email.value;
     var userPassword = password.value;
     
-    var data = { email: userEmailAddress, password: userPassword,
-        endpoint:"extension", browser:"firefox", version:"0.1.1.1"
-      };
+    var data = { email: userEmailAddress, password: userPassword };
     var xmlhttp = XMLHttpRequest();
     var url = privlyAuthentication.preferences
                 .getCharPref("contentServerUrl")+"/token_authentications.json";
@@ -61,7 +59,7 @@ var privlyAuthentication = {
           var responseText = xmlhttp.responseText;  
           var response = JSON.parse(responseText);
           if(response && response.auth_key){
-            var authToken = response.auth_key;            
+            var authToken = response.auth_key;
             if (authToken) {
               privlyAuthentication.preferences.setCharPref(privlyConstants.Strings.authToken,authToken);
               alert("You are now logged into Privly");
@@ -85,8 +83,8 @@ var privlyAuthentication = {
    */
   logoutFromPrivly: function() {
     "use strict";
-    var data = { _method: "delete", endpoint:"extension", browser:"firefox", 
-      version:"0.1.1.1", auth_token: privlyAuthentication.preferences.getCharPref(privlyConstants.Strings.authToken)
+    var data = { _method: "delete",
+      auth_token: privlyAuthentication.preferences.getCharPref(privlyConstants.Strings.authToken)
     };
     var xmlhttp = XMLHttpRequest();
     var url = privlyAuthentication.preferences

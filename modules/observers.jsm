@@ -55,32 +55,10 @@ var privlyObservers =  {
                                                 .interfaces.nsIHttpChannel);
         
         // Set the extension version
-        httpChannel.setRequestHeader("X-Privly-Version", "0.1.8", false);
-        /* 
-         * set the extension version and auth_token param on the request headers
-         * the content server uses this authToken to identify a specific user.
-         * TBD: 
-         * 1. version number is hardcoded. write a function to retrieve the 
-         * extension version number automatically
-         * 2. use a regex to match the content server url to eliminate the 
-         * if-else
-         */
-        var extensionMode = this.preferences.getIntPref("extensionMode");
-        var authToken = "";
-        if (this.preferences.prefHasUserValue(privlyConstants.Strings.authToken)) {
-          authToken = this.preferences.getCharPref(privlyConstants.Strings.authToken);
-        }
-        if (/priv.ly/.test(httpChannel.originalURI.host)) {
-          httpChannel.setRequestHeader(privlyConstants.Strings.authToken, 
-                                        authToken, false);
-        }
-        else if (/localhost/.test(httpChannel.originalURI.host)) {
-          httpChannel.setRequestHeader(privlyConstants.Strings.authToken, 
-                                        authToken, false);
-        }
+        httpChannel.setRequestHeader("X-Privly-Version", "0.2.6", false);
       }
     },
-  
+    
     get observerService() {
       
       "use strict";
@@ -133,7 +111,7 @@ var privlyObservers =  {
                             .getBranch("extensions.privly."),
     
     /** 
-     * Respond to mode changes from the server.
+     * Deprecated, not registered.
      *
      * @param {http subject} subject the interface for accessing the http
      * channel.
@@ -151,68 +129,10 @@ var privlyObservers =  {
       if (topic === "http-on-examine-response") {
         var httpChannel = subject.QueryInterface(Components
                                                 .interfaces.nsIHttpChannel);
-        /*
-         * read the extensionCommand header from the response.
-         * if the response header is not set or the server
-         * didn't reply, it will throw an error. so catch it
-         */
         try {
           
-          //Deprecated
-          var extensionCommand = httpChannel.
-                                 getResponseHeader("privlyExtensionCommand");
-                                 
-          // We are going to remove this functionality in favor of a different
-          // strategy for solving this issue: 
-          // https://github.com/smcgregor/privly-firefox/issues/18
-          if ( false ) {
-          //if (/priv.ly/.test(httpChannel.originalURI.host) || 
-          //   (/localhost/.test(httpChannel.originalURI.host) && 
-          //      /posts/.test(httpChannel.originalURI.path))) { 
-            /* 
-             * the extensioncommand response header will be a json string. 
-             * passive and requireClickthrough are mutually exclusive.
-             * eg - extensionCommand = 
-             * '{"disablePosts" : 200, "requireClickthrough":110}';
-             * '{"disablePosts":110,"passive": 100}'
-             */
-            extensionCommand = '';
-            var command = JSON.parse(extensionCommand);
-            
-            /*
-             * if requireClickthrough/passive field is present, change the extension 
-             * mode to privlyConstants.extensionModeEnum.CLICKTHROUGH/PASSIVE 
-             * accordingly. Set it back to active after the time interval  
-             * specified in the json string.
-             */
-            if (command && command.requireClickthrough) {
-              this.preferences.setIntPref("extensionMode",
-                               privlyConstants.extensionModeEnum.CLICKTHROUGH);
-              setTimeout(function() {
-                  this.preferences.setIntPref("extensionMode",
-                                     privlyConstants.extensionModeEnum.ACTIVE);
-                },
-                command.requireClickthrough);
-            }
-            else if (command && command.passive) {
-              this.preferences.setIntPref("extensionMode",
-                                    privlyConstants.extensionModeEnum.PASSIVE);
-              setTimeout(function() {
-                  this.preferences.setIntPref("extensionMode",
-                                     privlyConstants.extensionModeEnum.ACTIVE);
-                },
-                command.passive);
-            }
-            // disable the ability to post content to the server, if the 
-            // disablePosts field is present in the header.
-            if (command && command.disablePosts) {
-              this.preferences.setBoolPref('disablePosts', true);
-              setTimeout(function() {
-                  this.preferences.setBoolPref('disablePosts', false);
-                },
-                command.disablePosts);
-            }
-          }
+          // add response observer code here
+          
         }
         catch (err) {}
       }

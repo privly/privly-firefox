@@ -407,11 +407,10 @@ var privlyExtension = {
 };
 
 /**
- * register observers for http requests and responses. Handles privly authentication
- * and setting privly headers
+ * register observers for http requests and responses. Handles privly headers
  */
 privlyObservers.httpRequestObserver.register();
-privlyObservers.httpResponseObserver.register();
+//privlyObservers.httpResponseObserver.register();
 
 //change the displayed menus on right clicks
 window.addEventListener("contextmenu",

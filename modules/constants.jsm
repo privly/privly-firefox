@@ -7,6 +7,7 @@ var EXPORTED_SYMBOLS = ["privlyConstants"];
 
 
 var privlyConstants =  {
+  
   /**
    * Enum to hold various extension modes and their value. 
    * Extension modes are set through firefox's extension api.
@@ -22,6 +23,6 @@ var privlyConstants =  {
    * Misc strings
    */
   Strings:{
-	authToken:"X-Privly-Auth-Token"
+    authToken:"X-Privly-Auth-Token"
   }
 }
