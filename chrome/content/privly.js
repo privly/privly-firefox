@@ -301,7 +301,9 @@ var privly = {
   },
   
   /**
-   * Counter for injected frame identifiers.
+   * Counter for injected iframe identifiers. This variable is also used
+   * to indicate how many iframes have been injected so that the script
+   * will not inject too many iframes.
    */
   nextAvailableFrameID: 0,
   
@@ -362,7 +364,7 @@ var privly = {
     
     //The id and the name are the same so that the iframe can be 
     //uniquely identified and resized
-    var frameIdAndName = "ifrm"+privly.nextAvailableFrameID;
+    var frameIdAndName = "ifrm" + privly.nextAvailableFrameID;
     iFrame.setAttribute("id", frameIdAndName);
     iFrame.setAttribute("name", frameIdAndName);
     privly.nextAvailableFrameID++;
@@ -409,12 +411,14 @@ var privly = {
     var exclude = anchorElement.getAttribute("privly-exclude");
     var params = privly.getUrlVariables(anchorElement.href);
     
-    var privlyExclude = (params.exclude === undefined && params.privlyExclude === undefined);
+    var privlyExcludeUndefined = (params.exclude === undefined &&
+      params.privlyExclude === undefined);
     
-    if (!exclude && privlyExclude) {
+    if (!exclude && privlyExcludeUndefined) {
       
       var passive = this.extensionMode === privly.extensionModeEnum.PASSIVE ||
-        params.passive !== undefined ||  params.privlyPassive !== undefined || !whitelist;
+        params.passive !== undefined ||  params.privlyPassive !== undefined ||
+        !whitelist || privly.nextAvailableFrameID > 39;
       var burnt = params.burntAfter !== undefined && 
         parseInt(params.burntAfter, 10) < Date.now()/1000;
       if (!burnt) {
@@ -435,9 +439,8 @@ var privly = {
       {
         if (params.burntMessage !== undefined)
         {
-          var burntMessage = params.burntMessage.replace(/\+/g, " ");
           anchorElement.textContent = privly.messages.burntPrivlyContent + 
-            burntMessage;
+            params.burntMessage;
         }
         else if(params.privlyBurntMessage !== undefined)
         {
@@ -454,12 +457,13 @@ var privly = {
       else if (passive){
         if (params.passiveMessage !== undefined)
         {
-          var passiveMessage = params.passiveMessage.replace(/\+/g, " ");
-          anchorElement.textContent = privly.messages.privlyContent + passiveMessage;
+          anchorElement.textContent = privly.messages.privlyContent + 
+            params.passiveMessage;
         }
         else if(params.privlyPassiveMessage !== undefined)
         {
-          anchorElement.textContent = privly.messages.privlyContent + params.privlyPassiveMessage;
+          anchorElement.textContent = privly.messages.privlyContent + 
+            params.privlyPassiveMessage;
         }
         else
         {
@@ -622,10 +626,10 @@ var privly = {
     window.addEventListener("message", privly.resizeIframePostedMessage,
       false, true);
     
-    privly.runPending=true;
+    privly.runPending = true;
     setTimeout(
       function(){
-        privly.runPending=false;
+        privly.runPending = false;
         privly.run();
       },
       100);
@@ -638,11 +642,11 @@ var privly = {
         return;
       }
       
-      privly.runPending=true;
+      privly.runPending = true;
       
       setTimeout(
         function(){
-          privly.runPending=false;
+          privly.runPending = false;
           privly.run();
         },
         500);
