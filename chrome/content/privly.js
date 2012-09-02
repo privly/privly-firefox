@@ -124,13 +124,12 @@ var privly = {
    */
   privlyReferencesRegex: new RegExp(
     "\\b(https?:\\/\\/){0,1}(" + //protocol
-    "priv\\.ly|" + //priv.ly
-    "dev\\.privly\\.org|" + //dev.privly.org
-    "privly\\.org|" + //privly.org
-    "privly\\.com|" + //privly.com
-    "localhost|" + //localhost
-    "dev\\.privly\\.com|" + //dev.privly.com
-    "localhost:3000" + //localhost:3000
+    "priv\\.ly\\/|" + //priv.ly
+    "dev\\.privly\\.org\\/|" + //dev.privly.org
+    "localhost\\/|" + //localhost
+    "privlyalpha.org\\/|" + //localhost
+    "privlybeta.org\\/|" + //localhost
+    "localhost:3000\\/" + //localhost:3000
     ")(\\S){3,}$","gi"),
     //the final line matches
     //end of word
