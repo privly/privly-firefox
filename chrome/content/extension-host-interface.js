@@ -105,6 +105,12 @@ var privlyExtension = {
    */
   currentTargetNode: undefined,
   
+  /**
+   * Variable used furing posting transaction to save which tab
+   * contains the currentTargetNode.
+   */
+   tabReceivingPost: undefined,
+  
   /** 
    * Begins encrypted posting dialog.
    * This function opens an iframe from the current content server
@@ -117,6 +123,9 @@ var privlyExtension = {
   postEncryptedToPrivly: function () {
     
     "use strict";
+    
+    //Remember which tab the post is going to
+    privlyExtension.tabReceivingPost = gBrowser.selectedTab;
     
     //Open the form from the selected content server
     var contentServerUrl = this.preferences.getCharPref("contentServerUrl");
@@ -142,14 +151,42 @@ var privlyExtension = {
    */
   handleEncryptedUrlEvent: function(evt) {
     
-    privlyExtension.currentTargetNode.value = evt.target.getAttribute("privlyUrl");
-    privlyExtension.currentTargetNode.textContent = evt.target.getAttribute("privlyUrl");
+    //Switch to the tab initiating the post
+    gBrowser.selectedTab = privlyExtension.tabReceivingPost;
     
-    document.getElementById('encryption-splitter').hidden = true;
-    document.getElementById('encryption-iframe-vbox').hidden = true;
-    document.getElementById('encryption-cancel-button').hidden = true;
-    document.getElementById('encryption-iframe').setAttribute("src", "");
-    privlyExtension.currentTargetNode = undefined;
+    // Focus the DOM Node, then fire keydown and keypress events
+    privlyExtension.currentTargetNode.focus();
+    var keydownEvent = document.createEvent("KeyboardEvent"); 
+    keydownEvent.initKeyEvent('keydown', true, true, window, 0, 
+                            false, 0, false, 0, 0); 
+    privlyExtension.currentTargetNode.dispatchEvent(keydownEvent);
+    var keypressEvent = document.createEvent("KeyboardEvent"); 
+    keypressEvent.initKeyEvent('keypress', true, true, window, 0, 
+                            false, 0, false, 0, 0); 
+    privlyExtension.currentTargetNode.dispatchEvent(keypressEvent);
+    
+    // Some sites need time to execute form initialization 
+    // callbacks following focus and keydown events.
+    // One example includes Facebook.com's wall update
+    // form and message page.
+    setTimeout(function(){
+      
+      privlyExtension.currentTargetNode.value = evt.target.getAttribute("privlyUrl");
+      privlyExtension.currentTargetNode.textContent = evt.target.getAttribute("privlyUrl");
+      
+      var event = document.createEvent("KeyboardEvent"); 
+      event.initKeyEvent('keyup', true, true, window, 
+                              0, false, 0, false, 0, 0); 
+      privlyExtension.currentTargetNode.dispatchEvent(event);
+      
+      // Hide the posting window
+      document.getElementById('encryption-splitter').hidden = true;
+      document.getElementById('encryption-iframe-vbox').hidden = true;
+      document.getElementById('encryption-cancel-button').hidden = true;
+      document.getElementById('encryption-iframe').setAttribute("src", "");
+      privlyExtension.currentTargetNode = undefined;
+      privlyExtension.tabReceivingPost = undefined;
+    },500);
   },
   
   /**
@@ -157,6 +194,7 @@ var privlyExtension = {
    * should only be called after postEncryptedToPrivly is called.
    */
   cancelEncryptedPost: function() {
+    privlyExtension.tabReceivingPost = undefined;
     document.getElementById('encryption-splitter').hidden = true;
     document.getElementById('encryption-iframe-vbox').hidden = true;
     document.getElementById('encryption-cancel-button').hidden = true;
