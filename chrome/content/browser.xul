@@ -2,38 +2,34 @@
 <?xml-stylesheet href="chrome://privly/skin/skin.css" type="text/css"?> 
 <!DOCTYPE privly SYSTEM "chrome://privly/locale/translations.dtd">
 <overlay id="privly" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-
-	<script src="extension-host-interface.js" />
-	<script src="authentication.js" />
-
-	<menupopup id="contentAreaContextMenu">  
-		<menuitem id="publicPostToPrivlyMenuItem" label="Post Public Content to Privly" oncommand="privlyExtension.postToPrivly('public')"/>  
-	</menupopup>
-
-	<menupopup id="contentAreaContextMenu">  
-		<menuitem id="privatePostToPrivlyMenuItem" label="Post Private Content to Privly" oncommand="privlyExtension.postToPrivly('private')"/>  
-	</menupopup>
-
-	<menupopup id="contentAreaContextMenu">  
-		<menuitem id="encryptedPostToPrivlyMenuItem" label="Post Encrypted+Anonymous Content to Privly (destroyed in 24 hours)" oncommand="privlyExtension.postEncryptedToPrivly()"/>  
-	</menupopup>
-
-	<menupopup id="contentAreaContextMenu">  
-		<menuitem id="anonymousPostToPrivlyMenuItem" label="Post Anonymous Content to Privly (destroyed in 24 hours)" oncommand="privlyExtension.postAnonymouslyToPrivly()"/>  
-	</menupopup>
-	
-	<menupopup id="contentAreaContextMenu">  
-		<menuitem id="loginToPrivlyMenuItem" label="Login to Privly" oncommand="privlyAuthentication.loginToPrivly()"/>  
-	</menupopup>
-
-	<menupopup id="contentAreaContextMenu">  
-		<menuitem id="logoutFromPrivlyMenuItem" label="Logout from Privly" oncommand="privlyAuthentication.logoutFromPrivly()"/>  
-	</menupopup>
-	
-	<toolbarpalette id="BrowserToolbarPalette">
-		<toolbarbutton id="privly-tlbr-btn" insertafter="search-container" label="Privly" tooltiptext="Privly" oncommand="privlyExtension.toggleExtensionMode()"/>
-	</toolbarpalette>
-	
+  
+  <script src="extension-host-interface.js" />
+  <script src="authentication.js" />
+  
+  <menuseparator/>
+  <menupopup id="contentAreaContextMenu">  
+    <menuitem id="publicPostToPrivlyMenuItem" label="Create a Privly Post" oncommand="privlyExtension.postToPrivly('public')" image="chrome://privly/skin/logo_64.png" class="menuitem-iconic" />  
+  </menupopup>
+  
+  <menupopup id="contentAreaContextMenu">  
+    <menuitem id="encryptedPostToPrivlyMenuItem" label="Create a ZeroBin Post" oncommand="privlyExtension.postEncryptedToPrivly()" image="chrome://privly/skin/logo_64.png" class="menuitem-iconic" />  
+  </menupopup>
+  
+  
+  <menupopup id="contentAreaContextMenu">  
+    <menuitem id="loginToPrivlyMenuItem" label="Login to Privly" oncommand="privlyAuthentication.loginToPrivly()" image="chrome://privly/skin/logo_64.png" class="menuitem-iconic" />  
+  </menupopup>
+  
+  <menupopup id="contentAreaContextMenu">  
+    <menuitem id="logoutFromPrivlyMenuItem" label="Logout from Privly" oncommand="privlyAuthentication.logoutFromPrivly()" image="chrome://privly/skin/logo_64.png" class="menuitem-iconic" />  
+  </menupopup>
+  
+  <menuseparator/>
+  
+  <toolbarpalette id="BrowserToolbarPalette">
+    <toolbarbutton id="privly-tlbr-btn" insertafter="search-container" label="Privly" tooltiptext="Privly" oncommand="privlyExtension.toggleExtensionMode()"/>
+  </toolbarpalette>
+  
   <vbox id="appcontent">
     <splitter id="encryption-splitter" class="chromeclass-extrachrome" hidden="true"/>
     <vbox id="encryption-iframe-vbox" class="chromeclass-extrachrome" hidden="true" persist="height">

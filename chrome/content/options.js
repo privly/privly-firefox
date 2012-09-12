@@ -91,7 +91,7 @@ var privlyPrefPane =
     
     var contentServerURL = "";
     if (document.getElementById('contentServerPrivly').selected === true) {
-      contentServerURL = "https://priv.ly";
+      contentServerURL = "https://privlyalpha.org";
     }
     else if (document.getElementById('contentServerDev').selected === true) {
       contentServerURL = "https://dev.privly.org";

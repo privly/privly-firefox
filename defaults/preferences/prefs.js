@@ -12,5 +12,5 @@ pref("extensions.privly.disablePosts", false);
 // all posts default to public
 pref("extensions.privly.allPostsPublic", false);
 // Where to store posts, for testing use "http://localhost:3000"https://priv.ly
-pref("extensions.privly.contentServerUrl", "https://priv.ly");
+pref("extensions.privly.contentServerUrl", "https://privlyalpha.org");
 //pref("extensions.privly.firstRun", true);

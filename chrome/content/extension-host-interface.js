@@ -262,15 +262,11 @@ var privlyExtension = {
     var loginToPrivlyMenuItem = document.getElementById('loginToPrivlyMenuItem');
     var logoutFromPrivlyMenuItem = document.getElementById('logoutFromPrivlyMenuItem');
     var publicPostToPrivlyMenuItem = document.getElementById('publicPostToPrivlyMenuItem');
-    var privatePostToPrivlyMenuItem = document.getElementById('privatePostToPrivlyMenuItem');
-    var anonymousPostToPrivlyMenuItem = document.getElementById('anonymousPostToPrivlyMenuItem');
     var encryptedPostToPrivlyMenuItem = document.getElementById('encryptedPostToPrivlyMenuItem');
     
     loginToPrivlyMenuItem.hidden = true;
     logoutFromPrivlyMenuItem.hidden = true;
     publicPostToPrivlyMenuItem.hidden = true;
-    privatePostToPrivlyMenuItem.hidden = true;
-    anonymousPostToPrivlyMenuItem.hidden = true;
     encryptedPostToPrivlyMenuItem.hidden = true;
     
     var disablePosts = this.preferences.getBoolPref("disablePosts");
@@ -293,20 +289,13 @@ var privlyExtension = {
     }
     
     if (postable) {
-      anonymousPostToPrivlyMenuItem.hidden = false;
       encryptedPostToPrivlyMenuItem.hidden = false;
-    }
-    
-    if (loggedIn && postable) {
       publicPostToPrivlyMenuItem.hidden = false;
-      privatePostToPrivlyMenuItem.hidden = false;
     }
     
     if (loggedIn) {
       logoutFromPrivlyMenuItem.hidden = false;
-    }
-    
-    if (!loggedIn) {
+    } else {
       loginToPrivlyMenuItem.hidden = false;
     }
   },
