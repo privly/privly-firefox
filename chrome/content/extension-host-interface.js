@@ -273,7 +273,7 @@ var privlyExtension = {
     var authToken = this.preferences.prefHasUserValue(privlyConstants.
           Strings.authToken) ? this.preferences.getCharPref(
           privlyConstants.Strings.authToken) : ""; 
-    var loggedIn =  (authToken!== "");
+    var loggedIn =  (authToken !== "");
         
     var postable = false;
     if (!disablePosts && evt.target.nodeName !== null) {
@@ -288,13 +288,10 @@ var privlyExtension = {
       }
     }
     
-    if (postable) {
+    if (loggedIn && postable) {
+      logoutFromPrivlyMenuItem.hidden = false;
       encryptedPostToPrivlyMenuItem.hidden = false;
       publicPostToPrivlyMenuItem.hidden = false;
-    }
-    
-    if (loggedIn) {
-      logoutFromPrivlyMenuItem.hidden = false;
     } else {
       loginToPrivlyMenuItem.hidden = false;
     }
