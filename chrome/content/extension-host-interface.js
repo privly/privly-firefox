@@ -466,7 +466,7 @@ gBrowser.addEventListener("load",
     var wnd = doc.defaultView;
     var loader = Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
                       .getService(Components.interfaces.mozIJSSubScriptLoader);
-    if (doc.nodeName === '#document') {
+    if (doc.nodeName === '#document' && doc.contentType !== "application/json") {
       privlyExtension.insertPrivModeElement(doc);
       loader.loadSubScript("chrome://privly/content/privly.js", wnd);
     }
