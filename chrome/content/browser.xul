@@ -12,7 +12,7 @@
   </menupopup>
   
   <menupopup id="contentAreaContextMenu">  
-    <menuitem id="encryptedPostToPrivlyMenuItem" label="Create a ZeroBin Post" oncommand="privlyExtension.postEncryptedToPrivly()" image="chrome://privly/skin/logo_64.png" class="menuitem-iconic" />  
+    <menuitem id="encryptedPostToPrivlyMenuItem" label="Create a ZeroBin Post" oncommand="privlyExtension.openPostingApplication()" image="chrome://privly/skin/logo_64.png" class="menuitem-iconic" />  
   </menupopup>
   
   

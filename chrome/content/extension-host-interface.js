@@ -58,46 +58,6 @@ var privlyExtension = {
       this.preferences.setBoolPref(firstRun, true);
     }
   },
-
-  /** 
-   * Send data anonymously from the right-clicked form element to the content server, then
-   * assign the form element to the returned URL.
-   */
-  postAnonymouslyToPrivly: function () {
-    
-    "use strict";
-    
-    var target = document.popupNode;
-    
-    var value = target.value;
-    if (value === undefined) {
-      value = target.textContent;
-    }
-    var contentServerUrl = this.preferences.getCharPref("contentServerUrl");
-    if (value === "") {
-      alert("Sorry. You can not post empty content to Privly");
-    }
-    else {
-      var data = {"post":{ "content": value,
-            "public": true
-      }};
-      var xmlhttp = new XMLHttpRequest();
-      var url = contentServerUrl + "/posts/posts_anonymous.json";
-      xmlhttp.open("POST", url, true);
-      xmlhttp.setRequestHeader("Content-type", "application/json; charset=UTF-8");
-      xmlhttp.setRequestHeader('Accept', 'application/json');
-      xmlhttp.onreadystatechange = function(){
-        // process the server response
-        if(xmlhttp.readyState === 4 ){
-          if(xmlhttp.status === 200 || xmlhttp.status === 201){
-            target.value = xmlhttp.getResponseHeader("X-Privly-Url");
-            target.textContent = xmlhttp.getResponseHeader("X-Privly-Url");
-          }
-        }
-      };    
-      xmlhttp.send(JSON.stringify(data));
-    }
-  },
   
   /**
    * Variable used during a posting transaction to save where the 
@@ -112,15 +72,16 @@ var privlyExtension = {
    tabReceivingPost: undefined,
   
   /** 
-   * Begins encrypted posting dialog.
+   * Begins posting dialog for a javascript application.
    * This function opens an iframe from the current content server
-   * for the user to type their content into.
+   * for the user to type their content into. It currently only works
+   * with the zero_bin application, but other applications will be added.
    *
-   * @see privlyExtension.handleEncryptedUrlEvent
+   * @see privlyExtension.handleUrlEvent
    *
-   * @see privlyExtension.cancelEncryptedPost
+   * @see privlyExtension.cancelPost
    */
-  postEncryptedToPrivly: function () {
+  openPostingApplication: function () {
     
     "use strict";
     
@@ -149,7 +110,7 @@ var privlyExtension = {
    * containing a string variable, "privlyUrl", bound to the url intended to
    * be pasted to the relevent form element.
    */
-  handleEncryptedUrlEvent: function(evt) {
+  handleUrlEvent: function(evt) {
     
     //Switch to the tab initiating the post
     gBrowser.selectedTab = privlyExtension.tabReceivingPost;
@@ -190,10 +151,10 @@ var privlyExtension = {
   },
   
   /**
-   * Cancel the encrypted post dialog after the form frame popped up. This
-   * should only be called after postEncryptedToPrivly is called.
+   * Cancel the post dialog after the form frame popped up. This
+   * should only be called after postToPrivly is called.
    */
-  cancelEncryptedPost: function() {
+  cancelPost: function() {
     privlyExtension.tabReceivingPost = undefined;
     document.getElementById('encryption-splitter').hidden = true;
     document.getElementById('encryption-iframe-vbox').hidden = true;
@@ -203,8 +164,10 @@ var privlyExtension = {
   },
 
   /** 
-   * Send data from the right-clicked form element to the content server, then
-   * assign the form element to the returned URL.
+   * (Deprecated) Send data from the right-clicked form element to the content 
+   * server, then assign the form element to the returned URL. This function 
+   * will be retired once the Privly "Post" application is capable of 
+   * accepting content via message passing.
    *
    * @param {string} privacySetting Indicates the privacy level of the post.
    * Accepted values are 'public', and anything else. If the extension is set
@@ -240,8 +203,49 @@ var privlyExtension = {
         // process the server response
         if ( xmlhttp.readyState === 4 ) {
           if ( xmlhttp.status === 200 || xmlhttp.status === 201 ) {
-            target.value = xmlhttp.getResponseHeader("X-Privly-Url");
-            target.textContent = xmlhttp.getResponseHeader("X-Privly-Url");
+            
+            //Remember which tab the post is going to
+            privlyExtension.tabReceivingPost = gBrowser.selectedTab;
+            
+            //Save the destination for the encrypted URL
+            privlyExtension.currentTargetNode = target;
+            
+            //Switch to the tab initiating the post
+            gBrowser.selectedTab = privlyExtension.tabReceivingPost;
+            
+            // Focus the DOM Node, then fire keydown and keypress events
+            privlyExtension.currentTargetNode.focus();
+            var keydownEvent = document.createEvent("KeyboardEvent"); 
+            keydownEvent.initKeyEvent('keydown', true, true, window, 0, 
+                                    false, 0, false, 0, 0); 
+            privlyExtension.currentTargetNode.dispatchEvent(keydownEvent);
+            var keypressEvent = document.createEvent("KeyboardEvent"); 
+            keypressEvent.initKeyEvent('keypress', true, true, window, 0, 
+                                    false, 0, false, 0, 0); 
+            privlyExtension.currentTargetNode.dispatchEvent(keypressEvent);
+            
+            // Some sites need time to execute form initialization 
+            // callbacks following focus and keydown events.
+            // One example includes Facebook.com's wall update
+            // form and message page.
+            setTimeout(function(){
+
+              privlyExtension.currentTargetNode.value = xmlhttp.getResponseHeader("X-Privly-Url");
+              privlyExtension.currentTargetNode.textContent = xmlhttp.getResponseHeader("X-Privly-Url");
+              
+              var event = document.createEvent("KeyboardEvent"); 
+              event.initKeyEvent('keyup', true, true, window, 
+                                      0, false, 0, false, 0, 0); 
+              privlyExtension.currentTargetNode.dispatchEvent(event);
+
+              // Hide the posting window, if it is even displayed
+              document.getElementById('encryption-splitter').hidden = true;
+              document.getElementById('encryption-iframe-vbox').hidden = true;
+              document.getElementById('encryption-cancel-button').hidden = true;
+              document.getElementById('encryption-iframe').setAttribute("src", "");
+              privlyExtension.currentTargetNode = undefined;
+              privlyExtension.tabReceivingPost = undefined;
+            },500);
           }
         }
       };    
@@ -489,5 +493,5 @@ gBrowser.addEventListener("load",
 window.addEventListener("load", function load(event){  
     document.getElementById('encryption-iframe')
       .addEventListener("PrivlyUrlEvent", 
-        function(e) { privlyExtension.handleEncryptedUrlEvent(e); }, false, true);   
+        function(e) { privlyExtension.handleUrlEvent(e); }, false, true);   
   },false);
