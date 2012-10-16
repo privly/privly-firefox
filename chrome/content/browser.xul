@@ -4,38 +4,23 @@
 <overlay id="privly" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
   
   <script src="extension-host-interface.js" />
-  <script src="authentication.js" />
   
-  <menuseparator/>
-  <menupopup id="contentAreaContextMenu">  
-    <menuitem id="publicPostToPrivlyMenuItem" label="Create a Privly Post" oncommand="privlyExtension.postToPrivly('public')" image="chrome://privly/skin/logo_64.png" class="menuitem-iconic" />  
+  <menupopup id="contentAreaContextMenu">
+    <menuseparator id="postingMenuSeparator" />
+    <menuitem id="publicPostToPrivlyMenuItem" label="Create a Privly Post" oncommand="privlyExtension.openPostingApplication('/posts/new')" image="chrome://privly/skin/logo_64.png" class="menuitem-iconic" />
+    <menuitem id="encryptedPostToPrivlyMenuItem" label="Create a ZeroBin Post" oncommand="privlyExtension.openPostingApplication('/zero_bin/')" image="chrome://privly/skin/logo_64.png" class="menuitem-iconic" />
   </menupopup>
-  
-  <menupopup id="contentAreaContextMenu">  
-    <menuitem id="encryptedPostToPrivlyMenuItem" label="Create a ZeroBin Post" oncommand="privlyExtension.openPostingApplication()" image="chrome://privly/skin/logo_64.png" class="menuitem-iconic" />  
-  </menupopup>
-  
-  
-  <menupopup id="contentAreaContextMenu">  
-    <menuitem id="loginToPrivlyMenuItem" label="Login to Privly" oncommand="privlyAuthentication.loginToPrivly()" image="chrome://privly/skin/logo_64.png" class="menuitem-iconic" />  
-  </menupopup>
-  
-  <menupopup id="contentAreaContextMenu">  
-    <menuitem id="logoutFromPrivlyMenuItem" label="Logout from Privly" oncommand="privlyAuthentication.logoutFromPrivly()" image="chrome://privly/skin/logo_64.png" class="menuitem-iconic" />  
-  </menupopup>
-  
-  <menuseparator/>
   
   <toolbarpalette id="BrowserToolbarPalette">
     <toolbarbutton id="privly-tlbr-btn" insertafter="search-container" label="Privly" tooltiptext="Privly" oncommand="privlyExtension.toggleExtensionMode()"/>
   </toolbarpalette>
   
   <vbox id="appcontent">
-    <splitter id="encryption-splitter" class="chromeclass-extrachrome" hidden="true"/>
-    <vbox id="encryption-iframe-vbox" class="chromeclass-extrachrome" hidden="true" persist="height">
-      <iframe id="encryption-iframe" flex="1" src="" type="content-targetable" />
+    <splitter id="post-splitter" class="chromeclass-extrachrome" hidden="true"/>
+    <vbox id="post-iframe-vbox" class="chromeclass-extrachrome" hidden="true" persist="height">
+      <iframe id="post-iframe" flex="1" src="" type="content-targetable" />
     </vbox>
-    <button id="encryption-cancel-button" label="Cancel Post"
-      oncommand="privlyExtension.cancelEncryptedPost();" hidden="true" />
+    <button id="post-cancel-button" label="Cancel Post"
+      oncommand="privlyExtension.cancelPost();" hidden="true" />
   </vbox>
 </overlay>

@@ -35,7 +35,6 @@ var privlyObservers =  {
     
     /** 
      * Add headers to Privly requests containing the extension version
-     * and the authentication token.
      *
      * @param {http subject} subject the interface for accessing the http
      * channel.
