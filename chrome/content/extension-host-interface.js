@@ -69,7 +69,34 @@ var privlyExtension = {
    * Variable used furing posting transaction to save which tab
    * contains the currentTargetNode.
    */
-   tabReceivingPost: undefined,
+  tabReceivingPost: undefined,
+  
+  /**
+   * This is the value of the form element being passed into 
+   * the posting application. It should be cleared when the posting 
+   * process completes
+   */
+  postingApplicationMessage: "",
+  
+  /**
+   * This callback is executed when a posting application sends a secret
+   * identifier to the extension to open the communication channel.
+   *
+   * @param e event The event fired by the posting application.
+   *
+   * See openPostingApplication
+   *
+   */
+  handleMessageSecretEvent: function (e) {
+    
+    "use strict";
+    
+    var contentServerUrl = this.preferences.getCharPref("contentServerUrl");
+    var postingDocument = document.getElementById('post-iframe').contentWindow;
+    var secretMessage = e.target.getAttribute("privlyMessageSecret");
+    postingDocument.postMessage(secretMessage +
+      privlyExtension.postingApplicationMessage, contentServerUrl);
+  },
   
   /** 
    * Begins posting dialog for a javascript application.
@@ -94,7 +121,8 @@ var privlyExtension = {
     
     //Open the form from the selected content server
     var contentServerUrl = this.preferences.getCharPref("contentServerUrl");
-    document.getElementById('post-iframe').setAttribute("src", contentServerUrl + postingApplication);
+    document.getElementById('post-iframe').setAttribute("src", 
+      contentServerUrl + postingApplication);
     
     //display the form elements in the bottom of the browser chrome
     document.getElementById('post-splitter').hidden = false;
@@ -103,6 +131,11 @@ var privlyExtension = {
     
     //Save the destination for the encrypted URL
     privlyExtension.currentTargetNode = document.popupNode;
+      
+    //Get the current value of the form
+    privlyExtension.postingApplicationMessage = 
+      privlyExtension.currentTargetNode.value;
+    
   },
   
   /**
@@ -159,6 +192,9 @@ var privlyExtension = {
    * should only be called after postToPrivly is called.
    */
   cancelPost: function() {
+    
+    "use strict";
+    
     privlyExtension.tabReceivingPost = undefined;
     document.getElementById('post-splitter').hidden = true;
     document.getElementById('post-iframe-vbox').hidden = true;
@@ -399,5 +435,11 @@ gBrowser.addEventListener("load",
 window.addEventListener("load", function load(event){  
     document.getElementById('post-iframe')
       .addEventListener("PrivlyUrlEvent", 
-        function(e) { privlyExtension.handleUrlEvent(e); }, false, true);   
+        function(e) { 
+          privlyExtension.handleUrlEvent(e); 
+        }, false, true);
+    document.getElementById('post-iframe')
+      .addEventListener("PrivlyMessageSecretEvent", 
+        function(e) { 
+          privlyExtension.handleMessageSecretEvent(e); }, false, true);
   },false);
