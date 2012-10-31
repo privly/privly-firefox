@@ -1,9 +1,1 @@
-This is the official repository for the Privly Firefox Extension.
-
-For more information on what Privly is, see https://priv.ly.
-
-The development home of Privly is at http://www.privly.org/. For information on how to join the Privly community, read this: http://www.privly.org/content/welcome-privly-development
-
-You can download the latest release version of the extension from here: https://addons.mozilla.org/en-US/firefox/addon/privly/
-
-You can download the latest development version of the extension (updated automatically every 15 minutes) from this URL: https://dev.privly.org/PrivlyFirefoxExtension.xpi !!!NOTE!!! Installing the extension from this URL will not updated it in the future. You will have to periodically download new versions of the extension. If you are not testing the latest and greatest functionality, I would stick with the Mozilla link above.
+View the README at: https://github.com/privly/privly-firefox
