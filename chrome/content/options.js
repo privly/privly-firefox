@@ -37,9 +37,6 @@ var privlyPrefPane =
     else if (extensionMode === privlyConstants.extensionModeEnum.CLICKTHROUGH) {
       document.getElementById('require-clickthrough').selected = true;
     }
-     //get the disable post option from preferences and update the checkbox 
-    document.getElementById('disable-post').checked = this.preferences.
-                                                   getBoolPref("disablePosts");
   },
   
   /**
@@ -62,21 +59,6 @@ var privlyPrefPane =
       mode = privlyConstants.extensionModeEnum.CLICKTHROUGH;
     }
     this.preferences.setIntPref("extensionMode", mode);
-  },
-  
-  /**
-   * Handler for changing the post mode, which determines whether the
-   * the extension can post content to remote servers.
-   * This function checks the state of the preference pane, and assigns
-   * the post mode accordingly.
-   */
-  updatePostMode: function () {
-    
-    "use strict";
-    
-    if (document.getElementById('disable-post').checked === true) {
-      this.preferences.setBoolPref('disablePosts', true);
-    }
   },
   
   /**

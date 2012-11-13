@@ -9,7 +9,6 @@ xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
   
     <preferences>
       <preference id="privly-mode" name="extensions.privly.extensionMode" type="int" instantApply="true" onchange="privlyPrefPane.updateMode();"/>
-      <preference id="privly-disable-post" name="extensions.privly.disablePosts" type="bool" instantApply="true" onchange="privlyPrefPane.updatePostMode()"/>
       <preference id="privly-server" name="extensions.privly.contentServerUrl" type="string" instantApply="true" onchange="privlyPrefPane.updateContentServerURL()"/>
     </preferences>
 
@@ -32,9 +31,6 @@ xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
         </radiogroup>
       </groupbox>
       
-      <groupbox>
-        <checkbox id="disable-post" label="Disable extension from posting content to Privly content server" checked="false"  preference="privly-disable-post"  />
-      </groupbox>
     </vbox>
     
   </prefpane>

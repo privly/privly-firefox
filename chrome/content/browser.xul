@@ -22,6 +22,6 @@
       <iframe id="post-iframe" flex="1" src="" type="content-targetable" />
     </vbox>
     <button id="post-cancel-button" label="Cancel Post"
-      oncommand="privlyExtension.cancelPost();" hidden="true" />
+      oncommand="privlyExtensionPosting.cancelPost();" hidden="true" />
   </vbox>
 </overlay>

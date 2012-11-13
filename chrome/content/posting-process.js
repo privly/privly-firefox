@@ -1,17 +1,15 @@
 /**
- * import the http observer module for listening to calls to privly servers
- */
-Components.utils.import("resource://privly/observers.jsm");
-
-/**
- * import privly constants
- */
-Components.utils.import("resource://privly/constants.jsm");
-
-/**
  * @namespace
- * Handles interaction with the host page, including injecting the content
- * script, privly.js.
+ * Handles posting process, whereby the user generates a new Privly link for
+ * addition to the host page's form. The process is as follows:
+ * 1. The user opens a context menu by right-clicking on a form element
+ * 2. The user selects a posting application from the context menu
+ * 3. The extension opens the posting application in the bottom of the chrome
+ *    window.
+ * 4. The user completes interaction with the chrome window and it fires
+ *    a PrivlyUrlEvent, containing the URL of the generated content.
+ * 5. The extension places the event's URL into the host page's form, and
+ *    closes the posting application's window.
  */
 var privlyExtensionPosting = {
   
@@ -47,7 +45,7 @@ var privlyExtensionPosting = {
    *
    * @param e event The event fired by the posting application.
    *
-   * See openPostingApplication
+   * @see privlyExtensionPosting.openPostingApplication
    *
    */
   handleMessageSecretEvent: function (e) {
@@ -184,10 +182,8 @@ var privlyExtensionPosting = {
     encryptedPostToPrivlyMenuItem.hidden = true;
     postingMenuSeparator.hidden = true;
     
-    var disablePosts = this.preferences.getBoolPref("disablePosts");
-    
     var postable = false;
-    if (!disablePosts && evt.target.nodeName !== null) {
+    if (evt.target.nodeName !== null) {
       if (evt.target.nodeName.toLowerCase() === 'input' ||
         evt.target.nodeName.toLowerCase() === 'textarea') {
           postable = true;
@@ -220,7 +216,8 @@ var privlyExtensionPosting = {
 };
 
 /**
- * change the displayed menus on right clicks
+ * Modify the context menu (right click menu) according to the page element
+ * the user clicks.
  */
 window.addEventListener("contextmenu",
   function (e) {
@@ -230,7 +227,8 @@ window.addEventListener("contextmenu",
   false);
 
 /**
- * Watch for encrypted URLs sent by the encryption iframe.
+ * Watch for encrypted URLs sent by the encryption iframe. These URLs are
+ * generated whent the user completes the posting process.
  */
 window.addEventListener("load", function load(event){  
     document.getElementById('post-iframe')
