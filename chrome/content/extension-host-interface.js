@@ -14,7 +14,6 @@ Components.utils.import("resource://privly/constants.jsm");
  * script, privly.js.
  */
 var privlyExtension = {
-
   
   /**
    * Interface object to the extension preferences.
@@ -22,7 +21,6 @@ var privlyExtension = {
   preferences: Components.classes["@mozilla.org/preferences-service;1"]
                          .getService(Components.interfaces.nsIPrefService)
                          .getBranch("extensions.privly."),
-
 
   /**
    * Installs toolbar button in the navigation bar
@@ -59,190 +57,6 @@ var privlyExtension = {
     }
   },
   
-  /**
-   * Variable used during a posting transaction to save where the 
-   * resulting URL will be pasted to.
-   */
-  currentTargetNode: undefined,
-  
-  /**
-   * Variable used furing posting transaction to save which tab
-   * contains the currentTargetNode.
-   */
-  tabReceivingPost: undefined,
-  
-  /**
-   * This is the value of the form element being passed into 
-   * the posting application. It should be cleared when the posting 
-   * process completes
-   */
-  postingApplicationMessage: "",
-  
-  /**
-   * This callback is executed when a posting application sends a secret
-   * identifier to the extension to open the communication channel.
-   *
-   * @param e event The event fired by the posting application.
-   *
-   * See openPostingApplication
-   *
-   */
-  handleMessageSecretEvent: function (e) {
-    
-    "use strict";
-    
-    var contentServerUrl = this.preferences.getCharPref("contentServerUrl");
-    var postingDocument = document.getElementById('post-iframe').contentWindow;
-    var secretMessage = e.target.getAttribute("privlyMessageSecret");
-    postingDocument.postMessage(secretMessage +
-      privlyExtension.postingApplicationMessage, contentServerUrl);
-  },
-  
-  /** 
-   * Begins posting dialog for a javascript application.
-   * This function opens an iframe from the current content server
-   * for the user to type their content into.
-   *
-   * @param postingApplication string A string that will be added to the
-   * currently selected content server's URL. Currently supported values
-   * are /zero_bin/ and /posts/, but the string could potentially be
-   * anything.
-   *
-   * @see privlyExtension.handleUrlEvent
-   *
-   * @see privlyExtension.cancelPost
-   */
-  openPostingApplication: function (postingApplication) {
-    
-    "use strict";
-    
-    //Remember which tab the post is going to
-    privlyExtension.tabReceivingPost = gBrowser.selectedTab;
-    
-    //Open the form from the selected content server
-    var contentServerUrl = this.preferences.getCharPref("contentServerUrl");
-    document.getElementById('post-iframe').setAttribute("src", 
-      contentServerUrl + postingApplication);
-    
-    //display the form elements in the bottom of the browser chrome
-    document.getElementById('post-splitter').hidden = false;
-    document.getElementById('post-iframe-vbox').hidden = false;
-    document.getElementById('post-cancel-button').hidden = false;
-    
-    //Save the destination for the encrypted URL
-    privlyExtension.currentTargetNode = document.popupNode;
-      
-    //Get the current value of the form
-    privlyExtension.postingApplicationMessage = 
-      privlyExtension.currentTargetNode.value;
-    
-  },
-  
-  /**
-   * Receive URL to encrypted post for posting to selected form element.
-   * This function also closes the posting iframe and chnages its source
-   * so it no longer contains the content.
-   * 
-   * @param {event} evt An event dispatched from the encryption application 
-   * containing a string variable, "privlyUrl", bound to the url intended to
-   * be pasted to the relevent form element.
-   */
-  handleUrlEvent: function(evt) {
-    
-    //Switch to the tab initiating the post
-    gBrowser.selectedTab = privlyExtension.tabReceivingPost;
-    
-    // Focus the DOM Node, then fire keydown and keypress events
-    privlyExtension.currentTargetNode.focus();
-    var keydownEvent = document.createEvent("KeyboardEvent"); 
-    keydownEvent.initKeyEvent('keydown', true, true, window, 0, 
-                            false, 0, false, 0, 0); 
-    privlyExtension.currentTargetNode.dispatchEvent(keydownEvent);
-    var keypressEvent = document.createEvent("KeyboardEvent");
-    keypressEvent.initKeyEvent('keypress', true, true, window, 0, 
-                            false, 0, false, 0, 0); 
-    privlyExtension.currentTargetNode.dispatchEvent(keypressEvent);
-    
-    // Some sites need time to execute form initialization 
-    // callbacks following focus and keydown events.
-    // One example includes Facebook.com's wall update
-    // form and message page.
-    setTimeout(function(){
-      
-      privlyExtension.currentTargetNode.value = evt.target.getAttribute("privlyUrl");
-      privlyExtension.currentTargetNode.textContent = evt.target.getAttribute("privlyUrl");
-      
-      var event = document.createEvent("KeyboardEvent"); 
-      event.initKeyEvent('keyup', true, true, window, 
-                              0, false, 0, false, 0, 0); 
-      privlyExtension.currentTargetNode.dispatchEvent(event);
-      
-      // Hide the posting window
-      document.getElementById('post-splitter').hidden = true;
-      document.getElementById('post-iframe-vbox').hidden = true;
-      document.getElementById('post-cancel-button').hidden = true;
-      document.getElementById('post-iframe').setAttribute("src", "");
-      privlyExtension.currentTargetNode = undefined;
-      privlyExtension.tabReceivingPost = undefined;
-    },500);
-  },
-  
-  /**
-   * Cancel the post dialog after the form frame popped up. This
-   * should only be called after postToPrivly is called.
-   */
-  cancelPost: function() {
-    
-    "use strict";
-    
-    privlyExtension.tabReceivingPost = undefined;
-    document.getElementById('post-splitter').hidden = true;
-    document.getElementById('post-iframe-vbox').hidden = true;
-    document.getElementById('post-cancel-button').hidden = true;
-    document.getElementById('post-iframe').setAttribute("src", "");
-    privlyExtension.currentTargetNode = undefined;
-  },
-  
-  /**
-   * Determines which menu options are shown in the right-click menu.
-   *
-   * @param {event} evt A right click event.
-   *
-   */
-  checkContextForPrivly: function (evt) {
-    
-    "use strict";
-    
-    var publicPostToPrivlyMenuItem = document.getElementById('publicPostToPrivlyMenuItem');
-    var encryptedPostToPrivlyMenuItem = document.getElementById('encryptedPostToPrivlyMenuItem');
-    var postingMenuSeparator = document.getElementById('postingMenuSeparator');
-    
-    publicPostToPrivlyMenuItem.hidden = true;
-    encryptedPostToPrivlyMenuItem.hidden = true;
-    postingMenuSeparator.hidden = true;
-    
-    var disablePosts = this.preferences.getBoolPref("disablePosts");
-    
-    var postable = false;
-    if (!disablePosts && evt.target.nodeName !== null) {
-      if (evt.target.nodeName.toLowerCase() === 'input' ||
-        evt.target.nodeName.toLowerCase() === 'textarea') {
-          postable = true;
-      }
-      else if(evt.target.nodeName.toLowerCase() === 'div') {
-        if (evt.target.getAttribute("contenteditable") === 'true') {
-          postable = true;
-        }
-      }
-    }
-    
-    if ( postable ) {
-      encryptedPostToPrivlyMenuItem.hidden = false;
-      publicPostToPrivlyMenuItem.hidden = false;
-      postingMenuSeparator.hidden = false;
-    }
-  },
-
   /**
    * Toggle the extension mode between active and passive modes.
    */
@@ -380,15 +194,6 @@ var privlyExtension = {
  * register observers for http requests and responses. Handles privly headers
  */
 privlyObservers.httpRequestObserver.register();
-//privlyObservers.httpResponseObserver.register();
-
-//change the displayed menus on right clicks
-window.addEventListener("contextmenu",
-  function (e) {
-    "use strict";
-    privlyExtension.checkContextForPrivly(e);
-  },
-  false);
 
 /*
  * user could change the mode from the preferences menu in the add-on page. 
@@ -428,18 +233,3 @@ gBrowser.addEventListener("load",
     }
   },
   true);
-
-/**
- * Watch for encrypted URLs sent by the encryption iframe.
- */
-window.addEventListener("load", function load(event){  
-    document.getElementById('post-iframe')
-      .addEventListener("PrivlyUrlEvent", 
-        function(e) { 
-          privlyExtension.handleUrlEvent(e); 
-        }, false, true);
-    document.getElementById('post-iframe')
-      .addEventListener("PrivlyMessageSecretEvent", 
-        function(e) { 
-          privlyExtension.handleMessageSecretEvent(e); }, false, true);
-  },false);

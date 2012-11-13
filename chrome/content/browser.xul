@@ -4,11 +4,12 @@
 <overlay id="privly" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
   
   <script src="extension-host-interface.js" />
+  <script src="posting-process.js" />
   
   <menupopup id="contentAreaContextMenu">
     <menuseparator id="postingMenuSeparator" />
-    <menuitem id="publicPostToPrivlyMenuItem" label="Create a Privly Post" oncommand="privlyExtension.openPostingApplication('/posts/new')" image="chrome://privly/skin/logo_64.png" class="menuitem-iconic" />
-    <menuitem id="encryptedPostToPrivlyMenuItem" label="Create a ZeroBin Post" oncommand="privlyExtension.openPostingApplication('/zero_bin/')" image="chrome://privly/skin/logo_64.png" class="menuitem-iconic" />
+    <menuitem id="publicPostToPrivlyMenuItem" label="Create a Privly Post" oncommand="privlyExtensionPosting.openPostingApplication('/posts/new')" image="chrome://privly/skin/logo_64.png" class="menuitem-iconic" />
+    <menuitem id="encryptedPostToPrivlyMenuItem" label="Create a ZeroBin Post" oncommand="privlyExtensionPosting.openPostingApplication('/zero_bin/')" image="chrome://privly/skin/logo_64.png" class="menuitem-iconic" />
   </menupopup>
   
   <toolbarpalette id="BrowserToolbarPalette">
