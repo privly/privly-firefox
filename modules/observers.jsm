@@ -1,6 +1,7 @@
 /**
  * @namespace
- * Module for modifying http requests
+ * Module for modifying http requests. Currently the observers only add
+ * the Privly version header to all requests.
  */
 
 /**
@@ -89,16 +90,8 @@ var privlyObservers =  {
   
   /**
    * @namespace
-   * The response observer checks whether localhost or priv.ly
-   * set operation flags. These are usually set in instances
-   * of high content server load. The extension will notify
-   * the user of the issue, and switch into passive mode.
-   *
-   * The content server can set the extension to any one of the three modes.
-   * it can do so by setting a header in the response header called 
-   * 'privlyExtensionCommand'.
-   * in responseObserver, we read this header value and set the extension mode
-   * accordingly
+   * The response observer has been removed due to performance and security
+   * concerns for the client, but it may be added back in at a later point.
    */
   httpResponseObserver: {
     
