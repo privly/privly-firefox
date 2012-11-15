@@ -27,17 +27,65 @@ var privlyExtensionPosting = {
   currentTargetNode: undefined,
   
   /**
-   * Variable used furing posting transaction to save which tab
+   * Variable used during posting transaction to save which tab
    * contains the currentTargetNode.
    */
   tabReceivingPost: undefined,
   
   /**
    * This is the value of the form element being passed into 
-   * the posting application. It should be cleared when the posting 
-   * process completes
+   * the posting application.
    */
   postingApplicationMessage: "",
+  
+  /**
+   * Start the posting process from a keyboard shortcut. The active element
+   * (where the user focused) must be a form element. The extension
+   * will message the posting application the current value of the form
+   * element, as well as a message indicating the posting process resulted from
+   * a keyboard shortcut.
+   *
+   * @param postingApplicationPath string the path to the posting application
+   * being used to generate the post. Example values are '/zero_bin/' and
+   * '/posts/plain_post/'
+   *
+   */
+  keyboardPost: function (postingApplicationPath) {
+    
+    var nodeName = gBrowser.contentDocument.activeElement.nodeName;
+    
+    if ( nodeName !== "INPUT" && nodeName !== "TEXTAREA" ) {
+      alert("The Privly keyboard shortcut only works for standard" + 
+            "forms. If you want us to make it work here, report a bug at: " + 
+            "http://www.privly.org/content/bug-report");
+    } else {
+      privlyExtensionPosting.tabReceivingPost = gBrowser.selectedTab;
+      privlyExtensionPosting.currentTargetNode = gBrowser.contentDocument.activeElement;
+      privlyExtensionPosting.postingApplicationMessage = 
+        privlyExtensionPosting.currentTargetNode.value;
+      privlyExtensionPosting.openPostingApplication(postingApplicationPath);
+    }
+  },
+  
+  /**
+   * Start the posting process from the context menu. The active element
+   * (where the user focused) must be a form element. The extension
+   * will message the posting application the current value of the form
+   * element.
+   *
+   * @param postingApplicationPath string the path to the posting application
+   * being used to generate the post. Example values are '/zero_bin/' and
+   * '/posts/plain_post/'
+   *
+   */
+  contextmenuPost: function (postingApplicationPath) {
+    privlyExtensionPosting.tabReceivingPost = gBrowser.selectedTab;
+    privlyExtensionPosting.currentTargetNode = document.popupNode;
+    privlyExtensionPosting.postingApplicationMessage = 
+      privlyExtensionPosting.currentTargetNode.value;
+    privlyExtensionPosting.currentTargetNode = gBrowser.contentDocument.activeElement;
+    privlyExtensionPosting.openPostingApplication(postingApplicationPath);
+  },
   
   /**
    * This callback is executed when a posting application sends a secret
@@ -60,25 +108,22 @@ var privlyExtensionPosting = {
   },
   
   /** 
-   * Begins posting dialog for a javascript application.
+   * Opens posting application in the 'chrome' of the browser.
    * This function opens an iframe from the current content server
    * for the user to type their content into.
    *
    * @param postingApplication string A string that will be added to the
    * currently selected content server's URL. Currently supported values
-   * are /zero_bin/ and /posts/, but the string could potentially be
+   * are /zero_bin/ and /posts/plain_post, but the string could potentially be
    * anything.
    *
    * @see privlyExtensionPosting.handleUrlEvent
    *
-   * @see privlyExtensionPosting.cancelPost
+   * @see privlyExtensionPosting.closePostingApplication
    */
   openPostingApplication: function (postingApplication) {
     
     "use strict";
-    
-    //Remember which tab the post is going to
-    privlyExtensionPosting.tabReceivingPost = gBrowser.selectedTab;
     
     //Open the form from the selected content server
     var contentServerUrl = this.preferences.getCharPref("contentServerUrl");
@@ -89,14 +134,27 @@ var privlyExtensionPosting = {
     document.getElementById('post-splitter').hidden = false;
     document.getElementById('post-iframe-vbox').hidden = false;
     document.getElementById('post-cancel-button').hidden = false;
+  },
+  
+  /** 
+   * Closes posting application in the 'chrome' of the browser.
+   * This function closes the iframe that generates new Privly content.
+   *
+   * @see privlyExtensionPosting.handleUrlEvent
+   *
+   */
+  closePostingApplication: function (postingApplication) {
     
-    //Save the destination for the encrypted URL
-    privlyExtensionPosting.currentTargetNode = document.popupNode;
-      
-    //Get the current value of the form
-    privlyExtensionPosting.postingApplicationMessage = 
-      privlyExtensionPosting.currentTargetNode.value;
+    "use strict";
     
+    privlyExtensionPosting.postingApplicationMessage = undefined;
+    privlyExtensionPosting.tabReceivingPost = undefined;
+    privlyExtensionPosting.currentTargetNode = undefined;
+    
+    document.getElementById('post-splitter').hidden = true;
+    document.getElementById('post-iframe-vbox').hidden = true;
+    document.getElementById('post-cancel-button').hidden = true;
+    document.getElementById('post-iframe').setAttribute("src", "");
   },
   
   /**
@@ -137,31 +195,8 @@ var privlyExtensionPosting = {
       event.initKeyEvent('keyup', true, true, window, 
                               0, false, 0, false, 0, 0); 
       privlyExtensionPosting.currentTargetNode.dispatchEvent(event);
-      
-      // Hide the posting window
-      document.getElementById('post-splitter').hidden = true;
-      document.getElementById('post-iframe-vbox').hidden = true;
-      document.getElementById('post-cancel-button').hidden = true;
-      document.getElementById('post-iframe').setAttribute("src", "");
-      privlyExtensionPosting.currentTargetNode = undefined;
-      privlyExtensionPosting.tabReceivingPost = undefined;
+      privlyExtensionPosting.closePostingApplication();
     },500);
-  },
-  
-  /**
-   * Cancel the post dialog after the form frame popped up. This
-   * should only be called after postToPrivly is called.
-   */
-  cancelPost: function() {
-    
-    "use strict";
-    
-    privlyExtensionPosting.tabReceivingPost = undefined;
-    document.getElementById('post-splitter').hidden = true;
-    document.getElementById('post-iframe-vbox').hidden = true;
-    document.getElementById('post-cancel-button').hidden = true;
-    document.getElementById('post-iframe').setAttribute("src", "");
-    privlyExtensionPosting.currentTargetNode = undefined;
   },
   
   /**
@@ -200,18 +235,6 @@ var privlyExtensionPosting = {
       publicPostToPrivlyMenuItem.hidden = false;
       postingMenuSeparator.hidden = false;
     }
-  },
-  
-  /**
-   * Change the mode of operation for the extension.
-   * @param {int} extensionMode The integer identifier of the extension mode
-   */
-  updateExtensionMode: function (extensionMode) {
-    
-    "use strict";
-    
-    this.preferences.setIntPref("extensionMode", extensionMode);
-    this.updatePrivModeElement();
   }
 };
 

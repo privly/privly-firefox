@@ -8,9 +8,14 @@
   
   <menupopup id="contentAreaContextMenu">
     <menuseparator id="postingMenuSeparator" />
-    <menuitem id="publicPostToPrivlyMenuItem" label="Create a Privly Post" oncommand="privlyExtensionPosting.openPostingApplication('/posts/new')" image="chrome://privly/skin/logo_64.png" class="menuitem-iconic" />
-    <menuitem id="encryptedPostToPrivlyMenuItem" label="Create a ZeroBin Post" oncommand="privlyExtensionPosting.openPostingApplication('/zero_bin/')" image="chrome://privly/skin/logo_64.png" class="menuitem-iconic" />
+    <menuitem id="publicPostToPrivlyMenuItem" label="Create a Privly Post" oncommand="privlyExtensionPosting.contextmenuPost('/posts/plain_post')" image="chrome://privly/skin/logo_64.png" class="menuitem-iconic" />
+    <menuitem id="encryptedPostToPrivlyMenuItem" label="Create a ZeroBin Post" oncommand="privlyExtensionPosting.contextmenuPost('/zero_bin/')" image="chrome://privly/skin/logo_64.png" class="menuitem-iconic" />
   </menupopup>
+  
+  <keyset id="mainKeyset">
+      <key id="zero_bin_post_key" key="." modifiers="accel alt" oncommand="privlyExtensionPosting.keyboardPost('/posts/plain_post')" />
+      <key id="plain_post_post_key" key="," modifiers="accel alt" oncommand="privlyExtensionPosting.keyboardPost('/zero_bin/')" />
+  </keyset>
   
   <toolbarpalette id="BrowserToolbarPalette">
     <toolbarbutton id="privly-tlbr-btn" insertafter="search-container" label="Privly" tooltiptext="Privly" oncommand="privlyExtension.toggleExtensionMode()"/>
@@ -22,6 +27,6 @@
       <iframe id="post-iframe" flex="1" src="" type="content-targetable" />
     </vbox>
     <button id="post-cancel-button" label="Cancel Post"
-      oncommand="privlyExtensionPosting.cancelPost();" hidden="true" />
+      oncommand="privlyExtensionPosting.closePostingApplication();" hidden="true" />
   </vbox>
 </overlay>
