@@ -54,8 +54,9 @@ var privlyObservers =  {
         var httpChannel = subject.QueryInterface(Components
                                                 .interfaces.nsIHttpChannel);
         
-        // Set the extension version
-        httpChannel.setRequestHeader("X-Privly-Version", "0.2.6", false);
+        // Send the extension version
+        httpChannel.setRequestHeader("X-Privly-Version", 
+          privlyConstants.broadcastVersion, false);
       }
     },
     
