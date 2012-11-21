@@ -39,6 +39,14 @@ var privlyExtensionPosting = {
   postingApplicationMessage: "",
   
   /**
+   * Indicates which user interface element opened the posting application.
+   * Values include: 
+   * "keyboard" the keyboard shortcut opened the posting application.
+   * "contextmenu" the context menu opened the posting application.
+   */
+  interactionType: "",
+  
+  /**
    * Start the posting process from a keyboard shortcut. The active element
    * (where the user focused) must be a form element. The extension
    * will message the posting application the current value of the form
@@ -52,10 +60,12 @@ var privlyExtensionPosting = {
    */
   keyboardPost: function (postingApplicationPath) {
     
+    privlyExtensionPosting.interactionType = "keyboard";
+    
     var nodeName = gBrowser.contentDocument.activeElement.nodeName;
     
     if ( nodeName !== "INPUT" && nodeName !== "TEXTAREA" ) {
-      alert("The Privly keyboard shortcut only works for standard" + 
+      alert("The Privly keyboard shortcut only works for standard " + 
             "forms. If you want us to make it work here, report a bug at: " + 
             "http://www.privly.org/content/bug-report");
     } else {
@@ -79,11 +89,11 @@ var privlyExtensionPosting = {
    *
    */
   contextmenuPost: function (postingApplicationPath) {
+    privlyExtensionPosting.interactionType = "contextmenu";
     privlyExtensionPosting.tabReceivingPost = gBrowser.selectedTab;
     privlyExtensionPosting.currentTargetNode = document.popupNode;
     privlyExtensionPosting.postingApplicationMessage = 
       privlyExtensionPosting.currentTargetNode.value;
-    privlyExtensionPosting.currentTargetNode = gBrowser.contentDocument.activeElement;
     privlyExtensionPosting.openPostingApplication(postingApplicationPath);
   },
   
@@ -100,11 +110,20 @@ var privlyExtensionPosting = {
     
     "use strict";
     
-    var contentServerUrl = this.preferences.getCharPref("contentServerUrl");
-    var postingDocument = document.getElementById('post-iframe').contentWindow;
-    var secretMessage = e.target.getAttribute("privlyMessageSecret");
-    postingDocument.postMessage(secretMessage +
-      privlyExtensionPosting.postingApplicationMessage, contentServerUrl);
+    if ( privlyExtensionPosting.postingApplicationMessage !== undefined &&
+         privlyExtensionPosting.postingApplicationMessage !== "" ) {
+           
+      var contentServerUrl = this.preferences.getCharPref("contentServerUrl");
+      var postingDocument = document.getElementById('post-iframe').contentWindow;
+      var secretMessage = e.target.getAttribute("privlyMessageSecret");
+      postingDocument.postMessage(secretMessage + "InitialContent" +
+        privlyExtensionPosting.postingApplicationMessage, contentServerUrl);
+
+      if ( privlyExtensionPosting.interactionType === "keyboard" ) {
+        postingDocument.postMessage(secretMessage + "Submit" +
+          privlyExtensionPosting.postingApplicationMessage, contentServerUrl);
+      }
+    }
   },
   
   /** 
@@ -150,6 +169,7 @@ var privlyExtensionPosting = {
     privlyExtensionPosting.postingApplicationMessage = undefined;
     privlyExtensionPosting.tabReceivingPost = undefined;
     privlyExtensionPosting.currentTargetNode = undefined;
+    privlyExtensionPosting.interactionType = "";
     
     document.getElementById('post-splitter').hidden = true;
     document.getElementById('post-iframe-vbox').hidden = true;
@@ -199,6 +219,36 @@ var privlyExtensionPosting = {
     },500);
   },
   
+  /** 
+   * This is a helper method for determining whether a DOM node is editable.
+   * We only want to post into form, or editable elements.
+   *
+   * @param {DOM node} node The node for which we want to know if
+   * it is editable.
+   *
+   * @return {boolean} Indicates whether the node is editable.
+   *
+   */
+  isEditable: function(node) {
+    
+    "use strict";
+    
+    if ( node.contentEditable === "true" ) {
+      return true;
+    } else if ( node.contentEditable === "inherit" ) {
+      //support for the Closure library
+      if ( node.getAttribute("g_editable") === "true" ) {
+        return true;
+      } else if ( node.parentNode !== undefined && node.parentNode !== null ) {
+        return privly.isEditable(node.parentNode);
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  },
+  
   /**
    * Determines which menu options are shown in the right-click menu.
    *
@@ -223,11 +273,9 @@ var privlyExtensionPosting = {
         evt.target.nodeName.toLowerCase() === 'textarea') {
           postable = true;
       }
-      else if(evt.target.nodeName.toLowerCase() === 'div') {
-        if (evt.target.getAttribute("contenteditable") === 'true') {
-          postable = true;
-        }
-      }
+    }
+    if (!postable && privlyExtensionPosting.isEditable(evt.target)) {
+      postable = true;
     }
     
     if ( postable ) {
