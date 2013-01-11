@@ -29,4 +29,34 @@
     <button id="post-cancel-button" label="Cancel Post"
       oncommand="privlyExtensionPosting.closePostingApplication();" hidden="true" />
   </vbox>
+  
+  
+  
+  <!-- Jen: You can test the functionality of:
+          extension-host-interface.js
+          posting-process.js
+          
+        From the window found at:
+          chrome://privly/content/browser.xul
+        
+        We will eventually be moving this functionality outside the
+        "overlay" but you don't need to worry about that yet.
+  -->
+  <window title="Test Runner" id="test-window"
+      xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+    
+    <script>
+      function privlyTestFunction() {
+        alert("Call Privly Code Here");
+      }
+    </script>
+    
+    <box id="singlebox">
+      <button id="runTestsButton" label="Run Tests" onclick="privlyTestFunction();" />
+    </box>
+
+  </window>
+  
+  
+  
 </overlay>
