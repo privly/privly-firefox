@@ -30,41 +30,4 @@
       oncommand="privlyExtensionPosting.closePostingApplication();" hidden="true" />
   </vbox>
   
-  <window title="Library Integration Code" id="test-window"
-      xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-    
-    <script>
-      
-      // Standard mozilla ctypes interface
-      // For Further Reference
-      // https://developer.mozilla.org/en-US/docs/Mozilla/js-ctypes
-      Components.utils.import("resource://gre/modules/ctypes.jsm");
-      
-      // CHANGE THIS TO THE LIBRARY's PATH: see "library search paths"
-      // https://developer.mozilla.org/en-US/docs/Mozilla/js-ctypes/Using_js-ctypes
-      // var library = ctypes.open("library_sitting_in_path_path");
-      
-      // Declare types
-      // stdAlert = library.declare(...);
-      
-      // Use types
-      // var err = stdAlert(1, msgErr, msgExp, 0, hit);
-      
-      // At this point you should do whatever you want to do with the library.
-      // I recommend using the alert box approach to debug since it doesn't
-      // require any interfacing with the XUL page. Call "alert(string)"
-      // for any string you want to test. The string will alert anytime you
-      // open a new Firefox window. You must close and reopen Firefox for
-      // changes in this file to take effect.
-      alert("change me");
-      
-      // close the library
-      // library.close();
-      
-    </script>
-    
-  </window>
-  
-  
-  
 </overlay>
