@@ -725,7 +725,7 @@ var privly = {
     }
     
     var links = document.getElementsByTagName("a");
-    for(var i = 0; i < iframes.length; i++) {
+    for(var i = 0; i < links.length; i++) {
       var link = links[i];
       if (link.getAttribute("data-privly-display") === "true") {
         link.setAttribute("data-privly-display", "false");
