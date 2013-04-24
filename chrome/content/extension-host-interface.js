@@ -95,11 +95,11 @@ var privlyExtension = {
         privlyToolbarButton.tooltipText = "Privly is in active mode";
       }
       else if (extensionMode === privlyConstants.extensionModeEnum.PASSIVE) {
-        privlyToolbarButton.style.listStyleImage = "url('chrome://privly/skin/logo_16_dis.png')";
+        privlyToolbarButton.style.listStyleImage = "url('chrome://privly/skin/Lock_New_Disabled_16.png')";
         privlyToolbarButton.tooltipText = "Privly is in passive mode";
       }
       else if (extensionMode === privlyConstants.extensionModeEnum.CLICKTHROUGH) {
-        privlyToolbarButton.style.listStyleImage = "url('chrome://privly/skin/logo_16_dis.png')";
+        privlyToolbarButton.style.listStyleImage = "url('chrome://privly/skin/Lock_New_Disabled_16.png')";
         privlyToolbarButton.tooltipText = "Privly is in require-clickthrough mode";
       }
     }
