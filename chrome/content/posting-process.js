@@ -101,12 +101,12 @@ var privlyExtensionPosting = {
    * This callback is executed when a posting application sends a secret
    * identifier to the extension to open the communication channel.
    *
-   * @param e event The event fired by the posting application.
+   * @param secretMessage string The secret message string.
    *
    * @see privlyExtensionPosting.openPostingApplication
    *
    */
-  handleMessageSecretEvent: function (e) {
+  handleMessageSecretEvent: function (secretMessage) {
     
     "use strict";
     
@@ -115,10 +115,16 @@ var privlyExtensionPosting = {
            
       var contentServerUrl = this.preferences.getCharPref("contentServerUrl");
       var postingDocument = document.getElementById('post-iframe').contentWindow;
-      var secretMessage = e.target.getAttribute("privlyMessageSecret");
+      
+      //deprectated
       postingDocument.postMessage(secretMessage + "InitialContent" +
         privlyExtensionPosting.postingApplicationMessage, contentServerUrl);
-
+      
+      // privly-applications posting method
+      var message = JSON.stringify({secret: secretMessage,
+                        handler: "messageSecret"});
+      postingDocument.postMessage(message, contentServerUrl);
+      
       if ( privlyExtensionPosting.interactionType === "keyboard" ) {
         postingDocument.postMessage(secretMessage + "Submit" +
           privlyExtensionPosting.postingApplicationMessage, contentServerUrl);
@@ -179,14 +185,12 @@ var privlyExtensionPosting = {
   
   /**
    * Receive URL to encrypted post for posting to selected form element.
-   * This function also closes the posting iframe and chnages its source
+   * This function also closes the posting iframe and changes its source
    * so it no longer contains the content.
    * 
-   * @param {event} evt An event dispatched from the encryption application 
-   * containing a string variable, "privlyUrl", bound to the url intended to
-   * be pasted to the relevent form element.
+   * @param {string} url The URL to be added to the host page.
    */
-  handleUrlEvent: function(evt) {
+  handleUrlEvent: function(url) {
     
     //Switch to the tab initiating the post
     gBrowser.selectedTab = privlyExtensionPosting.tabReceivingPost;
@@ -208,8 +212,8 @@ var privlyExtensionPosting = {
     // form and message page.
     setTimeout(function(){
       
-      privlyExtensionPosting.currentTargetNode.value = evt.target.getAttribute("privlyUrl");
-      privlyExtensionPosting.currentTargetNode.textContent = evt.target.getAttribute("privlyUrl");
+      privlyExtensionPosting.currentTargetNode.value = url;
+      privlyExtensionPosting.currentTargetNode.textContent = url;
       
       var event = document.createEvent("KeyboardEvent"); 
       event.initKeyEvent('keyup', true, true, window, 
@@ -301,11 +305,25 @@ window.addEventListener("contextmenu",
  * Watch for encrypted URLs sent by the encryption iframe. These URLs are
  * generated whent the user completes the posting process.
  */
-window.addEventListener("load", function load(event){  
+window.addEventListener("load", function load(event){
+    
+    document.getElementById('post-iframe')
+      .addEventListener("PrivlyMessageEvent", 
+        function(e) {
+          var data = JSON.parse(e.target.getAttribute("data-message-body"));
+          if (data.handler === "messageSecret") {
+            privlyExtensionPosting.handleMessageSecretEvent(data.data);
+          } else if(data.handler === "privlyUrl") {
+            privlyExtensionPosting.handleUrlEvent(data.data);
+          }
+        }, false, true);
+    
+    //decprecated messagers
     document.getElementById('post-iframe')
       .addEventListener("PrivlyUrlEvent", 
         function(e) { 
-          privlyExtensionPosting.handleUrlEvent(e); 
+          var url = e.target.getAttribute("privlyUrl");
+          privlyExtensionPosting.handleUrlEvent(url); 
         }, false, true);
     document.getElementById('post-iframe')
       .addEventListener("PrivlyMessageSecretEvent", 

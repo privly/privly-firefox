@@ -8,8 +8,8 @@
   
   <menupopup id="contentAreaContextMenu">
     <menuseparator id="postingMenuSeparator" />
-    <menuitem id="publicPostToPrivlyMenuItem" label="Create a Privly Post" oncommand="privlyExtensionPosting.contextmenuPost('/posts/plain_post')" image="chrome://privly/skin/logo_64.png" class="menuitem-iconic" />
-    <menuitem id="encryptedPostToPrivlyMenuItem" label="Create a ZeroBin Post" oncommand="privlyExtensionPosting.contextmenuPost('/zero_bin/')" image="chrome://privly/skin/logo_64.png" class="menuitem-iconic" />
+    <menuitem id="publicPostToPrivlyMenuItem" label="Create a Privly Post" oncommand="privlyExtensionPosting.contextmenuPost('/apps/PlainPost/new.html')" image="chrome://privly/skin/logo_64.png" class="menuitem-iconic" />
+    <menuitem id="encryptedPostToPrivlyMenuItem" label="Create a ZeroBin Post" oncommand="privlyExtensionPosting.contextmenuPost('/apps/ZeroBin/new.html')" image="chrome://privly/skin/logo_64.png" class="menuitem-iconic" />
   </menupopup>
   
   <keyset id="mainKeyset">
