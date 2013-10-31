@@ -207,6 +207,11 @@ gBrowser.addEventListener("select",
   },
   true);
 
+
+/**
+ * Handle the injection of the privly.js content script and injection of
+ * privly applications into existing iframes.
+ */
 gBrowser.addEventListener("load",
   function (event) {
     
@@ -221,7 +226,46 @@ gBrowser.addEventListener("load",
       privlyExtension.insertPrivModeElement(doc);
       loader.loadSubScript("chrome://privly/content/privly.js", wnd);
     }
-
+    
+    // Check the head element of the document for the custom attribute 
+    // "data-privly-swap-document" which indicates that the document should be
+    // swapped.
+    var head = doc.getElementsByTagName("head")[0];
+    
+    // Check if the document wants to be swapped, and proceed with assignment
+    if( head.getAttribute("data-privly-swap-document") === "true" ) {
+      
+      // The xul wrapped frame element that gives higher permissions on the DOM
+      var frame = wnd.content.document
+          .getElementsByName(event.wrappedJSObject.target.defaultView.name)[0];
+      
+      // The url to give to the injectable application
+      var url = frame.getAttribute("data-privly-swap-document-to");
+      
+      // Get the sham iframe's document in the host page
+      var frameDoc = frame.contentDocument.defaultView;
+      
+      // Assign the sham iframe's src element to the proper chrome URL
+      if( url.indexOf("privlyInjectableApplication=ZeroBin") > 0 || // deprecated
+           url.indexOf("privlyApp=ZeroBin") > 0) {
+         frameDoc.location.href = 
+          "chrome://privly/content/privly-applications/ZeroBin/show.html?privlyOriginalURL=" + 
+          encodeURIComponent(url);
+       } else if( url.indexOf("privlyInjectableApplication=PlainPost") > 0 || // deprecated
+                  url.indexOf("privlyApp=PlainPost") > 0) {
+         frameDoc.location.href = 
+           "chrome://privly/content/privly-applications/PlainPost/show.html?privlyOriginalURL=" + 
+           encodeURIComponent(url);
+       } else {
+         console.warn("Injectable App not specified, defaulting to sandboxed PlainPost");
+         frameDoc.location.href = 
+           "chrome://privly/content/privly-applications/PlainPost/show.html?privlyOriginalURL=" + 
+           encodeURIComponent(url);
+       }  
+      
+    }
+    
+    // Update the operation mode
     if ((doc.nodeName === '#document') &&
         (wnd.location.href === gBrowser.currentURI.spec)) {
       setTimeout(
@@ -231,5 +275,38 @@ gBrowser.addEventListener("load",
         3000);
       privlyExtension.updatePrivModeElement();
     }
+  },
+  true);
+
+/**
+ * Resize iframes that fire a "IframeResizeEvent". Only
+ * iframes which have been marked as eligibile to resize
+ * in their parent document's iframe element will be resized.
+ */
+gBrowser.addEventListener("IframeResizeEvent",
+  function (event) {
+
+    "use strict";
+    
+    var doc = event.originalTarget.ownerDocument;
+    var wnd = doc.defaultView;
+    
+    var height = event.target.getAttribute("height");  
+    var frameId = event.target.getAttribute("frame_id");
+    
+    var frame = wnd.content.document.getElementsByName(frameId)[0].contentDocument.defaultView;
+    
+    var parentIframe = frame.parent.document.getElementsByName(frame.name)[0];
+    
+    // Only resize iframes eligible for resize.
+    // All iframes eligible for resize have a custom attribute,
+    // data-privly-accept-resize, set to true.
+    var acceptresize = parentIframe.getAttribute("data-privly-accept-resize");
+    if (acceptresize !== "true") {
+      return;
+    }
+    
+    parentIframe.style.height = height + "px";
+    
   },
   true);

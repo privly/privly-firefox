@@ -8,13 +8,15 @@
   
   <menupopup id="contentAreaContextMenu">
     <menuseparator id="postingMenuSeparator" />
-    <menuitem id="publicPostToPrivlyMenuItem" label="Create a Privly Post" oncommand="privlyExtensionPosting.contextmenuPost('/apps/PlainPost/new.html')" image="chrome://privly/skin/logo_64.png" class="menuitem-iconic" />
-    <menuitem id="encryptedPostToPrivlyMenuItem" label="Create a ZeroBin Post" oncommand="privlyExtensionPosting.contextmenuPost('/apps/ZeroBin/new.html')" image="chrome://privly/skin/logo_64.png" class="menuitem-iconic" />
+    <menuitem id="publicPostToPrivlyMenuItem" label="Create a Privly Post"
+     oncommand="privlyExtensionPosting.contextmenuPost('chrome://privly/content/privly-applications/PlainPost/new.html')"
+      image="chrome://privly/skin/logo_64.png" class="menuitem-iconic" />
+    <menuitem id="encryptedPostToPrivlyMenuItem" label="Create a ZeroBin Post" oncommand="privlyExtensionPosting.contextmenuPost('chrome://privly/content/privly-applications/ZeroBin/new.html')" image="chrome://privly/skin/logo_64.png" class="menuitem-iconic" />
   </menupopup>
   
   <keyset id="mainKeyset">
-      <key id="zero_bin_post_key" key="." modifiers="accel alt" oncommand="privlyExtensionPosting.keyboardPost('/posts/plain_post')" />
-      <key id="plain_post_post_key" key="," modifiers="accel alt" oncommand="privlyExtensionPosting.keyboardPost('/zero_bin/')" />
+      <key id="zero_bin_post_key" key="." modifiers="accel alt" oncommand="privlyExtensionPosting.keyboardPost('chrome://privly/content/privly-applications/PlainPost/new.html')" />
+      <key id="plain_post_post_key" key="," modifiers="accel alt" oncommand="privlyExtensionPosting.keyboardPost('chrome://privly/content/privly-applications/ZeroBin/new.html')" />
   </keyset>
   
   <toolbarpalette id="BrowserToolbarPalette">

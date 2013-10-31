@@ -16,3 +16,5 @@ pref("extensions.privly.allPostsPublic", false);
 
 // Where to store posts, examples include http://localhost:3000 and https://privlyalpha.org
 pref("extensions.privly.contentServerUrl", "https://privlyalpha.org");
+
+pref("extensions.privly.glyph", "000000,000000,000000,000000,000000");

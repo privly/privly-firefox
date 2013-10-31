@@ -151,9 +151,8 @@ var privlyExtensionPosting = {
     "use strict";
     
     //Open the form from the selected content server
-    var contentServerUrl = this.preferences.getCharPref("contentServerUrl");
     document.getElementById('post-iframe').setAttribute("src", 
-      contentServerUrl + postingApplication);
+      postingApplication);
     
     //display the form elements in the bottom of the browser chrome
     document.getElementById('post-splitter').hidden = false;

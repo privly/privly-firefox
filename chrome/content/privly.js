@@ -303,13 +303,19 @@ var privly = {
    */
   nextAvailableFrameID: 0,
   
-  
+  /**
+   * Inject a sham application in the context of the host page
+   * so the extension-host-interface can replace it with 
+   * a URL targeting the locally stored privly applications.
+   */
   injectLinkApplication: function(object, applicationUrl, id)
   {
     "use strict";
     
+    // Don't inject the link a second time
     object.setAttribute("data-privly-exclude", "true");
     
+    // The sham iframe
     var iFrame = document.createElement('iframe');
     
     //Styling and display attributes
@@ -326,21 +332,26 @@ var privly = {
     iFrame.setAttribute("scrolling","no");
     iFrame.setAttribute("overflow","hidden");
     
-    //Determines whether the element will be shown after it is toggled.
-    //This allows for the button to turn on and off the display of the
-    //injected content.
+    // Determines whether the element will be shown after it is toggled.
+    // This allows for the button to turn on and off the display of the
+    // injected content.
     iFrame.setAttribute("data-privly-display", "true");
     if ( object.getAttribute("data-privly-display") !== "off" ) {
       object.setAttribute("data-privly-display", "false");
     }
     object.style.display = "none";
     
-    //Custom attribute indicating this iframe is eligible for being resized by
-    //its contents
+    // Custom attribute indicating this iframe is eligible for being resized by
+    // its contents
     iFrame.setAttribute("data-privly-accept-resize","true");
     
-    //Set the source URL
-    iFrame.setAttribute("src", applicationUrl);
+    // The associated link is set to a custom attribute. This link will be 
+    // passed into the privly application.
+    iFrame.setAttribute("data-privly-swap-document-to", applicationUrl);
+    
+    // Create the sham iframe's document.
+    iFrame.setAttribute("srcdoc", 
+      "<html><head data-privly-swap-document='true'></head><body></body></html>");
     
     //The id and the name are the same so that the iframe can be 
     //uniquely identified and resized
@@ -368,16 +379,8 @@ var privly = {
     var frameId = privly.nextAvailableFrameID++;
     var iframeUrl = object.getAttribute("privlyHref");
     
-    if (iframeUrl.indexOf("?") > 0){
-      iframeUrl = iframeUrl.replace("?","?format=iframe&frame_id=" +
-        frameId + "&");
-    }
-    else if (iframeUrl.indexOf("#") > 0)
-    {
-      iframeUrl = iframeUrl.replace("#","?format=iframe&frame_id=" +
-        frameId + "#");
-    }
-    privly.injectLinkApplication(object, iframeUrl, frameId);
+    privly.injectLinkApplication(object, 
+      iframeUrl, frameId);
   },
   
   /** 
@@ -638,6 +641,10 @@ var privly = {
     }
     
     var sourceURL = iframe.getAttribute("src");
+    if( sourceURL === null ) {
+      return;
+    }
+    
     var originDomain = message.origin;
     sourceURL = sourceURL.replace("http://", "https://");
     originDomain = originDomain.replace("http://", "https://");
