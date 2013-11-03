@@ -27,6 +27,13 @@ var privlyExtensionPosting = {
   currentTargetNode: undefined,
   
   /**
+   * The secret known by a posting application so that it can trust messages
+   * send by the extension. This is initialized by a message from a posting
+   * application.
+   */
+  sharedSecret: undefined,
+  
+  /**
    * Variable used during posting transaction to save which tab
    * contains the currentTargetNode.
    */
@@ -45,6 +52,11 @@ var privlyExtensionPosting = {
    * "contextmenu" the context menu opened the posting application.
    */
   interactionType: "",
+  
+  /**
+   * The document that will be receiving messages.
+   */
+  postingDocument: undefined,
   
   /**
    * Start the posting process from a keyboard shortcut. The active element
@@ -110,26 +122,12 @@ var privlyExtensionPosting = {
     
     "use strict";
     
-    if ( privlyExtensionPosting.postingApplicationMessage !== undefined &&
-         privlyExtensionPosting.postingApplicationMessage !== "" ) {
-           
-      var contentServerUrl = this.preferences.getCharPref("contentServerUrl");
-      var postingDocument = document.getElementById('post-iframe').contentWindow;
-      
-      //deprectated
-      postingDocument.postMessage(secretMessage + "InitialContent" +
-        privlyExtensionPosting.postingApplicationMessage, contentServerUrl);
-      
-      // privly-applications posting method
-      var message = JSON.stringify({secret: secretMessage,
-                        handler: "messageSecret"});
-      postingDocument.postMessage(message, contentServerUrl);
-      
-      if ( privlyExtensionPosting.interactionType === "keyboard" ) {
-        postingDocument.postMessage(secretMessage + "Submit" +
-          privlyExtensionPosting.postingApplicationMessage, contentServerUrl);
-      }
-    }
+    privlyExtensionPosting.sharedSecret = secretMessage.data;
+    
+    // privly-applications posting method
+    var message = JSON.stringify({secret: privlyExtensionPosting.sharedSecret,
+                      handler: "messageSecret"});
+    privlyExtensionPosting.postingDocument.defaultView.postMessage(message, "*");
   },
   
   /** 
@@ -187,9 +185,10 @@ var privlyExtensionPosting = {
    * This function also closes the posting iframe and changes its source
    * so it no longer contains the content.
    * 
-   * @param {string} url The URL to be added to the host page.
+   * @param {json} json A JSON document containing the URL to be posted
+   * to a host page.
    */
-  handleUrlEvent: function(url) {
+  handleUrlEvent: function(json) {
     
     //Switch to the tab initiating the post
     gBrowser.selectedTab = privlyExtensionPosting.tabReceivingPost;
@@ -211,8 +210,8 @@ var privlyExtensionPosting = {
     // form and message page.
     setTimeout(function(){
       
-      privlyExtensionPosting.currentTargetNode.value = url;
-      privlyExtensionPosting.currentTargetNode.textContent = url;
+      privlyExtensionPosting.currentTargetNode.value = json.data;
+      privlyExtensionPosting.currentTargetNode.textContent = json.data;
       
       var event = document.createEvent("KeyboardEvent"); 
       event.initKeyEvent('keyup', true, true, window, 
@@ -300,32 +299,32 @@ window.addEventListener("contextmenu",
   },
   false);
 
-/**
- * Watch for encrypted URLs sent by the encryption iframe. These URLs are
- * generated whent the user completes the posting process.
- */
-window.addEventListener("load", function load(event){
-    
-    document.getElementById('post-iframe')
-      .addEventListener("PrivlyMessageEvent", 
-        function(e) {
-          var data = JSON.parse(e.target.getAttribute("data-message-body"));
-          if (data.handler === "messageSecret") {
-            privlyExtensionPosting.handleMessageSecretEvent(data.data);
-          } else if(data.handler === "privlyUrl") {
-            privlyExtensionPosting.handleUrlEvent(data.data);
-          }
-        }, false, true);
-    
-    //decprecated messagers
-    document.getElementById('post-iframe')
-      .addEventListener("PrivlyUrlEvent", 
-        function(e) { 
-          var url = e.target.getAttribute("privlyUrl");
-          privlyExtensionPosting.handleUrlEvent(url); 
-        }, false, true);
-    document.getElementById('post-iframe')
-      .addEventListener("PrivlyMessageSecretEvent", 
-        function(e) { 
-          privlyExtensionPosting.handleMessageSecretEvent(e); }, false, true);
-  },false);
+window.addEventListener("PrivlyMessageEvent", 
+    function(e) {
+      
+      // Firefox does not respect the targetOrigin for the postMessage command properly
+      // if it is a Chrome origin page. So we must use the "*" origin in the message.
+      // To make this safer, we check that the owning document is in a privly controlled
+      // window.
+      if ( e.originalTarget.ownerDocument.defaultView.location.origin === ("chrome://privly")) {
+        
+        privlyExtensionPosting.postingDocument = e.originalTarget.ownerDocument;
+        
+        var data = JSON.parse(e.target.getAttribute("data-message-body"));
+        
+        if (data.handler === "messageSecret") {
+          privlyExtensionPosting.handleMessageSecretEvent(data);
+        } else if(data.handler === "privlyUrl") {
+          privlyExtensionPosting.handleUrlEvent(data);
+        } else if(data.handler == "initialContent") {
+          
+          var message = JSON.stringify({
+            secret: privlyExtensionPosting.sharedSecret,
+            handler: "initialContent",
+            initialContent: privlyExtensionPosting.postingApplicationMessage});
+          
+          privlyExtensionPosting.postingDocument.defaultView.postMessage(message, "*");
+        }
+        
+      }
+    }, false, true);
