@@ -4,23 +4,22 @@ Privly is a developing set of browser extensions for protecting content wherever
 
 ## Development Status ##
 
-**[Barn Owl](https://github.com/privly/privly-organization/wiki/Barn) Alpha Version**
-
-We are currently fixing bugs and developing the [cryptography library](https://github.com/privly/privly-library/) to package into the extension. For more information about our development path, please see the [central wiki](https://github.com/privly/privly-organization/wiki/Version-List).
-
-The Privly Firefox extension is currently maintained by [Sean McGregor](https://github.com/smcgregor), on behalf of the [Privly Foundation](http://www.privly.org).
-
-## About this Extension ##
-
 This extension currently supports:
 
 * Posting to any website by right-clicking a form element.
 * Turning on/off link injection via a button in the "chrome" of the browser.
-* All the implemented [Injectable Applications](https://github.com/privly/privly-organization/wiki/Injectable-Applications) of the content server
-* Setting the posting content server via extension preferences
+* Locally served posting and injectable applications.
+* All the implemented [Injectable Applications](https://github.com/privly/privly-organization/wiki/Injectable-Applications) of the content server.
+* Setting the posting content server via extension preferences.
 * [Active and passive mode](https://github.com/privly/privly-organization/wiki/Link-Operation-Modes) link injection.
 
+**[Barn Owl](https://github.com/privly/privly-organization/wiki/Barn) Alpha Version**
+
+The Privly Firefox extension is currently maintained by [Sean McGregor](https://github.com/smcgregor), on behalf of the [Privly Foundation](http://www.privly.org).
+
 ## Testing/Submitting Bugs ##
+
+To install the current version of the extension, you need to also clone the submodules. This can be achieved in one command with `git clone --recursive REPO_PATH`
 
 Extension integration test cases are found at [test.privly.org](http://test.privly.org). If you have discovered a bug, only [open a public issue](https://github.com/privly/privly-firefox/issues/new) on GitHub if it could not possibly be a security related bug. If the bug affects the security of the system, please report it privately at [privly.org](http://www.privly.org/content/bug-report). We will then fix the bug and follow a process of responsible disclosure.
 
