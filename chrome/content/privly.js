@@ -351,7 +351,7 @@ var privly = {
     
     // Create the sham iframe's document.
     iFrame.setAttribute("srcdoc", 
-      "<html><head data-privly-swap-document='true'></head><body></body></html>");
+      "<html><head></head><body></body></html>");
     
     //The id and the name are the same so that the iframe can be 
     //uniquely identified and resized

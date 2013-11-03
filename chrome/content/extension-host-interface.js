@@ -227,17 +227,18 @@ gBrowser.addEventListener("load",
       loader.loadSubScript("chrome://privly/content/privly.js", wnd);
     }
     
-    // Check the head element of the document for the custom attribute 
-    // "data-privly-swap-document" which indicates that the document should be
-    // swapped.
-    var head = doc.getElementsByTagName("head")[0];
-    
-    // Check if the document wants to be swapped, and proceed with assignment
-    if( head.getAttribute("data-privly-swap-document") === "true" ) {
-      
-      // The xul wrapped frame element that gives higher permissions on the DOM
+    // The xul wrapped frame element that gives higher permissions on the DOM
+    if ( event.wrappedJSObject !== undefined ) {
       var frame = wnd.content.document
           .getElementsByName(event.wrappedJSObject.target.defaultView.name)[0];
+    }
+    
+    // Check if the document wants to be swapped, and proceed with assignment
+    if( frame !== undefined && 
+        frame.getAttribute("data-privly-swap-document-to") !== null ) {
+      
+      // Remove the sham document from the iframe
+      frame.removeAttribute("srcdoc");
       
       // The url to give to the injectable application
       var url = frame.getAttribute("data-privly-swap-document-to");
