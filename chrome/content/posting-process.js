@@ -169,7 +169,7 @@ var privlyExtensionPosting = {
     
     "use strict";
     
-    privlyExtensionPosting.postingApplicationMessage = undefined;
+    privlyExtensionPosting.postingApplicationMessage = "";
     privlyExtensionPosting.tabReceivingPost = undefined;
     privlyExtensionPosting.currentTargetNode = undefined;
     privlyExtensionPosting.interactionType = "";
