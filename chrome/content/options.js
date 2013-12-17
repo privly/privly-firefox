@@ -2,6 +2,7 @@
  * import the module containing definition of all privly constants
  */
 Components.utils.import("resource://privly/constants.jsm");
+
 /**
  * @namespace
  * Handles changes to the extension's preferences.
@@ -16,7 +17,6 @@ var privlyPrefPane =
                          .getService(Components.interfaces.nsIPrefService)
                          .getBranch("extensions.privly."),
 
-
   /**
    * Handler for the loading of the extension preference pane.
    * @param {event} event The load event. Not currently used.
@@ -25,18 +25,28 @@ var privlyPrefPane =
     
     "use strict";
     
-    //get the extensionmode from preferences if it was modified using the toolbar button
+    //get the extensionmode from preferences if it was modified using the 
+    //toolbar button
     var extensionMode = this.preferences.getIntPref("extensionMode");
+      
     //update the radio buttons to reflect the changes.
-    if (extensionMode === privlyConstants.extensionModeEnum.ACTIVE) {
-      document.getElementById('active').selected = true;
+    if (extensionMode === privlyConstants.extensionModeEnum.PASIVE) {
+      this.preferences.setIntPref("extensionMode", 
+        privlyConstants.extensionModeEnum.CLICKTHROUGH);
     }
-    else if (extensionMode === privlyConstants.extensionModeEnum.PASSIVE) {
-      document.getElementById('passive').selected = true;
+    
+    // Get the current content server preference
+    var contentServerURL = this.preferences.getCharPref("contentServerUrl");
+    document.getElementById('contentServerCustom').value = contentServerURL;
+    document.getElementById('contentServerCustomURL').value = contentServerURL;
+    
+    // Set the radio to the custom item if it is currently assigned properly
+    if( contentServerURL !== 
+        document.getElementById('privlyContentServer').selectedItem.value ) {
+      document.getElementById('contentServerPrivly').setAttribute("selected", "false");
+      document.getElementById('contentServerCustom').setAttribute("selected", "true");
     }
-    else if (extensionMode === privlyConstants.extensionModeEnum.CLICKTHROUGH) {
-      document.getElementById('require-clickthrough').selected = true;
-    }
+    
   },
   
   /**
@@ -51,11 +61,7 @@ var privlyPrefPane =
     var mode = 0;
     if (document.getElementById('active').selected === true) {
       mode = privlyConstants.extensionModeEnum.ACTIVE;
-    }
-    else if (document.getElementById('passive').selected === true) {
-      mode = privlyConstants.extensionModeEnum.PASSIVE;
-    }
-    else if (document.getElementById('require-clickthrough').selected === true) {
+    } else if (document.getElementById('require-clickthrough').selected === true) {
       mode = privlyConstants.extensionModeEnum.CLICKTHROUGH;
     }
     this.preferences.setIntPref("extensionMode", mode);
@@ -71,16 +77,18 @@ var privlyPrefPane =
     
     "use strict";
     
-    var contentServerURL = "";
-    if (document.getElementById('contentServerPrivly').selected === true) {
-      contentServerURL = "https://privlyalpha.org";
-    }
-    else if (document.getElementById('contentServerDev').selected === true) {
-      contentServerURL = "https://dev.privly.org";
-    }
-    else if (document.getElementById('contentServerLocalhost').selected === true) {
-      contentServerURL = "http://localhost:3000";
-    }
-    this.preferences.setStringPref("contentServerUrl", contentServerURL);
+    // set custom content server value to current value of text area
+    var contentServerURL = document.getElementById('contentServerCustomURL').value;
+    document.getElementById('contentServerCustom').value = contentServerURL;
+    
+    // set preference to the value of the currently selected radio item
+    contentServerURL = document.getElementById('privlyContentServer').selectedItem.value;
+    this.preferences.setCharPref("contentServerUrl", contentServerURL);
+    
+    // set the textbox to the current value to avoid confusion
+    document.getElementById('contentServerCustom').value = contentServerURL;
+    document.getElementById('contentServerCustomURL').value = contentServerURL;
+    
   }
 };
+

@@ -5,11 +5,13 @@
 xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
   
   <script src="options.js" />
-  <prefpane id="appPreferences" label="Privly - Preferences" onpaneload="privlyPrefPane.onPaneLoad(event);">
+  <prefpane id="appPreferences" label="Privly - Preferences" onpaneload="privlyPrefPane.onPaneLoad(event);" onpaneclose="alert('1')">
   
     <preferences>
-      <preference id="privly-mode" name="extensions.privly.extensionMode" type="int" instantApply="true" onchange="privlyPrefPane.updateMode();"/>
-      <preference id="privly-server" name="extensions.privly.contentServerUrl" type="string" instantApply="true" onchange="privlyPrefPane.updateContentServerURL()"/>
+      <preference id="privly-mode" name="extensions.privly.extensionMode" type="int"
+        instantApply="true" onchange="privlyPrefPane.updateMode();"/>
+      <preference id="privly-server" name="extensions.privly.contentServerUrl" type="string"
+        onchange="privlyPrefPane.updateContentServerURL()"/>
     </preferences>
 
     <vbox>    
@@ -17,18 +19,20 @@ xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
         <caption label="Extension Mode" />
         <radiogroup id="mode"  preference="privly-mode">
             <radio id="active" label="Active - Shows content from Privly on the page automatically" value="0"/>
-            <radio id="passive" label="Passive - Shows content from Privly on the page only when you click on the link" value="1"/>
-            <radio id="require-clickthrough" label="Require Clickthrough - Takes you to the corresponding Privly post on a new tab" value="2"/>
+            <radio id="require-clickthrough" label="Clickthrough - Disables injection of content into web pages" value="2"/>
         </radiogroup>
       </groupbox>
       
       <groupbox>
-        <caption label="Content Server (developers only)" />
-        <radiogroup id="mode"  preference="privly-server">
-            <radio id="contentServerPrivly" label="https://privlyalpha.org (recommended)" value="https://privlyalpha.org"/>
-            <radio id="contentServerDev" label="https://dev.privly.org" value="https://dev.privly.org"/>
-            <radio id="contentServerLocalhost" label="http://localhost:3000" value="http://localhost:3000"/>
+        <caption label="Content Server - Set which domain you upload your content to when generating new links." />
+        <radiogroup id="privlyContentServer"  preference="privly-server">
+          <radio id="contentServerPrivly" label="https://privlyalpha.org (recommended)" value="https://privlyalpha.org"/>
+          <radio id="contentServerDev" label="https://dev.privly.org" value="https://dev.privly.org"/>
+          <radio id="contentServerLocalhost" label="http://localhost:3000" value="http://localhost:3000"/>
+          <radio id="contentServerCustom" label="Custom Server (Set Below)" value=""/> 
         </radiogroup>
+        <label control="your-custom-content-server" value="Custom Content Server"/>
+        <textbox id="contentServerCustomURL" oninput="privlyPrefPane.updateContentServerURL(event);"/>
       </groupbox>
       
     </vbox>
