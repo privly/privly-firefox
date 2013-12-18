@@ -543,7 +543,6 @@ var privly = {
     var elements = document.getElementsByTagName("privModeElement");
     if (elements.length > 0){
       this.extensionMode = parseInt(elements[0].getAttribute('data-mode'), 10);
-      privly.updateWhitelist(elements[0].getAttribute('data-whitelist-regexp'));
     }
     
     privly.createLinks();
@@ -555,7 +554,7 @@ var privly = {
    * Listener Function Called when the page is modified with dynamic content
    * @see privly.addListeners
    */
-  listenerDOMNodeInserted: function(event) {
+  listenerDOMNodeInserted: function(mutations) {
     //we check the page a maximum of two times a second
     if (privly.runPending) {
       return;
@@ -599,11 +598,13 @@ var privly = {
         privly.run();
       },
       100);
-      
-    //Everytime the page is updated via javascript, we have to check
-    //for new Privly content. This might not be supported on other platforms
-    document.addEventListener("DOMNodeInserted", privly.listenerDOMNodeInserted);
     
+    // Watch the whole body for changes
+    var target = document.querySelector("body");
+    privly.observer = new MutationObserver(privly.listenerDOMNodeInserted);
+    var config = { attributes: true, childList: true, characterData: true, 
+      subtree: true };
+    privly.observer.observe(target, config);
   },
   
   /**
@@ -615,10 +616,10 @@ var privly = {
   removeListeners: function(){
     
     "use strict";
-    
+
     window.removeEventListener("message", privly.resizeIframePostedMessage,
       false);
-    document.removeEventListener("DOMNodeInserted", privly.listenerDOMNodeInserted);
+    privly.observer.disconnect();
     privly.runPending = false;
   },
   
@@ -724,6 +725,13 @@ var privly = {
   start: function(){
     
     if ( !privly.started ) {
+      
+      //set the mode
+      var elements = document.getElementsByTagName("privModeElement");
+      if (elements.length > 0){
+        this.extensionMode = parseInt(elements[0].getAttribute('data-mode'), 10);
+        privly.updateWhitelist(elements[0].getAttribute('data-whitelist-regexp'));
+      }
       
       privly.toggleInjection();
       
