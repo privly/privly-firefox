@@ -8,10 +8,15 @@ xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
   <prefpane id="appPreferences" label="Privly - Preferences" onpaneload="privlyPrefPane.onPaneLoad(event);" onpaneclose="alert('1')">
   
     <preferences>
-      <preference id="privly-mode" name="extensions.privly.extensionMode" type="int"
-        instantApply="true" onchange="privlyPrefPane.updateMode();"/>
-      <preference id="privly-server" name="extensions.privly.contentServerUrl" type="string"
-        onchange="privlyPrefPane.updateContentServerURL()"/>
+      <preference id="privly-mode" name="extensions.privly.extensionMode"
+        type="int" instantApply="true" onchange="privlyPrefPane.updateMode();"/>
+      <preference id="privly-server" name="extensions.privly.contentServerUrl" 
+        type="string" onchange="privlyPrefPane.updateContentServerURL()"/>
+      <preference id="privly-whitelist" name="extensions.privly.userWhitelist" 
+        type="string" onchange="privlyPrefPane.saveWhitelist()"/>
+      <preference id="privly-whitelist-regular-expression" 
+        name="extensions.privly.userWhitelistForRegularExpression" type="string"
+        onchange="privlyPrefPane.saveWhitelist()"/>
     </preferences>
 
     <vbox>    
@@ -33,6 +38,12 @@ xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
         </radiogroup>
         <label control="your-custom-content-server" value="Custom Content Server"/>
         <textbox id="contentServerCustomURL" oninput="privlyPrefPane.updateContentServerURL(event);"/>
+      </groupbox>
+      
+      <groupbox>
+        <caption label="User Whitelist" />
+        <textbox id="userWhitelist" 
+          oninput="privlyPrefPane.saveWhitelist(event);"/>
       </groupbox>
       
     </vbox>

@@ -16,3 +16,10 @@ pref("extensions.privly.allPostsPublic", false);
 
 // Where to store posts, examples include http://localhost:3000 and https://privlyalpha.org
 pref("extensions.privly.contentServerUrl", "https://privlyalpha.org");
+
+// User defined whitelist
+pref("extensions.privly.userWhitelist", "");
+
+// Whitelist for regular expression in privly.js. This is specially formatted
+// so it can be added to privly.js many times quickly
+pref("extensions.privly.userWhitelistForRegularExpression", "");

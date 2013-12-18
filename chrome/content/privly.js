@@ -542,7 +542,8 @@ var privly = {
     
     var elements = document.getElementsByTagName("privModeElement");
     if (elements.length > 0){
-      this.extensionMode = parseInt(elements[0].getAttribute('mode'), 10);
+      this.extensionMode = parseInt(elements[0].getAttribute('data-mode'), 10);
+      privly.updateWhitelist(elements[0].getAttribute('data-whitelist-regexp'));
     }
     
     privly.createLinks();
