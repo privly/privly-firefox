@@ -41,7 +41,7 @@ xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
       </groupbox>
       
       <groupbox>
-        <caption label="User Whitelist" />
+        <caption label="User Whitelist - Set which domains you trust (CSV)" />
         <textbox id="userWhitelist" 
           oninput="privlyPrefPane.saveWhitelist(event);"/>
       </groupbox>
