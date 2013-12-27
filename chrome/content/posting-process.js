@@ -93,19 +93,19 @@ var privlyExtensionPosting = {
    * Start the posting process from the context menu. The active element
    * (where the user focused) must be a form element. The extension
    * will message the posting application the current value of the form
-   * element.
+   * element if it is a standard for element.
    *
    * @param postingApplicationPath string the path to the posting application
-   * being used to generate the post. Example values are '/zero_bin/' and
-   * '/posts/plain_post/'
-   *
+   * being used to generate the post.
    */
   contextmenuPost: function (postingApplicationPath) {
     privlyExtensionPosting.interactionType = "contextmenu";
     privlyExtensionPosting.tabReceivingPost = gBrowser.selectedTab;
     privlyExtensionPosting.currentTargetNode = document.popupNode;
-    privlyExtensionPosting.postingApplicationMessage = 
-      privlyExtensionPosting.currentTargetNode.value;
+    if ( privlyExtensionPosting.currentTargetNode.value !== undefined ) {
+      privlyExtensionPosting.postingApplicationMessage = 
+        privlyExtensionPosting.currentTargetNode.value;
+    }
     privlyExtensionPosting.openPostingApplication(postingApplicationPath);
   },
   
