@@ -1,0 +1,28 @@
+before_install:
+- git clone https://github.com/smcgregor/privly-web.git # clone the webserver
+language: ruby
+rvm:
+- 1.9.3
+env:
+  global:
+  - DB=mysql
+  - TRAVIS_LAUNCHES_SAUCE_CONNECT=true # Tell the karma file that it does not need to launch Sauce connect
+  - secure: "DyjRkiUG0oz+BHkSMS+x3TzYyglqID4iNMPWI/H7jH2UmMHFHItO2TUB/F8+lcqxBNRiS3vjUOXjQ+emSBzXC6L4jZMpZkcE0NyKmFAJoKLGXfnGG1XJMrXCKOZ3LHvRcjuKAKLOgcNKds/sUPJgwvQI/Rv6zvloI0gg9Dsi6UU=" # SAUCE_URL=
+script:
+- ruby test/selenium/run_all.rb -p sauce_firefox_extension -c http://localhost:3000
+- "cd chrome/content/privly-applications && ruby test/selenium/run_all.rb -p sauce_firefox_extension -c http://localhost:3000"
+before_script:
+- cd privly-web
+- cp config/database.travis.yml config/database.yml
+- RAILS_ENV=development mysql -e 'create database privly_test'
+- bundle install #Installs the required gems
+- rake db:create #Creates the Database
+- rake db:schema:load #Loads the Scheme
+- rake db:seed #Seeds the DB
+- "RAILS_ENV=development bundle exec rails server -p 3000 &"
+- cd ../chrome/content/privly-applications
+addons:
+  sauce_connect:
+    username: smcgregor
+    access_key:
+      secure: "MV0d1AacZ5gab6uLM1sbNeBk4/7XqLbhaNJybCMKG0/Pg6wEawmLIIKebyDMh5JiVrDTAh3TyFYBjSXSqnsAw1OeJ5ArJ9aB7D8QvLlOMFQv79R3sy0TXy6HR1z67d/E+UoHbd3HOIGCTLnbPAugF27nowasJD/kLJwggRAnw7s="
