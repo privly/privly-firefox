@@ -12,7 +12,6 @@ env:
   - RAILS_ENV=development
 script:
 - ruby test/selenium/run_all.rb -p sauce_firefox_extension -c http://localhost:3000
-- "cd chrome/content/privly-applications && ruby test/selenium/run_all.rb -p sauce_firefox_extension -c http://localhost:3000"
 before_script:
 - cd privly-web
 - cp config/database.travis.yml config/database.yml
