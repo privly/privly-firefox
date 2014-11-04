@@ -14,4 +14,4 @@ chrome/content/privly-applications/vendor/build.py
 *.subtemplate
 *.template
 *templates/
-
+privly-web/
