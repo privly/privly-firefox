@@ -129,8 +129,11 @@ var privlyExtension = {
     else {
       var element = doc.createElement("privModeElement");
       element.setAttribute("data-mode", extensionMode);
-      element.setAttribute("data-whitelist-regexp", 
-        this.preferences.getCharPref("userWhitelistForRegularExpression"));
+      var userWhitelistRegexp = ls.getItem("user_whitelist_regexp");
+      if( userWhitelistRegexp !== undefined &&
+          userWhitelistRegexp !== "" &&
+          userWhitelistRegexp !== null )
+        element.setAttribute("data-whitelist-regexp", userWhitelistRegexp);
       doc.documentElement.appendChild(element);
     }
   },
