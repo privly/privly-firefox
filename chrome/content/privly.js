@@ -32,15 +32,15 @@ DEALINGS IN THE SOFTWARE.
  * @author Sean McGregor
  * @version 0.2-dev
  **/
- 
+
 /**
  * @namespace
  * Script injected into the host page.
  */
 var privly = {
-  
+
   /**
-   * Gives a map of the URL parameters and the anchor. 
+   * Gives a map of the URL parameters and the anchor.
    * This method assumes the parameters and the anchor are encoded
    * with encodeURIcomponent. Parameters present in both the anchor text
    * and the parameter section will default to the server parameters.
@@ -55,9 +55,9 @@ var privly = {
    * @returns {object} Contains a dictionary of the parameter values.
    */
   getUrlVariables: function(url) {
-    
+
     "use strict";
-    
+
     var vars = {};
     var anchorString, parameterArray, i, pair, key, value;
 
@@ -73,7 +73,7 @@ var privly = {
         vars[key] = value;
       }
     }
-    
+
     //Get the variables from the query parameters
     if (url.indexOf("?",0) > 0)
     {
@@ -90,49 +90,33 @@ var privly = {
         vars[key] = value;
       }
     }
-    
+
     return vars;
   },
-  
-  /** 
+
+  /**
    * The Privly RegExp determines which links are eligible for
    * automatic injection.
-   * This system will need to change so we can move to a whitelist 
+   * This system will need to change so we can move to a whitelist
    * approach. See: http://www.privly.org/content/why-privly-server
    *
-   * Currently matched domains are priv.ly, dev.privly.org, dev.privly.com, 
+   * Currently matched domains are priv.ly, dev.privly.org, dev.privly.com,
    * privly.com, pivly.org, privly.com, and localhost
    *
    */
   privlyReferencesRegex: new RegExp(
-    "\^(https?:\\/\\/){0,1}(" + //protocol
+    "(?:^|\\s+)(https?:\\/\\/){0,1}(" + //protocol
     "priv\\.ly\\/|" + //priv.ly
     "dev\\.privly\\.org\\/|" + //dev.privly.org
     "localhost\\/|" + //localhost
     "privlyalpha.org\\/|" + //localhost
     "privlybeta.org\\/|" + //localhost
     "localhost:3000\\/" + //localhost:3000
-    ")(\\S){3,}$","gi"),
+    ")(\\S){3,}/[^\\s]*\\b","gi"),
     //the final line matches
     //end of word
-  
-  /** 
-   * Holds the identifiers for each of the modes of operation.
-   * Extension modes are set through firefox's extension api.
-   * https://developer.mozilla.org/en/Code_snippets/Preferences
-   */
-  extensionModeEnum : {
-    ACTIVE : 0,
-    PASSIVE : 1,
-    CLICKTHROUGH : 2
-  },
-  
+
   /**
-   * Sets a mode of operation found in extensionModeEnum.
-   */
-  extensionMode: 0,
-  
-  /** 
    * Adds 'http' to strings if it is not already present
    *
    * @param {string} domain the domain potentially needing a protocol.
@@ -148,7 +132,7 @@ var privly = {
     }
     return domain;
   },
-  
+
   /**
    * Make plain text links into anchor elements.
    */
@@ -158,43 +142,43 @@ var privly = {
     /***********************************************************************
     Inspired by Linkify script:
       http://downloads.mozdev.org/greasemonkey/linkify.user.js
-      
+
     Originally written by Anthony Lieuallen of http://arantius.com/
     Licensed for unlimited modification and redistribution as long as
     this notice is kept intact.
     ************************************************************************/
-    
+
     var excludeParents = ["a", "applet", "button", "code", "form",
                            "input", "option", "script", "select", "meta",
                            "style", "textarea", "title", "div","span"];
     var excludedParentsString = excludeParents.join(" or parent::");
     var xpathExpression = ".//text()[not(parent:: " +
         excludedParentsString +")]";
-        
+
     var textNodes = document.evaluate(xpathExpression, document.body, null,
         XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
-        
+
     for (var i=0; i < textNodes.snapshotLength; i++){
       var item = textNodes.snapshotItem(i);
-        
-      var itemText = item.nodeValue;
-      
+
+      var itemText = item.nodeValue.trim();
+
       privly.privlyReferencesRegex.lastIndex = 0;
       if (privly.privlyReferencesRegex.test(itemText)){
+
         var span = document.createElement("span");
         var lastLastIndex = 0;
         privly.privlyReferencesRegex.lastIndex = 0;
-        
+
         var results = privly.privlyReferencesRegex.exec(itemText);
         while ( results ){
           span.appendChild(document.createTextNode(
             itemText.substring(lastLastIndex, results.index)));
-            
-          var rawHref = results[0];
-          var text = (rawHref.indexOf(" ") === 0)?rawHref.substring(1):rawHref;
-          
+
+          var text = results[0].trim();
+
           var href = privly.makeHref(text);
-          
+
           var a = document.createElement("a");
           a.setAttribute("href", href);
           a.appendChild(document.createTextNode(
@@ -207,19 +191,19 @@ var privly = {
           results = privly.privlyReferencesRegex.exec(itemText);
         }
         span.appendChild(document.createTextNode(
-          itemText.substring(lastLastIndex)));
+          itemText.substring(lastLastIndex + 1)));
         item.parentNode.replaceChild(span, item);
       }
     }
   },
-  
+
   /**
    * Changes hyperlinks to reference the proper url.
    * Twitter and other hosts change links so they can collect
    * click events. It also sets a non-standard attribute,
-   * privlyHref, to the correct href. If the privlyHref is
+   * data-privlyHref, to the correct href. If the data-privlyHref is
    * present, the script will use it instead of the standard href.
-   * The privlyHref is recommended for sites that use javascript
+   * The data-privlyHref is recommended for sites that use javascript
    * to swap hrefs for tracking purposes.
    */
   correctIndirection: function()
@@ -229,10 +213,10 @@ var privly = {
     var i = anchors.length;
     while (i--){
       var a = anchors[i];
-      
+
       var href = a.href;
-      a.setAttribute("privlyHref", href);
-      
+      a.setAttribute("data-privlyHref", href);
+
       privly.privlyReferencesRegex.lastIndex = 0;
       if (href && !privly.privlyReferencesRegex.test(href))
       {
@@ -243,16 +227,16 @@ var privly = {
           privly.privlyReferencesRegex.lastIndex = 0;
           var results = privly.privlyReferencesRegex.exec(a.textContent);
           var newHref = privly.makeHref(results[0]);
-          a.setAttribute("privlyHref", newHref);
+          a.setAttribute("data-privlyHref", newHref);
         }
-        
+
         //check if Privly was moved to another attribute
         for (var y = 0; y < a.attributes.length; y++) {
           var attrib = a.attributes[y];
           if (attrib.specified === true) {
             privly.privlyReferencesRegex.lastIndex = 0;
             if (privly.privlyReferencesRegex.test(attrib.value)) {
-              a.setAttribute("privlyHref", attrib.value);
+              a.setAttribute("data-privlyHref", attrib.value);
             }
           }
         }
@@ -260,29 +244,29 @@ var privly = {
       privly.privlyReferencesRegex.lastIndex = 0;
     }
   },
-  
+
   /**
    * Counter for injected iframe identifiers. This variable is also used
    * to indicate how many iframes have been injected so that the script
    * will not inject too many iframes.
    */
   nextAvailableFrameID: 0,
-  
+
   /**
-   * Inject a sham application in the context of the host page
-   * so the extension-host-interface can replace it with 
-   * a URL targeting the locally stored privly applications.
+   * Inject an application in place of object with the
+   * URL applicationUrl and give it the specified ID.
+   * @param {object} object The Object to inject the application next to.
+   * @param {string} applicationUrl The URL of the application we are injecting.
+   * @param {string} id The id of the application we are going to inject.
    */
   injectLinkApplication: function(object, applicationUrl, id)
   {
     "use strict";
-    
-    // Don't inject the link a second time
+
     object.setAttribute("data-privly-exclude", "true");
-    
-    // The sham iframe
+
     var iFrame = document.createElement('iframe');
-    
+
     //Styling and display attributes
     iFrame.setAttribute("frameborder","0");
     iFrame.setAttribute("vspace","0");
@@ -296,42 +280,40 @@ var privly = {
       "overflow: hidden;");
     iFrame.setAttribute("scrolling","no");
     iFrame.setAttribute("overflow","hidden");
-    
-    // Determines whether the element will be shown after it is toggled.
-    // This allows for the button to turn on and off the display of the
-    // injected content.
+
+    //Determines whether the element will be shown after it is toggled.
+    //This allows for the button to turn on and off the display of the
+    //injected content.
     iFrame.setAttribute("data-privly-display", "true");
     if ( object.getAttribute("data-privly-display") !== "off" ) {
       object.setAttribute("data-privly-display", "false");
     }
     object.style.display = "none";
-    
-    // Custom attribute indicating this iframe is eligible for being resized by
-    // its contents
+
+    //Custom attribute indicating this iframe is eligible for being resized by
+    //its contents
     iFrame.setAttribute("data-privly-accept-resize","true");
-    
+
     // The associated link is set to a custom attribute. This link will be 
     // passed into the privly application.
     iFrame.setAttribute("data-privly-swap-document-to", applicationUrl);
-    
+
     // Create the sham iframe's document.
     iFrame.setAttribute("srcdoc", 
       "<html><head></head><body></body></html>");
-    
-    //The id and the name are the same so that the iframe can be 
+
+    //The id and the name are the same so that the iframe can be
     //uniquely identified and resized
     var frameIdAndName = "ifrm" + id;
     iFrame.setAttribute("id", frameIdAndName);
     iFrame.setAttribute("name", frameIdAndName);
-    
+
     //put the iframe into the page
     object.parentNode.insertBefore(iFrame, object);
   },
-  
+
   /**
-   * Replace an anchor element with its referenced content. This function
-   * will opt for a locally stored application if there is one, otherwise
-   * it will inject the remote code.
+   * Replace an anchor element with its referenced content.
    *
    * @param {object} object A hyperlink element to be replaced
    * with an iframe referencing its content
@@ -339,16 +321,27 @@ var privly = {
   injectLink: function(object)
   {
     "use strict";
-    
+
     //Sets content URL.
     var frameId = privly.nextAvailableFrameID++;
-    var iframeUrl = object.getAttribute("privlyHref");
-    
-    privly.injectLinkApplication(object, 
-      iframeUrl, frameId);
+    var iframeUrl = object.getAttribute("data-privlyHref");
+
+    // Assume either Chrome or Firefox
+    if (typeof chrome !== "undefined" && typeof chrome.extension !== "undefined" &&
+      typeof "chrome.extension.sendMessage" !== "undefined") {
+        chrome.extension.sendMessage(
+          {privlyOriginalURL: iframeUrl},
+          function(response) {
+            if( response.privlyApplicationURL !== undefined ) {
+              privly.injectLinkApplication(object, response.privlyApplicationURL, frameId);
+            }
+          });
+    } else {
+      privly.injectLinkApplication(object, iframeUrl, frameId); // FF
+    }
   },
-  
-  /** 
+
+  /**
    * This is a helper method for determining whether a DOM node is editable.
    * We generally don't want to replace a link in an element that is eligible
    * for editing because these occur in email editors.
@@ -378,16 +371,16 @@ var privly = {
      return false;
    }
   },
-  
+
   /**
    * Process a link according to its parameters and whitelist status.
    * If the link is in active mode and is whitelisted, it will replace
-   * the link with the referenced content. If the link is in passive mode
-   * or it is not a whitelisted link, the link will be clickable to replace
+   * the link with the referenced application. If the link is not
+   * whitelisted the link will be clickable to replace
    * the content. Parameters on the link can also affect how the link is
    * processed. All link parameters are optional.
    *
-   * @param {object} anchorElement A hyperlink element eligible for 
+   * @param {object} anchorElement A hyperlink element eligible for
    * processessing by Privly. The link may define the following parameters
    * which this function will check
    * burntAfter: specifies a time in seconds in the Unix epoch
@@ -400,56 +393,59 @@ var privly = {
   processLink: function(anchorElement)
   {
     "use strict";
-    
+
     // Don't process editable links
     if ( privly.isEditable(anchorElement) ){
       return;
     }
-    
-    var href = anchorElement.getAttribute("privlyHref");
-    
+
+    var href = anchorElement.getAttribute("data-privlyHref");
+
     this.privlyReferencesRegex.lastIndex = 0;
     var whitelist = this.privlyReferencesRegex.test(href);
-    
+
     var exclude = anchorElement.getAttribute("data-privly-exclude");
-    exclude = exclude || 
-      anchorElement.getAttribute("privly-exclude"); //deprecated
-    
     var params = privly.getUrlVariables(href);
-    
+
     if (exclude || params.privlyExclude === "true") {
       return;
     }
-    
-    // Deprecated
-    var passive = this.extensionMode === privly.extensionModeEnum.PASSIVE ||
-      params.passive !== undefined ||  params.privlyPassive !== undefined;
-    
-    var burnt = params.privlyBurntAfter !== undefined && 
+
+    // See if the area containing the link will expand sufficiently
+    // by temporarily inflating the link's font-size.
+    var priorFontSize = anchorElement.style.fontSize;
+    anchorElement.style.fontSize = "200%";
+    if(anchorElement.parentNode.offsetHeight < 20 &&
+      window.getComputedStyle(anchorElement.parentNode, null).getPropertyValue("height") !== "auto") {
+        anchorElement.style.fontSize = priorFontSize;
+        return;
+    }
+    anchorElement.style.fontSize = priorFontSize;
+
+    var burnt = params.privlyBurntAfter !== undefined &&
         parseInt(params.privlyBurntAfter, 10) < Date.now()/1000;
-    
-    var active = this.extensionMode === privly.extensionModeEnum.ACTIVE &&
-      whitelist && privly.nextAvailableFrameID <= 39;
-    
-    if (active && !burnt && !passive){
+
+    var shouldInject = whitelist && privly.nextAvailableFrameID <= 39 && !burnt;
+
+    if (shouldInject) {
       this.injectLink(anchorElement);
     }
   },
-  
+
   /**
    * Process all links that are tagged as supporting injection.
    */
   injectLinks: function()
   {
     "use strict";
-    
+
     var anchors = document.links;
     var i = anchors.length;
-    
+
     while (--i >= 0){
       var a = anchors[i];
-      var privlyHref = a.getAttribute("privlyHref");
-      
+      var privlyHref = a.getAttribute("data-privlyHref");
+
       if (privlyHref && privlyHref.indexOf("privlyInject1",0) > 0)
       {
         privly.processLink(a);
@@ -460,7 +456,7 @@ var privly = {
       }
     }
   },
-  
+
   /**
    * Receive an iframe resize message sent by the iframe using postMessage.
    * Injected iframe elements need to know the height of the iframe's contents.
@@ -468,28 +464,28 @@ var privly = {
    * resizes the iframe accordingly.
    *
    * @param {message} message A posted message from one of the trusted domains
-   * it contains the name of the iframe, and height of the iframe's 
+   * it contains the name of the iframe, and height of the iframe's
    * contents. Ex: "ifrm0,200"
    *
    */
   resizeIframePostedMessage: function(message){
-    
+
     "use strict";
-    
+
     //check the format of the message
-    if (typeof(message.origin) !== "string" || 
+    if (typeof(message.origin) !== "string" ||
         typeof(message.data) !== "string" ||
-        message.data.indexOf(',') < 1) { 
+        message.data.indexOf(',') < 1) {
       return;
     }
-    
+
     //Get the element by name.
     var data = message.data.split(",");
     var iframe = document.getElementsByName(data[0])[0];
     if (iframe === undefined) {
       return;
     }
-    
+
     // Only resize iframes eligible for resize.
     // All iframes eligible for resize have a custom attribute,
     // data-privly-accept-resize, set to true.
@@ -497,40 +493,37 @@ var privly = {
     if (acceptresize !== "true") {
       return;
     }
-    
+
     var sourceURL = iframe.getAttribute("src");
-    if( sourceURL === null ) {
-      return;
-    }
-    
     var originDomain = message.origin;
+    if ( typeof sourceURL !== "string") return;
     sourceURL = sourceURL.replace("http://", "https://");
     originDomain = originDomain.replace("http://", "https://");
-    
+
     //make sure the message comes from the expected domain
     if (sourceURL.indexOf(originDomain) === 0)
     {
       iframe.style.height = data[1]+'px';
     }
   },
-  
-  /** 
+
+  /**
    * Indicates whether the script is waiting to run again.
    * This prevents DOMNodeInserted from sending hundreds of extension runs
    * @see privly.run
    */
   runPending: false,
-  
+
   /**
-   * Perform the current mode of operation on the page.
+   * Run the injection script.
    * @see privly.runPending
    */
   run: function()
   {
     "use strict";
-    
+
     privly.dispatchResize();
-    
+
     //respect the settings of the host page.
     //If the body element has data-privly-exclude=true
     var body = document.getElementsByTagName("body");
@@ -539,17 +532,22 @@ var privly = {
     {
       return;
     }
-    
+
+    // Deprecated method of deactivating injection from the
+    // Firefox extension.
     var elements = document.getElementsByTagName("privModeElement");
     if (elements.length > 0){
-      this.extensionMode = parseInt(elements[0].getAttribute('data-mode'), 10);
+      var extensionMode = parseInt(elements[0].getAttribute('mode'), 10);
+      if ( extensionMode !== 0 ) {
+        return;
+      }
     }
-    
+
     privly.createLinks();
     privly.correctIndirection();
     privly.injectLinks();
   },
-  
+
   /**
    * Listener Function Called when the page is modified with dynamic content
    * @see privly.addListeners
@@ -559,9 +557,9 @@ var privly = {
     if (privly.runPending) {
       return;
     }
-    
+
     privly.runPending = true;
-    
+
     setTimeout(
       function(){
         privly.runPending = false;
@@ -569,7 +567,7 @@ var privly = {
       },
       500);
   },
-  
+
   /**
    * Runs privly once then registers the update listener
    * for dynamic pages.
@@ -578,19 +576,19 @@ var privly = {
    * by defining data-privly-exclude="true" as an attribute on either
    * the body element.
    *
-   * @see privly.listenerDOMNodeInserted 
-   * @see privly.removeListeners 
+   * @see privly.listenerDOMNodeInserted
+   * @see privly.removeListeners
    */
   addListeners: function(){
-    
+
     "use strict";
-    
+
     //The content's iframe will post a message to the hosting document.
     //This listener sets the height  of the iframe according to the messaged
     //height
     window.addEventListener("message", privly.resizeIframePostedMessage,
       false, true);
-    
+
     privly.runPending = true;
     setTimeout(
       function(){
@@ -598,31 +596,33 @@ var privly = {
         privly.run();
       },
       100);
-    
+
+
     // Watch the whole body for changes
     var target = document.querySelector("body");
     privly.observer = new MutationObserver(privly.listenerDOMNodeInserted);
-    var config = { attributes: true, childList: true, characterData: true, 
+    var config = { childList: true, characterData: true,
       subtree: true };
     privly.observer.observe(target, config);
   },
-  
+
   /**
-   * Removes event listeners defined by the script. This is primarily 
+   * Removes event listeners defined by the script. This is primarily
    * used to deactivate the content script from the Browser's user
    * interface.
-   * @see privly.addListeners 
+   * @see privly.addListeners
    */
   removeListeners: function(){
-    
+
     "use strict";
 
     window.removeEventListener("message", privly.resizeIframePostedMessage,
       false);
+
     privly.observer.disconnect();
     privly.runPending = false;
   },
-  
+
   /**
    * Toggles the display of links and the iframes injected based on the links.
    */
@@ -638,7 +638,7 @@ var privly = {
         iframe.style.display = "";
       }
     }
-    
+
     var links = document.getElementsByTagName("a");
     for(var i = 0; i < links.length; i++) {
       var link = links[i];
@@ -651,7 +651,7 @@ var privly = {
       }
     }
   },
-  
+
   /**
    * Sends the parent iframe the height of this iframe, only if the "wrapper"
    * div is not specified. Note: This function does not work on Google Chrome
@@ -659,41 +659,41 @@ var privly = {
    * Google Chrome is expected to fire its own postMessage event.
    */
   dispatchResize: function() {
-    
+
     "use strict";
-    
+
     //don't send a message if it is the top window
     if (top === this.self) {
       return;
     }
-    
+
     //Only send the message if there is no "wrapper" div element.
     //If there is a wrapper element it might already be a privly
     //iframe, which will send the resize command. I added the wrapper
     //div because its height is the most accurate reflection of the
-    //content's height. Future version may remove this element. 
+    //content's height. Future version may remove this element.
     var wrapper = document.getElementById("wrapper");
     if (wrapper === null) {
       var D = document;
       if(D.body){
         var newHeight = Math.max(
-                D.body.scrollHeight, 
-                D.documentElement.scrollHeight, 
-                D.body.offsetHeight, 
-                D.documentElement.offsetHeight, 
-                D.body.clientHeight, 
+                D.body.scrollHeight,
+                D.documentElement.scrollHeight,
+                D.body.offsetHeight,
+                D.documentElement.offsetHeight,
+                D.body.clientHeight,
                 D.documentElement.clientHeight
             );
         parent.postMessage(window.name + "," + newHeight, "*");
       }
-    }    
+    }
   },
-  
-  /** 
-   * Cross platform onload event. 
+
+  /**
+   * Cross platform onload event.
    * won't attach anything on IE on macintosh systems.
    *
-   * @param {object} obj The object we are goingt to add 
+   * @param {object} obj The object we are going to add
    * a listener to.
    *
    * @param {string} evType The name of the event to listen for
@@ -702,9 +702,9 @@ var privly = {
    *
    */
   addEvent: function(obj, evType, fn){
-    
+
     "use strict";
-    
+
     if (obj.addEventListener){
       obj.addEventListener(evType, fn, false);
     }
@@ -712,31 +712,31 @@ var privly = {
       obj.attachEvent("on"+evType, fn);
     }
   },
-  
-  /** 
+
+  /**
    * Variable indicates whether the script is currently running on the page.
    * This helps toggle the script's operation mode
    */
   started: false,
-  
+
   /**
    * Start this content script if it has not already been started.
    */
   start: function(){
-    
+
     if ( !privly.started ) {
-      
+
       //set the mode
       var elements = document.getElementsByTagName("privModeElement");
       if (elements.length > 0){
         this.extensionMode = parseInt(elements[0].getAttribute('data-mode'), 10);
         privly.updateWhitelist(elements[0].getAttribute('data-whitelist-regexp'));
       }
-      
+
       privly.toggleInjection();
-      
+
       privly.started = true;
-      
+
       //This is mostly here for Google Chrome.
       //Google Chrome will inject the top level script after the load event,
       //and subsequent iframes after before the load event.
@@ -748,10 +748,10 @@ var privly = {
         privly.addEvent(window, 'load', privly.addListeners);
         privly.addEvent(window, 'load', privly.dispatchResize);
       }
-      
+
     }
   },
-  
+
   /**
    * Stop this content script if it has already been started.
    */
@@ -762,7 +762,7 @@ var privly = {
       privly.toggleInjection();
     }
   },
-  
+
   /**
    *
    * Update the list of links to automatically inject.
@@ -780,7 +780,7 @@ var privly = {
    */
   updateWhitelist: function(domainRegexp) {
     privly.privlyReferencesRegex = new RegExp(
-      "\^(https?:\\/\\/){0,1}(" + //protocol
+      "(?:^|\\s+)(https?:\\/\\/){0,1}(" + //protocol
       "priv\\.ly\\/|" + //priv.ly
       "dev\\.privly\\.org\\/|" + //dev.privly.org
       "localhost\\/|" + //localhost
@@ -788,9 +788,8 @@ var privly = {
       "privlybeta.org\\/|" + //localhost
       "localhost:3000\\/" + //localhost:3000
       domainRegexp +
-      ")(\\S){3,}$","gi")
+      ")(\\S){3,}/[^\\s]*\\b","gi")
   }
 };
 
 privly.start();
-
