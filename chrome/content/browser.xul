@@ -3,6 +3,8 @@
 <!DOCTYPE privly SYSTEM "chrome://privly/locale/translations.dtd">
 <overlay id="privly" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
   
+  <script src="privly-applications/shared/javascripts/local_storage.js" />
+  <script src="first-run.js" />
   <script src="extension-host-interface.js" />
   <script src="posting-process.js" />
   
