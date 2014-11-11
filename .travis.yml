@@ -8,7 +8,7 @@ env:
   global:
   - DB=mysql
   - TRAVIS_LAUNCHES_SAUCE_CONNECT=true # Tell the karma file that it does not need to launch Sauce connect
-  - secure: "DyjRkiUG0oz+BHkSMS+x3TzYyglqID4iNMPWI/H7jH2UmMHFHItO2TUB/F8+lcqxBNRiS3vjUOXjQ+emSBzXC6L4jZMpZkcE0NyKmFAJoKLGXfnGG1XJMrXCKOZ3LHvRcjuKAKLOgcNKds/sUPJgwvQI/Rv6zvloI0gg9Dsi6UU=" # SAUCE_URL=
+  - secure: "mVySvTZJu/TnfYQvn2YVRfLByBlVtw0hu5OIyDd6qnHBS+MYehEgq6Q2xP61eG97xuou9LKTLnCG7aYHPKU91g3kVC1//WxCjRu4mjkZC8lqq5d3FQNKHIWXvvov6ReP+RHUpq4hoGhwm3jWAregIsEGhUapEyfqzhsI+8uVrwA=" # SAUCE_URL=
   - RAILS_ENV=development
 script:
 - ruby test/selenium/run_all.rb -p sauce_firefox_extension -c http://localhost:3000
@@ -24,6 +24,6 @@ before_script:
 - cd ../chrome/content/privly-applications
 addons:
   sauce_connect:
-    username: smcgregor
+    username: privly
     access_key:
-      secure: "MV0d1AacZ5gab6uLM1sbNeBk4/7XqLbhaNJybCMKG0/Pg6wEawmLIIKebyDMh5JiVrDTAh3TyFYBjSXSqnsAw1OeJ5ArJ9aB7D8QvLlOMFQv79R3sy0TXy6HR1z67d/E+UoHbd3HOIGCTLnbPAugF27nowasJD/kLJwggRAnw7s="
+      secure: "Q/QojWavKrUVKy/Hy7oj0TwA91+h4j/oytswut5qr9+WJ+uyMCScVjY+ri8xaukbzTOj6UhQxFu61bDSJWgq2LFYHf/gtEEYdfn9Hv4h9mU27XAbS91YuqOdCRsyB7E6iUqoCXq+kUa8rpeRD8GiENSTXdpYbOogxIMtQrF6geE="
