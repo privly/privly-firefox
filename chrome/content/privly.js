@@ -313,7 +313,9 @@ var privly = {
   },
 
   /**
-   * Replace an anchor element with its referenced content.
+   * Replace an anchor element with its referenced content. This function
+   * will opt for a locally stored application if there is one, otherwise
+   * it will inject the remote code.
    *
    * @param {object} object A hyperlink element to be replaced
    * with an iframe referencing its content
@@ -325,20 +327,7 @@ var privly = {
     //Sets content URL.
     var frameId = privly.nextAvailableFrameID++;
     var iframeUrl = object.getAttribute("data-privlyHref");
-
-    // Assume either Chrome or Firefox
-    if (typeof chrome !== "undefined" && typeof chrome.extension !== "undefined" &&
-      typeof "chrome.extension.sendMessage" !== "undefined") {
-        chrome.extension.sendMessage(
-          {privlyOriginalURL: iframeUrl},
-          function(response) {
-            if( response.privlyApplicationURL !== undefined ) {
-              privly.injectLinkApplication(object, response.privlyApplicationURL, frameId);
-            }
-          });
-    } else {
-      privly.injectLinkApplication(object, iframeUrl, frameId); // FF
-    }
+    privly.injectLinkApplication(object, iframeUrl, frameId); // FF
   },
 
   /**
