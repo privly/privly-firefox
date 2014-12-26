@@ -242,7 +242,7 @@ var privlyExtensionPosting = {
       if ( node.getAttribute("g_editable") === "true" ) {
         return true;
       } else if ( node.parentNode !== undefined && node.parentNode !== null ) {
-        return privly.isEditable(node.parentNode);
+        return privlyExtensionPosting.isEditable(node.parentNode);
       } else {
         return false;
       }
