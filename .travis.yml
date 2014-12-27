@@ -8,8 +8,13 @@ env:
   global:
   - DB=mysql
   - TRAVIS_LAUNCHES_SAUCE_CONNECT=true # Tell the karma file that it does not need to launch Sauce connect
-  - secure: "mVySvTZJu/TnfYQvn2YVRfLByBlVtw0hu5OIyDd6qnHBS+MYehEgq6Q2xP61eG97xuou9LKTLnCG7aYHPKU91g3kVC1//WxCjRu4mjkZC8lqq5d3FQNKHIWXvvov6ReP+RHUpq4hoGhwm3jWAregIsEGhUapEyfqzhsI+8uVrwA=" # SAUCE_URL=
   - RAILS_ENV=development
+  - secure: "mVySvTZJu/TnfYQvn2YVRfLByBlVtw0hu5OIyDd6qnHBS+MYehEgq6Q2xP61eG97xuou9LKTLnCG7aYHPKU91g3kVC1//WxCjRu4mjkZC8lqq5d3FQNKHIWXvvov6ReP+RHUpq4hoGhwm3jWAregIsEGhUapEyfqzhsI+8uVrwA="#SAUCE_URL="http://privly:********-****-****-****-************@ondemand.saucelabs.com:80/wd/hub"(privly/privly-firefox)
+  - secure: "cEoEOyEziE4qG5O5ps62/o5qq95wtf0ksLByvgHQxDtNCvRYvbdhV83iuXIhfnuhtYRCDPG+F7pHWL0Agnbw1xMtP0p/yM9optPdtfQHYGUHKG6SMXSCQtcPz14So0foVKO46h0mftmerkuK3/5Bc8M//cwKUfutpYtFT5giWEM="#SAUCE_USERNAME=privly(privly/privly-firefox)
+  - secure: "fkStJIIsWqEUntjzq3oSpr8mz5sOwW87CgBBg9980lyqvL3i8NFLe8caSe4ib+6MsftXuTqS9iIw+AF3UpgdKIncfPHz6auxD+OSnAva8FLt7QNpC0RPxPhMZ2xojRcMCJoCUIa29yV5IXlnj6LXaj38YwEC6abQCLY3MbcsxCk="#SAUCE_ACCESS_KEY=********-****-****-****-************(privly/privly-firefox)
+  - secure: "QCfuMgCtqNiyBoR+RPpWoal8KYbce6rtk6XluE6EYYwxHCFyO2NFcNHI6ElCDqvzQs2vnNp4x/mCP+3ceIP9A7xithw26YsacrGI1HnoNpFDPIDg0CZqyTRNXVAFUToZqq7HdOYj1Tvb7mxqLSVZh0D/TYKVg2dwe2kdZpxSPko="#SAUCE_URL="http://smcgregor:********-****-****-****-************@ondemand.saucelabs.com:80/wd/hub"(smcgregor/privly-firefox)
+  - secure: "DT8PYMaqlQ33jwWf4/ge7gMvB6hvXG3TT7RaeLkp2adh6MgiyZnEGFhZFWwT27AcNncd/vZdSPujYxyrTJRwFHLQNDqxmSmChNkwIGOxd5hW4QuzaxU1T27aVOecJnKCnlEFPGB6gvp2f1OeLuRouaTcsojLf05ly4YSNVVq9CQ="#SAUCE_USERNAME=smcgregor(smcgregor/privly-firefox)
+  - secure: "AQPFM3ezsus6h4Oi0DDvMnsa2VdYc+MUv5nJIE3N6Wl+Y2+wa/ddYO1wuPCL+bdCvM9dhUEn6dHcToGv5uD0xNs734R2Y4BM8ZeR6+sUfazE5RQdEE21YyBE2qtIBP4mXaKJKCDVdzOvcJetDXCnVCZdxbzpqcu5/7Kj4zHQcvA="#SAUCE_ACCESS_KEY=********-****-****-****-************(smcgregor/privly-firefox)
 script:
 - ruby test/selenium/run_all.rb -p sauce_firefox_extension -c http://localhost:3000
 before_script:
@@ -23,7 +28,4 @@ before_script:
 - "bundle exec rails server -p 3000 &"
 - cd ../chrome/content/privly-applications
 addons:
-  sauce_connect:
-    username: privly
-    access_key:
-      secure: "Q/QojWavKrUVKy/Hy7oj0TwA91+h4j/oytswut5qr9+WJ+uyMCScVjY+ri8xaukbzTOj6UhQxFu61bDSJWgq2LFYHf/gtEEYdfn9Hv4h9mU27XAbS91YuqOdCRsyB7E6iUqoCXq+kUa8rpeRD8GiENSTXdpYbOogxIMtQrF6geE="
+  sauce_connect: true

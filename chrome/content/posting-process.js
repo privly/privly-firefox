@@ -130,7 +130,7 @@ var privlyExtensionPosting = {
     privlyExtensionPosting.postingDocument.defaultView.postMessage(message, "*");
   },
   
-  /** 
+  /**
    * Opens posting application in the 'chrome' of the browser.
    * This function opens an iframe from the current content server
    * for the user to type their content into.
@@ -178,6 +178,8 @@ var privlyExtensionPosting = {
     document.getElementById('post-iframe-vbox').hidden = true;
     document.getElementById('post-cancel-button').hidden = true;
     document.getElementById('post-iframe').setAttribute("src", "");
+
+    privlyExtensionPosting.currentTargetNode = undefined;
   },
   
   /**
@@ -189,39 +191,59 @@ var privlyExtensionPosting = {
    * to a host page.
    */
   handleUrlEvent: function(json) {
-    
+
+    // Two functions that dispatch special events needed for the correct
+    // insertion of the privlyURL text inside the form after it is received
+    function dispatchKeyboardEvent(target, eventType, char) {
+       var evt = document.createEvent("KeyboardEvent");
+       evt.initKeyEvent(eventType, true, true, window,
+         false, false, false, false,
+         0, char.charCodeAt(0));
+       target.dispatchEvent(evt);
+    }
+    function dispatchClickEvent(target, eventType) {
+      var evt = document.createEvent("MouseEvents");
+      evt.initMouseEvent(eventType, true, true, window,
+        1, 0, 0, 0, 0, false, false, false, false, 0, null);
+      target.dispatchEvent(evt);
+    }
+
     //Switch to the tab initiating the post
     gBrowser.selectedTab = privlyExtensionPosting.tabReceivingPost;
-    
-    // Focus the DOM Node, then fire keydown and keypress events
+
+    // Focus the DOM Node
     privlyExtensionPosting.currentTargetNode.focus();
-    var keydownEvent = document.createEvent("KeyboardEvent"); 
-    keydownEvent.initKeyEvent('keydown', true, true, window, 0, 
-                            false, 0, false, 0, 0); 
-    privlyExtensionPosting.currentTargetNode.dispatchEvent(keydownEvent);
-    var keypressEvent = document.createEvent("KeyboardEvent");
-    keypressEvent.initKeyEvent('keypress', true, true, window, 0, 
-                            false, 0, false, 0, 0); 
-    privlyExtensionPosting.currentTargetNode.dispatchEvent(keypressEvent);
-    
-    // Some sites need time to execute form initialization 
+
+    // Click the form to trigger any click callbacks
+    dispatchClickEvent(privlyExtensionPosting.currentTargetNode, "click");
+
+    // Some sites need time to execute form initialization
     // callbacks following focus and keydown events.
     // One example includes Facebook.com's wall update
     // form and message page.
-    setTimeout(function(){
-      
-      privlyExtensionPosting.currentTargetNode.value = json.data;
-      privlyExtensionPosting.currentTargetNode.textContent = json.data;
-      
-      var event = document.createEvent("KeyboardEvent"); 
-      event.initKeyEvent('keyup', true, true, window, 
-                              0, false, 0, false, 0, 0); 
-      privlyExtensionPosting.currentTargetNode.dispatchEvent(event);
+    setTimeout(function () {
+
+      // simulate every character of the URL as a keypress and
+      // dispatch for it 'keydown', 'keypress', 'textInput' and 'keyup' events
+      for(var i = 0; i < json.data.length; i++) {
+        var currentChar = json.data.charAt(i);
+
+        dispatchKeyboardEvent(privlyExtensionPosting.currentTargetNode,
+          "keydown", currentChar);
+        dispatchKeyboardEvent(privlyExtensionPosting.currentTargetNode,
+          "keypress", currentChar);
+        dispatchKeyboardEvent(privlyExtensionPosting.currentTargetNode,
+          "textinput", currentChar);
+        dispatchKeyboardEvent(privlyExtensionPosting.currentTargetNode,
+          "keyup", currentChar);
+      }
+
       privlyExtensionPosting.closePostingApplication();
-    },500);
+
+    }, 500);
   },
   
-  /** 
+  /**
    * This is a helper method for determining whether a DOM node is editable.
    * We only want to post into form, or editable elements.
    *
@@ -242,7 +264,7 @@ var privlyExtensionPosting = {
       if ( node.getAttribute("g_editable") === "true" ) {
         return true;
       } else if ( node.parentNode !== undefined && node.parentNode !== null ) {
-        return privly.isEditable(node.parentNode);
+        return privlyExtensionPosting.isEditable(node.parentNode);
       } else {
         return false;
       }
