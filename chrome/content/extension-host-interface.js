@@ -255,7 +255,11 @@ gBrowser.addEventListener("load",
       if( url.indexOf("privlyInjectableApplication=ZeroBin") > 0 || // deprecated
            url.indexOf("privlyApp=ZeroBin") > 0) {
          frameDoc.location.href = 
-          "chrome://privly/content/privly-applications/ZeroBin/show.html?privlyOriginalURL=" + 
+          "chrome://privly/content/privly-applications/Message/show.html?privlyOriginalURL=" +
+          encodeURIComponent(url);
+      } else if( url.indexOf("privlyInjectableApplication=Message") > 0 ) {
+        frameDoc.location.href =
+          "chrome://privly/content/privly-applications/Message/show.html?privlyOriginalURL=" +
           encodeURIComponent(url);
        } else if( url.indexOf("privlyInjectableApplication=PlainPost") > 0 || // deprecated
                   url.indexOf("privlyApp=PlainPost") > 0) {
