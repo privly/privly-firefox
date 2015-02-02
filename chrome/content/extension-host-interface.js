@@ -257,7 +257,7 @@ gBrowser.addEventListener("load",
          frameDoc.location.href = 
           "chrome://privly/content/privly-applications/Message/show.html?privlyOriginalURL=" +
           encodeURIComponent(url);
-      } else if( url.indexOf("privlyInjectableApplication=Message") > 0 ) {
+      } else if( url.indexOf("privlyApp=Message") > 0 ) {
         frameDoc.location.href =
           "chrome://privly/content/privly-applications/Message/show.html?privlyOriginalURL=" +
           encodeURIComponent(url);
