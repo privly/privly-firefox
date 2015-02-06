@@ -15,3 +15,5 @@ chrome/content/privly-applications/vendor/build.py
 *.template
 *templates/
 privly-web/*
+*/test/*
+.travis.yml
