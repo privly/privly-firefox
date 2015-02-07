@@ -10,7 +10,7 @@
   
   <menupopup id="contentAreaContextMenu">
     <menuseparator id="postingMenuSeparator" />
-    <menuitem id="encryptedPostToPrivlyMenuItem" label="Create a Priv.ly Message" oncommand="privlyExtensionPosting.contextmenuPost('chrome://privly/content/privly-applications/Message/new.html')" image="chrome://privly/skin/logo_64.png" class="menuitem-iconic" />
+    <menuitem id="encryptedPostToPrivlyMenuItem" label="New Message" oncommand="privlyExtensionPosting.contextmenuPost('chrome://privly/content/privly-applications/Message/new.html')" image="chrome://privly/skin/logo_64.png" class="menuitem-iconic" />
   </menupopup>
   
   <keyset id="mainKeyset">
