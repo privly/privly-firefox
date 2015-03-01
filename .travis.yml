@@ -16,7 +16,7 @@ env:
   - secure: "DT8PYMaqlQ33jwWf4/ge7gMvB6hvXG3TT7RaeLkp2adh6MgiyZnEGFhZFWwT27AcNncd/vZdSPujYxyrTJRwFHLQNDqxmSmChNkwIGOxd5hW4QuzaxU1T27aVOecJnKCnlEFPGB6gvp2f1OeLuRouaTcsojLf05ly4YSNVVq9CQ="#SAUCE_USERNAME=smcgregor(smcgregor/privly-firefox)
   - secure: "AQPFM3ezsus6h4Oi0DDvMnsa2VdYc+MUv5nJIE3N6Wl+Y2+wa/ddYO1wuPCL+bdCvM9dhUEn6dHcToGv5uD0xNs734R2Y4BM8ZeR6+sUfazE5RQdEE21YyBE2qtIBP4mXaKJKCDVdzOvcJetDXCnVCZdxbzpqcu5/7Kj4zHQcvA="#SAUCE_ACCESS_KEY=********-****-****-****-************(smcgregor/privly-firefox)
 script:
-- ruby test/selenium/run_all.rb -p sauce_firefox_extension -r experimental -c http://localhost:3000
+- "if [ ${TRAVIS_PULL_REQUEST} = 'false' ]; then ruby test/selenium/run_all.rb -p sauce_firefox_extension -r experimental -c http://localhost:3000; fi" # Don't run on pull requests
 before_script:
 - cd privly-web
 - cp config/database.travis.yml config/database.yml
