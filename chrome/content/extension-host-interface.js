@@ -250,29 +250,26 @@ gBrowser.addEventListener("load",
       
       // Get the sham iframe's document in the host page
       var frameDoc = frame.contentDocument.defaultView;
-      
-      // Assign the sham iframe's src element to the proper chrome URL
-      if( url.indexOf("privlyInjectableApplication=ZeroBin") > 0 || // deprecated
-           url.indexOf("privlyApp=ZeroBin") > 0) {
-         frameDoc.location.href = 
-          "chrome://privly/content/privly-applications/Message/show.html?privlyOriginalURL=" +
-          encodeURIComponent(url);
-      } else if( url.indexOf("privlyApp=Message") > 0 ) {
-        frameDoc.location.href =
-          "chrome://privly/content/privly-applications/Message/show.html?privlyOriginalURL=" +
-          encodeURIComponent(url);
-       } else if( url.indexOf("privlyInjectableApplication=PlainPost") > 0 || // deprecated
-                  url.indexOf("privlyApp=PlainPost") > 0) {
-         frameDoc.location.href = 
-           "chrome://privly/content/privly-applications/PlainPost/show.html?privlyOriginalURL=" + 
-           encodeURIComponent(url);
-       } else {
-         console.warn("Injectable App not specified, defaulting to sandboxed PlainPost");
-         frameDoc.location.href = 
-           "chrome://privly/content/privly-applications/PlainPost/show.html?privlyOriginalURL=" + 
-           encodeURIComponent(url);
-       }  
-      
+
+      // The local location of the selected Privly App
+      var path;
+
+      // Deprecated app specification parameter
+      var pattern = /privlyInjectableApplication\=/i;
+      url = url.replace(pattern, "privlyApp=");
+
+      if( url.indexOf("privlyApp=Message") > 0 ) {
+        path = "chrome://privly/content/privly-applications/Message/show.html?privlyOriginalURL=";
+      } else if( url.indexOf("privlyApp=ZeroBin") > 0) {
+        path = "chrome://privly/content/privly-applications/Message/show.html?privlyOriginalURL="; // Deprecated
+      } else if( url.indexOf("privlyApp=PlainPost") > 0) {
+        path = "chrome://privly/content/privly-applications/PlainPost/show.html?privlyOriginalURL=";
+      } else if( url.indexOf("https://priv.ly") === 0 ) {
+        path = "chrome://privly/content/privly-applications/PlainPost/show.html?privlyOriginalURL="; // Deprecated
+      } else {
+        return;
+      }
+      frameDoc.location.href =  path + encodeURIComponent(url);
     }
     
     // Update the operation mode
