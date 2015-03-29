@@ -492,7 +492,9 @@ var privly = {
 
     var sourceURL = iframe.getAttribute("src");
     var originDomain = message.origin;
-    if ( typeof sourceURL !== "string") return;
+    if ( typeof sourceURL !== "string") {
+      return;
+    }
     sourceURL = sourceURL.replace("http://", "https://");
     originDomain = originDomain.replace("http://", "https://");
 
@@ -548,7 +550,7 @@ var privly = {
    * Listener Function Called when the page is modified with dynamic content
    * @see privly.addListeners
    */
-  listenerDOMNodeInserted: function(mutations) {
+  listenerDOMNodeInserted: function() {
     //we check the page a maximum of two times a second
     if (privly.runPending) {
       return;
@@ -624,7 +626,8 @@ var privly = {
    */
   toggleInjection: function() {
     var iframes = document.getElementsByTagName("iframe");
-    for(var i = 0; i < iframes.length; i++) {
+    var i;
+    for(i = 0; i < iframes.length; i++) {
       var iframe = iframes[i];
       if (iframe.getAttribute("data-privly-display") === "true") {
         iframe.setAttribute("data-privly-display", "false");
@@ -636,7 +639,7 @@ var privly = {
     }
 
     var links = document.getElementsByTagName("a");
-    for(var i = 0; i < links.length; i++) {
+    for(i = 0; i < links.length; i++) {
       var link = links[i];
       if (link.getAttribute("data-privly-display") === "true") {
         link.setAttribute("data-privly-display", "false");
@@ -784,7 +787,7 @@ var privly = {
       "privlybeta.org\\/|" + //localhost
       "localhost:3000\\/" + //localhost:3000
       domainRegexp +
-      ")(\\S){3,}/[^\\s]*\\b","gi")
+      ")(\\S){3,}/[^\\s]*\\b","gi");
   }
 };
 
